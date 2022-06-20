@@ -1,3 +1,5 @@
+This is copied, modified and appended from [here](https://github.com/keyvanakbary/learning-notes/blob/master/books/designing-data-intensive-applications.md)
+
 # [Designing Data-Intensive Applications](https://www.goodreads.com/book/show/23463279-designing-data-intensive-applications)
 
 - [Reliable, scalable, and maintainable applications](#reliable-scalable-and-maintainable-applications)
