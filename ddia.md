@@ -58,12 +58,14 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 
 ## Reliable, scalable, and maintainable applications
 
-A data-intensive application is typically built from standard building blocks. They usually need to:
+Applications are today not compute intensive, rather data intensive. A data-intensive application is typically built from standard building blocks. They usually need to:
 * Store data (_databases_)
-* Speed up reads (_caches_)
-* Search data (_search indexes_)
+* Speed up reads (_caches_) (Memcache)
+* Search data (_search indexes_) (Elasticsearch or Solr)
 * Send a message to another process asynchronously (_stream processing_)
 * Periodically crunch data (_batch processing_)
+
+Things are becoming fuzzy too, and boundaries are not obvious. For instance, some datastores are also used as message queues (Redis), and there are message queues which have database like durability (Apache Kafka).
 
 * **Reliability**. To work _correctly_ even in the face of _adversity_.
 * **Scalability**. Reasonable ways of dealing with growth.
@@ -81,25 +83,25 @@ Systems that anticipate faults and can cope with them are called _fault-tolerant
 
 **A fault is usually defined as one component of the system deviating from its spec**, whereas _failure_ is when the system as a whole stops providing the required service to the user.
 
-You should generally **prefer tolerating faults over preventing faults**.
+You should generally **prefer tolerating faults over preventing faults** (there are cases where prevention is betteer than cure, because there is no cure -- for instance, a security failure which compromises data of users)
 
-* **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults. **There is a move towards systems that tolerate the loss of entire machines**. A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
+* **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults (MTTF of hard disk is 10-50 years, a dc with 10k disks on average have 1 disk per day failure). **There is a move towards systems that tolerate the loss of entire machines** (RAID config in disks, dual power supplies or hot swappable CPUs in servers, battery generator in datacenters). A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
 * **Software errors**. It is unlikely that a large number of hardware components will fail at the same time. Software errors are a systematic error within the system, they tend to cause many more system failures than uncorrelated hardware faults.
 * **Human errors**. Humans are known to be unreliable. Configuration errors by operators are a leading cause of outages. You can make systems more reliable:
     - Minimising the opportunities for error, peg: with admin interfaces that make easy to do the "right thing" and discourage the "wrong thing".
     - Provide fully featured non-production _sandbox_ environments where people can explore and experiment safely.
-    - Automated testing.
+    - Automated testing (unit and integration).
     - Quick and easy recovery from human error, fast to rollback configuration changes, roll out new code gradually and tools to recompute data.
     - Set up detailed and clear monitoring, such as performance metrics and error rates (_telemetry_).
     - Implement good management practices and training.
 
 ### Scalability
 
-This is how do we cope with increased load. We need to succinctly describe the current load on the system; only then we can discuss growth questions.
+This is how do we cope with increased load. We need to succinctly describe the current load on the system (for instance, requests per second, ratio of reads to writes in DB, # of active people in chat room, etc); only then we can discuss growth questions.
 
 ---
 
-#### Twitter example
+#### Describing Load - Twitter example
 
 Twitter main operations
 - Post tweet: a user can publish a new message to their followers (4.6k req/sec, over 12k req/sec peak)
@@ -152,7 +154,7 @@ When generating load artificially, the client needs to keep sending requests ind
 #### Approaches for coping with load
 
 * _Scaling up_ or _vertical scaling_: Moving to a more powerful machine
-* _Scaling out_ or _horizontal scaling_: Distributing the load across multiple smaller machines.
+* _Scaling out_ or _horizontal scaling_: Distributing the load across multiple smaller machines (_shared nothing architecture_)
 * _Elastic_ systems: Automatically add computing resources when detected load increase. Quite useful if load is unpredictable.
 
 Distributing stateless services across multiple machines is fairly straightforward. Taking stateful data systems from a single node to a distributed setup can introduce a lot of complexity. Until recently it was common wisdom to keep your database on a single node.
