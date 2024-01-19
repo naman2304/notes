@@ -1,11 +1,4 @@
-
 # Effective Java 3rd Edition Summary
-
-
-## Disclaimer
-This is a summary of the book "Effective Java 3rd Edition" by Joshua Bloch (https://twitter.com/joshbloch)
-The book is awesome and has a lot of interesting views in it. This document is only my take on what I want to really keep in mind when working with Java.
-I hope it's not a copyright infringement. If it is, please contact me in order to remove this file from github.
 
 ## Creating and destroying objects
 
