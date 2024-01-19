@@ -1,11 +1,13 @@
 # Effective Java 3rd Edition Summary
 
 * [Creating and destroying objects](#creating-and-destroying-objects)
+* [Classes and Interfaces](#classes-and-interfaces)
 
 
 ## Creating and destroying objects
 
 __Item 1 : Static factory methods__
+
 Pros
  - They have a name
  - You can use them to control the number of instance (Example : Boolean.valueOf)
@@ -26,7 +28,7 @@ __Item 2 : Builder__
 
 When few `required` parameters, but too many `optional` parameters, how do we create constructors?
 
-First Way: Telescoping Pattern (safe, but not so readable)
+First Way: **Telescoping Pattern** (safe, but not so readable)
  - in which you provide a constructor with only the required parameters, another with a
 single optional parameter, a third with two optional parameters, and so on, culminating in a constructor with all the optional parameters.
  - But it's too much to maintain and error prone.
@@ -59,10 +61,10 @@ public class NutritionFacts {
 }
 ```
 
-Second Way: JavaBean Pattern (unsafe, but readable)
+Second Way: **JavaBean Pattern** (unsafe, but readable)
  - Provide setter for all
- - But here, object is in inconsistent state during the various statements when client is trying to setup the object correctly.
- - Also, it precludes the possibility of making a class immutable, client has to ensure thread safety.
+ - But here, object is in inconsistent state during the various statements when client is trying to setup the object correctly. No atomocity while creation of object -- thread unsafe.
+ - Also, it precludes the possibility of making a class immutable.
 
 Example :
 ```java
@@ -90,15 +92,16 @@ cocaCola.setCalories(100);
 cocaCola.setSodium(35);
 ```
 
-Third Way: Builder Pattern (safe and readable)
- - Builder are interesting when your constructor may need many arguments
+Third Way: **Builder Pattern** (safe and readable)
  - It's easier to read and write
+ - You can prevent inconsistent state of you object as instance creation of main outer class is atomic.
  - Your class can be immutable (Instead of using a java bean)
- - You can prevent inconsistent state of you object
  - client calls a constructor (or static factory) with all of the required parameters and
 gets a builder object. Then the client calls setter-like methods on the builder object
 to set each optional parameter of interest. Finally, the client calls a parameterless
 build method to generate the object, which is typically immutable
+ - Checks for validity for individual parameters go in Builder's constructor and methods.
+ - Checks for multiple parameter's invariants goes to outer class's private constructor *after copying parameters from the builder* (Item 50)
 
 Example :
 ```java
@@ -145,10 +148,94 @@ public class NutritionFacts {
 		fat 			= builder.fat;
 		sodium 			= builder.sodium;
 	}
+
+NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8).calories(100).sodium(35).carbohydrate(27).build();
 }
 ```
 
+Builder pattern is good for class heirarchies too.
+ - Use a parallel hierarchy of builders, each nested in the corresponding class. Abstract classes have abstract builders; concrete classes have concrete builder.
+ - This technique, wherein a subclass method is declared to return a subtype of the return type declared in the superclass, is known as *covariant return typing*. It allows clients to use these builders
+without the need for casting.
+
+```java
+public abstract class Pizza {
+	public enum Topping { HAM, MUSHROOM, ONION, PEPPER, SAUSAGE };
+ 	final Set<Topping> toppings;
+
+  	abstract static class Builder<T extends Builder<T>> {
+		EnumSet<Topping> toppings = EnumSet.noneOf(Topping.class);
+		public T addTopping(Topping topping) {
+			toppings.add(Objects.requireNonNull(topping));
+			return self();			
+		}
+
+		abstract Pizza build();
+
+		// Subclasses must override this method to return "this"
+		protected abstract T self();
+	}
+
+	Pizza(Builder<?> builder) {
+		toppings = builder.toppings.clone();
+	}
+}
+
+public class NYPizza extends Pizza {
+	public enum Size { SMALL, MEDIUM, LARGE };
+	private final Size size;
+
+	public static class Builder extends Pizza.Builder<Builder> {
+		private final Size size;
+
+		public Builder(Size size) {
+			this.size = Objects.requireNonNull(size);
+		}
+		@Override public NyPizza build() {
+			return new NYPizza(this);
+		}
+		@Override protected Builder self() { return this; }
+	}
+
+	private NYPizza(Builder builder) {
+		super(builder);
+		size = builder.size;
+	}
+}
+
+public class Calzone extends Pizza {
+	private final boolean sauceInside;
+
+	public static class Builder extends Pizza.Builder<Builder> {
+		private final boolean sauceInside = false;
+
+		public Builder() {}
+
+		public Builder sauceInside() {
+			sauceInside = true;
+			return self();
+		}
+		
+		@Override public Calzone build() {
+			return new Calzone(this);
+		}
+		@Override protected Builder self() { return this; }
+	}
+
+	private Calzone(Builder builder) {
+		super(builder);
+		sauceInside = builder.sauceInside;
+	}
+}
+
+// See that we are able to call addTopping twice (or even more),
+// and it will aggregate various values to a single field `toppings`.
+NyPizza pizza = new NyPizza.Builder(SMALL).addTopping(SAUSAGE).addTopping(ONION).build();
+Calzone calzone = new Calzone.Builder().addTopping(HAM).sauceInside().build();
+```
+
 __Item 3 : Think of Enum to implement the Singleton pattern__
+
 
 Example :
 ```java
@@ -161,7 +248,10 @@ public enum Elvis() {
 
 __Item 4 : Utility class should have a private constructor__
 
-A utility class with only static methods will never be instantiated. Make sure it's the case with a private constructor to prevent the construction of a useless object.
+A utility class with only static fields and static methods should never be instantiated.
+ - Attempting to enforce noninstantiability by making a class abstract does not work. The class can be subclassed and the subclass instantiated.
+ - Hence, create a private constructor to prevent the construction of a useless object.
+ - As a side effect, this idiom also prevents the class from being subclassed as all constructors must invoke a superclass constructor, explicitly or implicitly.
 
 Example :
 ```java
@@ -174,7 +264,7 @@ public class UtilityClass {
 }
 ```
 
-__Item 5 : Dependency Injection__
+__Item 5 : Prefer Dependency Injection to hardwiring resources__
 
 A common mistake is the use of a singleton or a static utility class for a class that depends on underlying resources.
 The use of dependency injection gives us more flexibility, testability and reusability
