@@ -24,7 +24,7 @@ public static Boolean valueOf(boolean b) {
 }
 ```
 
-__Item 2 : Builder__
+__Item 2 : Consider a builder pattern__
 
 When few `required` parameters, but too many `optional` parameters, how do we create constructors?
 
@@ -246,7 +246,7 @@ public enum Elvis() {
 }
 ```
 
-__Item 4 : Utility class should have a private constructor__
+__Item 4 : Enforce noninstantiability with a private constructor__
 
 A utility class with only static fields and static methods should never be instantiated.
  - Attempting to enforce noninstantiability by making a class abstract does not work. The class can be subclassed and the subclass instantiated.
@@ -388,7 +388,7 @@ When confronted to different types of Object, compareTo can throw ClassCastExcep
 
 ## Classes and Interfaces
 
-__Item 15 : Accessibility__
+__Item 15 : Minimize the accessibility of classes and members__
 
 Make accessibility as low as possible. Work on a public API that you want to expose and try not to give access to implementation details. Encapsulation.
  - this allows components to be developed, tested, optimized, used, understood, and modified in isolation
@@ -408,14 +408,14 @@ Make accessibility as low as possible. Work on a public API that you want to exp
  - Use package-private visibility with `@VisibleForTesting` annotation to indicate that this is package-private just because we need to test it (rare cases, this annotation is used with `public` accessor too).
 
 
-__Item 16 : Accessor methods__
+__Item 16 : In public classes, use accessor methods, not public fields__
 
  - Public classes should never expose its fields. Doing this will prevent you to change its representation in the future.
  - Package private classes or private nested classes, can, on the contrary, expose their fields since it won't be part of the API.
    - For package private classes (as this is implementation detail), it can be changed or modified in code later as clients are within package only.
    - For private nested class, it doesn't really matter what the fields inside it are marked with access modifier as only outer class can read it no matter what the accessor is.
 
-__Item 17 : Immutability__
+__Item 17 : Minimize mutability__
 
 To create an immutable class : 
  - Don't provide methods that modify the visible object's state
