@@ -1,9 +1,11 @@
 # Effective Java 3rd Edition Summary
 
+* [Creating and destroying objects](#creating-and-destroying-objects)
+
+
 ## Creating and destroying objects
 
 __Item 1 : Static factory methods__
-
 Pros
  - They have a name
  - You can use them to control the number of instance (Example : Boolean.valueOf)
@@ -22,11 +24,81 @@ public static Boolean valueOf(boolean b) {
 
 __Item 2 : Builder__
 
-Pros
+When few `required` parameters, but too many `optional` parameters, how do we create constructors?
+
+First Way: Telescoping Pattern (safe, but not so readable)
+ - in which you provide a constructor with only the required parameters, another with a
+single optional parameter, a third with two optional parameters, and so on, culminating in a constructor with all the optional parameters.
+ - But it's too much to maintain and error prone.
+
+Example :
+```java
+public class NutritionFacts {
+	private final int servingSize; 	// required.
+	private final int servings;	// required.
+	private final int calories;
+	private final int fat;
+	private final int sodium;
+
+	public NutritionFacts(int servingSize, int servings) {
+		this(servingSize, servings, 0);
+	}
+	public NutritionFacts(int servingSize, int servings, int calories) {
+		this(servingSize, servings, calories, 0);
+	}
+	public NutritionFacts(int servingSize, int servings, int calories, int fat) {
+		this(servingSize, servings, calories, fat, 0);
+	}
+	public NutritionFacts(int servingSize, int servings, int calories, int fat, int sodium) {
+		this.servingSize = servingSize;
+		this.servings = servings;
+		this.calories = calories;
+		this.fat = fat;
+		this.sodium = sodium;
+	}
+}
+```
+
+Second Way: JavaBean Pattern (unsafe, but readable)
+ - Provide setter for all
+ - But here, object is in inconsistent state during the various statements when client is trying to setup the object correctly.
+ - Also, it precludes the possibility of making a class immutable, client has to ensure thread safety.
+
+Example :
+```java
+public class NutritionFacts {
+	private final int servingSize; 	// required.
+	private final int servings;	// required.
+	private final int calories;
+	private final int fat;
+	private final int sodium;
+
+	public NutritionFacts() {
+	}
+	// Setters
+	public void setServingSize(int val) { servingSize = val; }
+	public void setServings(int val) { servings = val; }
+	public void setCalories(int val) { calories = val; }
+	public void setFat(int val) { fat = val; }
+	public void setSodium(int val) { sodium = val; }
+}
+
+NutritionFacts cocaCola = new NutritionFacts();
+cocaCola.setServingSize(240);
+cocaCola.setServings(8);
+cocaCola.setCalories(100);
+cocaCola.setSodium(35);
+```
+
+Third Way: Builder Pattern (safe and readable)
  - Builder are interesting when your constructor may need many arguments
  - It's easier to read and write
  - Your class can be immutable (Instead of using a java bean)
  - You can prevent inconsistent state of you object
+ - client calls a constructor (or static factory) with all of the required parameters and
+gets a builder object. Then the client calls setter-like methods on the builder object
+to set each optional parameter of interest. Finally, the client calls a parameterless
+build method to generate the object, which is typically immutable
 
 Example :
 ```java
@@ -42,7 +114,7 @@ public class NutritionFacts {
 		private final int servingSize:
 		private final int servings;
 		//Optional parameters - initialized to default values
-		private int calories		= 0;
+		private int calories			= 0;
 		private int fat 			= 0;
 		private int sodium 			= 0;
 
