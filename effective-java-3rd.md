@@ -390,12 +390,30 @@ When confronted to different types of Object, compareTo can throw ClassCastExcep
 
 __Item 15 : Accessibility__
 
-Make accessibility as low as possible. Work on a public API that you want to expose and try not to give access to implementation details.
+Make accessibility as low as possible. Work on a public API that you want to expose and try not to give access to implementation details. Encapsulation.
+ - this allows components to be developed, tested, optimized, used, understood, and modified in isolation
+ - For top-level (non-nested) classes and interfaces, there are only two possible access levels: package-private and public.
+ - If a package-private top-level class or interface is used by only one class, consider making the top-level class a private static nested class of the sole class that uses it
+ - For members (fields, methods, nested classes, and nested interfaces), there are 4 possible access levels
+   - private: member is accessible only from the top-level class where it is declared
+   - package-private: member is accessible from any class in the package where it is declared (if we don't specify accessor, this is what we get -- except for interface members, which are public by default)
+   - protected: member is accessible from subclasses of the class where it is declared + from any class in the package where it is declared
+   - public: member is accessible from anywhere.
+ - If a method overrides a superclass method, it cannot have a more restrictive access level in the subclass than in the superclass (Liskov substitution principle can be applied then)
+ - Instance fields of public classes should not be public
+ - can make `static final` fields public only if it is either primitive or reference to immutable object, in which case these are effectively constants (CAPITAL_DECLARED)
+ - It is wrong for a class to have a public static final array field, as nonzero length arrays are mutable
+ - Implementation (fields) can leak into exported API if class implements `Serializable` class
+ - A `protected` member is part of the class’s exported API and must be supported forever
+ - Use package-private visibility with `@VisibleForTesting` annotation to indicate that this is package-private just because we need to test it (rare cases, this annotation is used with `public` accessor too).
+
 
 __Item 16 : Accessor methods__
 
-Public classes should never expose its fields. Doing this will prevent you to change its representation in the future.
-Package private or private nested classes, can, on the contrary, expose their fields since it won't be part of the API.
+ - Public classes should never expose its fields. Doing this will prevent you to change its representation in the future.
+ - Package private classes or private nested classes, can, on the contrary, expose their fields since it won't be part of the API.
+   - For package private classes (as this is implementation detail), it can be changed or modified in code later as clients are within package only.
+   - For private nested class, it doesn't really matter what the fields inside it are marked with access modifier as only outer class can read it no matter what the accessor is.
 
 __Item 17 : Immutability__
 
