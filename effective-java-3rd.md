@@ -418,13 +418,41 @@ __Item 16 : In public classes, use accessor methods, not public fields__
 __Item 17 : Minimize mutability__
 
 To create an immutable class : 
- - Don't provide methods that modify the visible object's state
- - Ensure that the class can't be extended
- - Make all fields final
- - Make all fields private
- - Don't give access to a reference of a mutable object that is a field of your class
+ - Don't provide methods that modify the visible object's state (mutators / setters)
+ - Ensure that the class can't be extended (by using `final` or another way given below)
+   - Can make class impossible to be subclassed by making all of its constructors private and add public static factories in place of the public constructors 
+ - Make all fields `final`
+ - Make all fields `private`
+ - Don't give access to a reference of a mutable object that is a field of your class. Never initialize such a field to a client-provided object reference or return the field from an accessor.
  
 As a rule of thumb, try to limit mutability.
+
+ - Immutable objects are simple as it can be in exactly one state, the state in which it was created.
+ - Immutable objects are inherently thread-safe; they require no synchroni￾zation, hence immutable objects can be shared freely among threads.
+ - You need not and should not provide a clone method or copy constructor on an immutable class.
+ - Immutable objects make great building blocks for other objects, whether mutable or immutable
+ - The major disadvantage of immutable classes is that they require a separate object for each distinct value.
+   - To tackle this disadvantage, the class can identify commonly used multistep operation and using an internal mutable companion class to speed them up. Or to provide a public companion class, e.g. StringBuilder for String.
+
+```java
+// instead of
+String result = "";
+for (int i = 0; i = 2 << 20; i++) {
+  result += "hello " + i + "\n";
+}
+
+// consider, which does not produce 2M of temp strings
+StringBuilder sb = new StringBuilder((2<<20)*16;
+for (int i = 0; i = 2 << 20; i++) {
+  sb.append("hello ").append(i).append("\n");
+}
+final String result = sb.toString();
+```
+  
+ - Consider adding `Comparable` and `equals`+`hashCode` to immutable classes to simplify unit testing 
+ - Immutability requires special efforts if combined with `Serializable`
+ - If using non-final classes which tend to be immutable, double check that given objects are not instances of some extended class (which can be no longer immutable). E.g. BigInteger allows extensions to be mutable)
+ 
 
 __Item 18 : Favor composition over inheritance__
 
