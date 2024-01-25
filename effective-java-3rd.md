@@ -569,6 +569,111 @@ Doing so can result in multiple definition for a single class at compile time.
 
 ## Generics
 
+Generics means type safety. Rather than finding type inconsistencies during runtime, find it at compile time.
+
+Two types of generic methods:
+```java
+class A<T> {
+	// Because class is type parameterized, we can directly use type parameter in function declaration.
+	public void foo(T value) {
+	}
+}
+
+class B {
+	// Class is not type parameterized, have to put <T> before return type
+	public <T> void foo(T value) {
+	}
+}
+```
+
+```java
+// This can be called as takeThing(ArrayList<Dog>), takeThing(ArrayList<Cat>), takeThing(ArrayList<Animal>) etc.
+public <T extends Animal> void takeThing(ArrayList<T> list) {}
+
+// This can only be called as takeThing(animals)
+public void takeThing(ArrayList<Animal> list) {}
+```
+
+If need to sort, say a List<Song>, can do either
+1. making `Song` implement `Comparable` interface and hence implementing `compareTo` method, and then just calling `Collections.sort(songList)`
+2. create a comparator implementing `Comparator` which implements `compare` method, and passing this comparator by calling `Collections.sort(songList, myComparator)`
+
+From Java Collections, we mainly get 3 things
+ - `List` interface extends `Collection`
+   - `ArrayList` implements `List`
+   - `LinkedList` implements `List`
+   - `Vector` implements `List`
+ - `Set` interface extends `Collection`
+   - `SortedSet` interface extends `Set`
+     - `TreeSet` implements `SortedSet` (can instantiate with no-arg constructor which would mean using type parameter class's `compareTo` method (which means they must implement `Comparable`) . Or, we can also instantiate passing Comparator as arg to constructor)
+   - `HashSet` implements `Set`
+   - `LinkedHashSet` implements `Set`
+ - `Map` interface (it **does not** extend `Collection` interface)
+   - `SortedMap` interface extends `Map`
+     - `TreeMap` implements `SortedMap`
+   - `HashMap` implements `Map`
+   - `LinkedHashMap` implements `Map`
+   - `HashTable` implements `Map`
+  
+For `HashSet` and `HashMap`, it first calls `hashCode` method and checks if this hashcode is present in the set or not. If not, it simply means that this is a diff element altogether. If yes, it then calls `equals` method to see if object references are actually meaningfully equal or not. Hence, you should always override `hashCode` and `equals` together if overriding any of the two.
+ - `a.equals(b)` must mean that `a.hashCode() == b.hashCode()`
+ - `a.hashCode() == b.hashCode()` does not have to mean `a.equals(b)`
+
+Arrays vs Generics
+ - Array type checks happen at runtime
+ - Generic type checks happen at compile time
+ - If a method is say `foo(Animal[] animals)`, it can take all: `foo(Animal[])`, `foo(Dog[])`, `foo(Cat[])`
+
+```java
+// Array
+public void foo(Animal[] animals) {
+	for (Animal animal: animals) {
+		animal.eat();
+	}
+}
+ 
+Animal[] animals = {new Dog(), new Cat()};
+foo(animals);
+Dog[] dogs = {new Dog(), new Dog()};
+foo(dogs);
+
+// Generic (ArrayList)
+public void foo(ArrayList<Animal> animals) {
+	for (Animal animal: animals) {
+		animal.eat();
+	}
+}
+
+ArrayList<Animal> animals = new ArrayList<>(); animals.add(new Dog()); animals.add(new Cat());
+foo(animals);
+ArrayList<Dog> dogs = new ArrayList<>(); dogs.add(new Dog()); dogs.add(new Dog());
+foo(dogs); // compile-error!!! 
+
+// Java doesn't allow because of the following, say it was allowed
+// call foo by passing ArrayList of Dog, and in foo add Cat to it --> YIKES!
+public void foo(ArrayList<Animal> animals) {
+	animals.add(new Cat());
+}
+foo(dogs);
+
+// We can do above thing using arrays say reassign animal[0] = new Cat();
+// but that would be then caught at runtime --> YIKES.
+// Hence, preempt the errors by using Generics and not arrays
+
+// To take a method any type of Animal using ArrayList, use either of these
+public void foo(ArrayList<? extends Animal> animals) {
+	// compiler won't allow any addition to `animals`
+	animals.add(new Cat());
+
+	// this is fine
+	findAngriestAnimal(animals);
+}
+
+// Exactly same as above
+public <T extends Animal> void foo(ArrayList<T> animals) {
+	...
+}
+``` 
 __Item 26 : Raw types__
 
 A raw type is a generic type without its type parameter (Example : *List* is the raw type of *List\<E>*)
@@ -601,8 +706,19 @@ Also, comment on why it is safe.
 
 __Item 28 : List and arrays__
 
-Arrays are covariant and generics are invariant meaning that Object[] is a superclass of String[] when List\<Object> is not for List\<String>.
-Arrays are reified when generics are erased. Meaning that array still have their typing right at runtime when generics don't. In order to assure retrocompatibility with previous version List\<String> will be a List at runtime.
+Arrays are **covariant** and generics are **invariant** meaning that because `Object` is a superclass of `String`, then `Object[]` is a superclass of `String[]` when `List<Object>` is not a superclass of for `List<String>`.
+
+```java
+// Fails at runtime!
+Object[] objectArray = new Long[1];
+objectArray[0] = "I don't fit in"; // Throws ArrayStoreException
+
+// Won't compile!
+List<Object> ol = new ArrayList<Long>(); // Incompatible types
+ol.add("I don't fit in");
+```
+
+Arrays are **reified** when generics are **erased**. Meaning that array have their typing constraint at "runtime" while generics enforce it at "compile" time and discard their type information at runtime. In order to assure retrocompatibility with previous version; `List<String>` will just be a `List` at runtime.
 Typesafety is assured at compile time with generics. Since it's always better to have our coding errors the sooner (meaning at compile time), prefer the usage of generics over arrays.
 
 __Item 29 : Generic types__ 
