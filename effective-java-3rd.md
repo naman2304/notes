@@ -676,22 +676,41 @@ public <T extends Animal> void foo(ArrayList<T> animals) {
 ``` 
 __Item 26 : Raw types__
 
-A raw type is a generic type without its type parameter (Example : *List* is the raw type of *List\<E>*)
-Raw types shouldn't be used. They exist for compatibility with older versions of Java.
+ - A raw type is a generic type without its type parameter (Example : `List` is the raw type of `List<E>`).
+ - Raw types shouldn't be used. They exist for compatibility with older versions of Java.
 We want to discover mistakes as soon as possible (compile time) and using raw types will probably result in error during runtime.
-We still need to use raw types in two cases : 
- - Usage of class literals (List.class)
- - Usage of instanceof
- 
-Examples :
-
 ```java
 //Use of raw type : don't !
 private final Collection stamps = ...
 stamps.add(new Coin(...)); //Erroneous insertion. Does not throw any error
 Stamp s = (Stamp) stamps.get(i); // Throws ClassCastException when getting the Coin
+```
+ - `List<Object>` is better than `List` because if there is a `List<String>`, then it can be passed to a method which accepts `List`, but it cannot be passed to a method that accepts `List<Object>`.
+ - If we don't care about type parameter in a method, then we should use unbounded wildcard types, rather than raw types. **You can't put any element (other than null) into a Collection<?>**
+```java
+// Bad
+static int numElementsInCommon(Set s1, Set s2) {
+	int result = 0;
+	for (Object o : s1) {
+		if (s2.contains(o)) {
+			result++;
+		}
+	}
+	return result;
+}
 
-//Common usage of instance of
+// Good
+static int numElementsInCommon(Set<?> s1, Set<?> s2) {
+	...
+}
+``` 
+We still need to use raw types in two cases : 
+ - Usage of class literals (`List.class`) (there is no such thing as `List<String>.class` or `List<?>.class`
+ - Usage of `instanceof`. `instanceof` does not recognize type parameters as type parameter is erased on runtime. After verifying that something is an `instanceof` `Set`, it must be casted into `Set<?>` though
+
+
+```java
+// Common usage of instance of
 if (o instanceof Set) {
 	Set<?> = (Set<?>) o;
 }
