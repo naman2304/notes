@@ -372,7 +372,7 @@ RETURN person.name
 #### The foundation: Datalog
 * _Datalog_ provides the foundation that later query languages build upon. Its model is similar to the triple-store model, generalised a bit. Instead of writing a triple (_subject_, _predicate_, _object_), we write as _predicate(subject, object)_.
 * Query language for Datomic
-* Cascalog is the Datalog implementation for querying large datasets in Hadoop.
+* Cascalog is the Datalog implementation for querying large datasets in Hadoop. For Hadoop, SQL like query languages are Apache Hive, Apache Pig and Apache Impala. Cascalog is a non-SQL language (but still declarative).
 * Datalog is a subset of Prolog
 * We define _rules_ that tell the database about new predicates and rules can refer to other rules, just like functions can call other functions or recursively call themselves.
 * Rules can be combined and reused in different queries. It's less convenient for simple one-off queries, but it can cope better if your data is complex.
