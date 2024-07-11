@@ -543,8 +543,8 @@ LSM-trees are typically faster for writes, whereas B-trees are thought to be fas
 
 ```sql
 // This is called vectorized processing.
-WHERE product_sk IN (30, 68, 69) // load the three bitmaps for 30, 68, 69 from product_sk column file and take bitwise OR.
-WHERE product_sk = 30 AND store_sk = 3 // load bitmap for product_sk=30 and store_sk=3, and calculate bitwise AND.
+WHERE product_sk IN (30, 68, 69) # load the three bitmaps for 30, 68, 69 from product_sk column file and take bitwise OR.
+WHERE product_sk = 30 AND store_sk = 3 # load bitmap for product_sk=30 and store_sk=3, and calculate bitwise AND.
 ```
 
 > Cassandra and HBase have a concept of _column families_, which they inherited from Bigtable.
