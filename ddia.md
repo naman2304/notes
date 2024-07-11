@@ -207,125 +207,78 @@ One of the best tools we have for removing accidental complexity is _abstraction
 
 _Agile_ working patterns provide a framework for adapting to change. Test Driven Development (TDD).
 
----
-
 * _Functional requirements_: what the application should do
 * _Nonfunctional requirements_: general properties like reliability, scalability, maintainability, security and compliance.
 
+---
 ---
 
 ## Data models and query language
 
 Most applications are built by layering one data model on top of another. Each layer hides the complexity of the layers below by providing a clean data model. These abstractions allow different groups of people to work effectively.
-
-### Relational model vs document model
-
-The roots of relational databases lie in _business data processing_, _transaction processing_ and _batch processing_.
-
-The goal was to hide the implementation details behind a cleaner interface.
+* Real life objects &#8594; Document, Graph, Relational DB &#8594; LSM, BTree &#8594; bytes in terms of electrical currents.
 
 _Not Only SQL_ has a few driving forces:
 * Greater scalability
 * preference for free and open source software
 * Specialised query optimisations
 * Desire for a more dynamic and expressive data model
+  
+### Relational model vs document model vs network model
 
-**With a SQL model, if data is stored in a relational tables, an awkward translation layer is translated, this is called _impedance mismatch_.**
+**Relational model**
+* Way to lay out all the data in the open -- a relation (table) is simply a collection of tuples (rows).
+* The roots of relational databases lie in _business data processing_ in 1960s and 70s (_transaction processing_ and _batch processing_). The goal was to hide the implementation details behind a cleaner interface.
+* **Impedance Mismatch** - With a SQL model, if data is stored in a relational tables, an awkward translation layer is translated, this is called _impedance mismatch_.
+* **Joins** - In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. Great for many-to-many relationships.
+* **Schema Flexibility** - schema-on-write, like static (compile time) type checking (C++, Java) where schema is handled at DB layer
+* **Locality** - not so great locality as tables are stored physically at different place on disk. Some databases do it differently -- Google Spanner offers great locality properties by allowing schema to declare that a table's rows should be interleaved (nested) within a parent table.
+* **Example** - MySQL, PostgreSQL, Oracle, SQL Server
 
-JSON model reduces the impedance mismatch and the lack of schema is often cited as an advantage.
+**Document model**
+* The most popular database for business data processing in the 1970s was the IBM's _Information Management System_ (IMS).
+* IMS used a _hierarchical model_ and like document databases worked well for one-to-many relationships, but it made many-to-any relationships difficult, and it didn't support joins.
+* **Impedance Mismatch** - JSON model reduces the impedance mismatch and the lack of schema is often cited as an advantage.
+* JSON representation has better _locality_ than the multi-table SQL schema. All the relevant information is in one place, and one query is sufficient.
+* **Joins** - In document databases, joins are not needed for one-to-many tree structures, and support for joins is poor. If the database itself does not support joins, you have to emulate a join in application code by making multiple queries (poor performance) (foreign key i.e. document reference concept is there, but have limitation that you cannot refer directly to a nested item within a document)
+* **Schema Flexibility** - schema-on-read, like dynamic (runtime) type checking (Python) where schema is handled at application layer while reading (client have no guarantees what data they will get; called schemaless but that's misleading).
+* **Locality** - great locality as all data of a document is stored at one place. The database typically needs to load the entire document, even if you access only a small portion of it. On updates, the entire document usually needs to be rewritten, it is recommended that you keep documents fairly small.
+* **Example** - MongoDB, CouchDB, RethinkDB, Espresso
 
-JSON representation has better _locality_ than the multi-table SQL schema. All the relevant information is in one place, and one query is sufficient.
+**PostgreSQL does support storing JSON documents in a single cell. RethinkDB supports relational-like joins in its query language. Relational and document databases are becoming more similar over time**
 
-In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. In document databases, joins are not needed for one-to-many tree structures, and support for joins is often weak.
-
-If the database itself does not support joins, you have to emulate a join in application code by making multiple queries.
-
-The most popular database for business data processing in the 1970s was the IBM's _Information Management System_ (IMS).
-
-IMS used a _hierarchical model_ and like document databases worked well for one-to-many relationships, but it made many-to-,any relationships difficult, and it didn't support joins.
-
-#### The network model
-
-Standardised by a committee called the Conference on Data Systems Languages (CODASYL) model was a generalisation of the hierarchical model. In the tree structure of the hierarchical model, every record has exactly one parent, while in the network model, a record could have multiple parents.
-
-The links between records are like pointers in a programming language. The only way of accessing a record was to follow a path from a root record called _access path_.
-
-A query in CODASYL was performed by moving a cursor through the database by iterating over a list of records. If you didn't have a path to the data you wanted, you were in a difficult situation as it was difficult to make changes to an application's data model.
-
-#### The relational model
-
-By contrast, the relational model was a way to lay out all the data in the open" a relation (table) is simply a collection of tuples (rows), and that's it.
-
-The query optimiser automatically decides which parts of the query to execute in which order, and which indexes to use (the access path).
-
-The relational model thus made it much easier to add new features to applications.
-
----
-
-**The main arguments in favour of the document data model are schema flexibility, better performance due to locality, and sometimes closer data structures to the ones used by the applications. The relation model counters by providing better support for joins, and many-to-one and many-to-many relationships.**
-
-If the data in your application has a document-like structure, then it's probably a good idea to use a document model. The relational technique of _shredding_ can lead unnecessary complicated application code.
-
-The poor support for joins in document databases may or may not be a problem.
-
-If you application does use many-to-many relationships, the document model becomes less appealing. Joins can be emulated in application code by making multiple requests. Using the document model can lead to significantly more complex application code and worse performance.
-
-#### Schema flexibility
-
-Most document databases do not enforce any schema on the data in documents. Arbitrary keys and values can be added to a document, when reading, **clients have no guarantees as to what fields the documents may contain.**
-
-Document databases are sometimes called _schemaless_, but maybe a more appropriate term is _schema-on-read_, in contrast to _schema-on-write_.
-
-Schema-on-read is similar to dynamic (runtime) type checking, whereas schema-on-write is similar to static (compile-time) type checking.
-
-The schema-on-read approach if the items on the collection don't have all the same structure (heterogeneous)
-* Many different types of objects
-* Data determined by external systems
-
-
-#### Data locality for queries
-
-If your application often needs to access the entire document, there is a performance advantage to this _storage locality_.
-
-The database typically needs to load the entire document, even if you access only a small portion of it. On updates, the entire document usually needs to be rewritten, it is recommended that you keep documents fairly small.
-
-#### Convergence of document and relational databases
-
-PostgreSQL does support JSON documents. RethinkDB supports relational-like joins in its query language and some MongoDB drivers automatically resolve database references. Relational and document databases are becoming more similar over time.
+**The network model**
+* Standardised by a committee called the Conference on Data Systems Languages (CODASYL) model was a generalisation of the hierarchical model. In the tree structure of the hierarchical model, every record has exactly one parent, while in the network model, a record could have multiple parents.
+* The links between records are like pointers in a programming language. The only way of accessing a record was to follow a path from a root record called _access path_ (very bad)
+* A query in CODASYL was performed by moving a cursor through the database by iterating over a list of records
+  * Several different paths can lead to same record and hence programmer had to keep track of these different access paths.
+  * If a record had multiple parents, application code had to keep track of all the various relationships.
+* Moved away from access path &#8594; query optimiser automatically decides which parts of the query to execute in which order, and which indexes to use (the access path) [for all 3: relational, document and network model)
 
 ### Query languages for data
-
-SQL is a _declarative_ query language. In an _imperative language_, you tell the computer to perform certain operations in order.
-
-In a declarative query language you just specify the pattern of the data you want, but not _how_ to achieve that goal.
-
-A declarative query language hides implementation details of the database engine, making it possible for the database system to introduce performance improvements without requiring any changes to queries.
-
-Declarative languages often lend themselves to parallel execution while imperative code is very hard to parallelise across multiple cores because it specifies instructions that must be performed in a particular order. Declarative languages specify only the pattern of the results, not the algorithm that is used to determine results.
-
-#### Declarative queries on the web
-
-In a web browser, using declarative CSS styling is much better than manipulating styles imperatively in JavaScript. Declarative languages like SQL turned out to be much better than imperative query APIs.
+* SQL is a _declarative_ query language. In an _imperative language_ (like IMS and CODASYL) you tell the computer to perform certain operations in order.
+* In a declarative query language you just specify the pattern of the data you want, but not _how_ to achieve that goal.
+* A declarative query language hides implementation details of the database engine, making it possible for the database system to introduce performance improvements without requiring any changes to queries.
+* Declarative languages often lend themselves to parallel execution while imperative code is very hard to parallelise across multiple cores because it specifies instructions that must be performed in a particular order. Declarative languages specify only the pattern of the results, not the algorithm that is used to determine results.
+* **Declarative queries on the web** - In a web browser, using declarative CSS styling is much better than manipulating styles imperatively in JavaScript. Declarative languages like SQL turned out to be much better than imperative query APIs.
 
 #### MapReduce querying
 
-_MapReduce_ is a programming model for processing large amounts of data in bulk across many machines, popularised by Google.
-
-Mongo offers a MapReduce solution.
+_MapReduce_ is a "programming model" (not some software) for processing large amounts of data in bulk across many machines, popularised by Google. Apache Hadoop leverages it. Also, MongoDB and CouchDB offers a MapReduce solution. MapReduce is neither imperative nor declarative, but something in between.
 
 ```js
 db.observations.mapReduce(
-    function map() { 2
+    function map() { // 2 
         var year  = this.observationTimestamp.getFullYear();
         var month = this.observationTimestamp.getMonth() + 1;
-        emit(year + "-" + month, this.numAnimals); 3
+        emit(year + "-" + month, this.numAnimals); // 3
     },
-    function reduce(key, values) { 4
-        return Array.sum(values); 5
+    function reduce(key, values) { // 4
+        return Array.sum(values); // 5
     },
     {
-        query: { family: "Sharks" }, 1
-        out: "monthlySharkReport" 6
+        query: { family: "Sharks" }, // 1
+        out: "monthlySharkReport" // 6
     }
 );
 ```
@@ -349,21 +302,23 @@ db.observations.aggregate([
 
 ### Graph-like data models
 
-If many-to-many relationships are very common in your application, it becomes more natural to start modelling your data as a graph.
-
-A graph consists of _vertices_ (_nodes_ or _entities_) and _edges_ (_relationships_ or _arcs_).
-
-Well-known algorithms can operate on these graphs, like the shortest path between two points, or popularity of a web page.
-
-There are several ways of structuring and querying the data. The _property graph_ model (implemented by Neo4j, Titan, and Infinite Graph) and the _triple-store_ model (implemented by Datomic, AllegroGraph, and others). There are also three declarative query languages for graphs: Cypher, SPARQL, and Datalog.
+* If many-to-many relationships are very common in your application, it becomes more natural to start modelling your data as a graph.
+* A graph consists of _vertices_ (_nodes_ or _entities_) and _edges_ (_relationships_ or _arcs_).
+* Well-known algorithms can operate on these graphs, like the shortest path between two points, or popularity of a web page.
+* There are several ways of structuring and querying the data.
+    * Property graph model (Neo4j &#8594; Cypher, Titan, and Infinite Graph)
+    * Triple-store_ model (Datomic &#8594; Datalog, AllegroGraph) SPARQL
+* There are also
+    * Declarative query languages for graphs: Cypher, SPARQL, and Datalog.
+    * Imperative query languages for graphs: Gremlin.
 
 #### Property graphs
 
 Each vertex consists of:
 * Unique identifier
-* Outgoing edges
-* Incoming edges
 * Collection of properties (key-value pairs)
+* Outgoing edges (optional)
+* Incoming edges (optional)
 
 Each edge consists of:
 * Unique identifier
@@ -374,28 +329,56 @@ Each edge consists of:
 
 Graphs provide a great deal of flexibility for data modelling. Graphs are good for evolvability.
 
----
+```sql
+CREATE TABLE vertices {
+  vertex_id    integer  PRIMARY KEY,
+  properties   json
+};
 
+CREATE TABLE edes {
+  edge_id      integer  PRIMARY KEY,
+  tail_vertex  integer  REFERENCES vertices {vertex_id},
+  head_vertex  integer  REFERENCES vertices {vertex_id},
+  label        text
+  properties   json
+};
+
+CREATE INDEX edge_tails ON edges {tail_vertex};
+CREATE INDEX head_tails ON edges {head_vertex};
+```
+
+**Cypher**
 * _Cypher_ is a declarative language for property graphs created by Neo4j
-* Graph queries in SQL. In a relational database, you usually know in advance which joins you need in your query. In a graph query, the number if joins is not fixed in advance. In Cypher `:WITHIN*0...` expresses "follow a `WITHIN` edge, zero or more times" (like the `*` operator in a regular expression). This idea of variable-length traversal paths in a query can be expressed using something called _recursive common table expressions_ (the `WITH RECURSIVE` syntax).
+* Graph queries in SQL. In a relational database, you usually know in advance which joins you need in your query. In a graph query, the number if joins is not fixed in advance. In Cypher `:WITHIN*0..` expresses "follow a `WITHIN` edge, zero or more times" (like the `*` operator in a regular expression). This idea of variable-length traversal paths in a query can be expressed using something called _recursive common table expressions_ (the `WITH RECURSIVE` syntax).
 
----
+```sql
+MATCH
+  (person) -[:BORN_IN]-> () -[WITHIN*0..]-> (us:Location {name:"United States"}),
+  (person) -[:LIVES_IN]-> () -[WITHIN*0..]-> (eu:Location {name:"Europe"})
+RETURN person.name
+```
 
-#### Triple-stores and SPARQL
+#### Triple-stores
 
-In a triple-store, all information is stored in the form of very simple three-part statements: _subject_, _predicate_, _object_ (peg: _Jim_, _likes_, _bananas_). A triple is equivalent to a vertex in graph.
-
-#### The SPARQL query language
-
-_SPARQL_ is a query language for triple-stores using the RDF data model.
+* In a triple-store, all information is stored in the form of very simple three-part statements: _subject_, _predicate_, _object_ (peg: _Jim_, _likes_, _bananas_). A triple is equivalent to a vertex in graph.
+* Subject is equivalent to vertex in graph
+* Object is one of two
+    * value in a primitive datatype (string or number). In that case, predicate and object of triple are equivalent to the key and value of a property on the subject. For example `{lucy, age, 33}`
+    * another vertex in graph. In that case, predicate is edge in the graph and subject is tail vertex and object is head vertex. For example `{lucy, marriedTo, john}`
+* _SPARQL_ is a query language for triple-stores using the Resource Description Framework (RDF) data model. RDF was intended as a mechanism for different websites to publish data in a consistent format, allowing data from different websites to be automatically combined into a web of data -- a kind of internet wide "database of everything"
 
 #### The foundation: Datalog
+* _Datalog_ provides the foundation that later query languages build upon. Its model is similar to the triple-store model, generalised a bit. Instead of writing a triple (_subject_, _predicate_, _object_), we write as _predicate(subject, object)_.
+* Query language for Datomic
+* Cascalog is the Datalog implementation for querying large datasets in Hadoop.
+* Datalog is a subset of Prolog
+* We define _rules_ that tell the database about new predicates and rules can refer to other rules, just like functions can call other functions or recursively call themselves.
+* Rules can be combined and reused in different queries. It's less convenient for simple one-off queries, but it can cope better if your data is complex.
 
-_Datalog_ provides the foundation that later query languages build upon. Its model is similar to the triple-store model, generalised a bit. Instead of writing a triple (_subject_, _predicate_, _object_), we write as _predicate(subject, object)_.
+All three models are widely used today. One model can be emulated in terms of another model -- for example, graph data can be represented in a relational database, but the result is often awkward. That's why we have different systems for different purposes, not a single one-size-fits-all solution.
 
-We define _rules_ that tell the database about new predicates and rules can refer to other rules, just like functions can call other functions or recursively call themselves.
-
-Rules can be combined and reused in different queries. It's less convenient for simple one-off queries, but it can cope better if your data is complex.
+---
+---
 
 ## Storage and retrieval
 
