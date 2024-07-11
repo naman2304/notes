@@ -83,12 +83,15 @@ Systems that anticipate faults and can cope with them are called _fault-tolerant
 
 **A fault is usually defined as one component of the system deviating from its spec**, whereas _failure_ is when the system as a whole stops providing the required service to the user.
 
-You should generally **prefer tolerating faults over preventing faults** (there are cases where prevention is betteer than cure, because there is no cure -- for instance, a security failure which compromises data of users)
+You should generally **prefer tolerating faults over preventing failures** (there are cases where prevention is better than cure, because there is no cure -- for instance, a security failure which compromises data of users)
 
-* **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults (MTTF of hard disk is 10-50 years, a dc with 10k disks on average have 1 disk per day failure). **There is a move towards systems that tolerate the loss of entire machines** (RAID config in disks, dual power supplies or hot swappable CPUs in servers, battery generator in datacenters). A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
+* **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults (MTTF of hard disk is 10-50 years, a datacentre with 10k disks on average have 1 disk per day failure). **There is a move towards systems that tolerate the loss of entire machines**. A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
+    - Disks: RAID config in disks
+    - Servers: dual power supplies or hot swappable CPUs in servers
+    - Datacentres: battery generator in datacenters)
 * **Software errors**. It is unlikely that a large number of hardware components will fail at the same time. Software errors are a systematic error within the system, they tend to cause many more system failures than uncorrelated hardware faults.
 * **Human errors**. Humans are known to be unreliable. Configuration errors by operators are a leading cause of outages. You can make systems more reliable:
-    - Minimising the opportunities for error, peg: with admin interfaces that make easy to do the "right thing" and discourage the "wrong thing".
+    - Minimising the opportunities for error, example: with admin interfaces that make easy to do the "right thing" and discourage the "wrong thing".
     - Provide fully featured non-production _sandbox_ environments where people can explore and experiment safely.
     - Automated testing (unit and integration).
     - Quick and easy recovery from human error, fast to rollback configuration changes, roll out new code gradually and tools to recompute data.
@@ -172,11 +175,11 @@ A good operations team is responsible for
 * Monitoring and quickly restoring service if it goes into bad state
 * Tracking down the cause of problems
 * Keeping software and platforms up to date
+* Perform complex maintenance tasks, like platform migration
+* Maintaining the security of the system
 * Keeping tabs on how different systems affect each other
 * Anticipating future problems
 * Establishing good practices and tools for development
-* Perform complex maintenance tasks, like platform migration
-* Maintaining the security of the system
 * Defining processes that make operations predictable
 * Preserving the organisation's knowledge about the system
 
@@ -197,7 +200,7 @@ _Agile_ working patterns provide a framework for adapting to change.
 ---
 
 * _Functional requirements_: what the application should do
-* _Nonfunctional requirements_: general properties like security, reliability, compliance, scalability, compatibility and maintainability.
+* _Nonfunctional requirements_: general properties like reliability, scalability, maintainability, security and compliance.
 
 ---
 
