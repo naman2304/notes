@@ -306,11 +306,13 @@ db.observations.aggregate([
 * A graph consists of _vertices_ (_nodes_ or _entities_) and _edges_ (_relationships_ or _arcs_).
 * Well-known algorithms can operate on these graphs, like the shortest path between two points, or popularity of a web page.
 * There are several ways of structuring and querying the data.
-    * Property graph model (Neo4j &#8594; Cypher, Titan, and Infinite Graph)
-    * Triple-store_ model (Datomic &#8594; Datalog, AllegroGraph) SPARQL
-* There are also
-    * Declarative query languages for graphs: Cypher, SPARQL, and Datalog.
-    * Imperative query languages for graphs: Gremlin.
+    * Property graph model
+        * Neo4j &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&#8594; Cypher &nbsp; &nbsp; &nbsp;(declarative)
+        * Titan &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#8594; Gremlin &nbsp; &nbsp; (imperative)
+        * Infinite Graph  &#8594; Gremlin &nbsp; &nbsp; (imperative)
+    * Triple-store_ model
+        * Datomic &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#8594; Datalog &nbsp; &nbsp; (declarative)
+        * AllegroGraph &nbsp;&#8594; SPARQL &nbsp; &nbsp; (declarative)
 
 #### Property graphs
 
@@ -360,7 +362,7 @@ RETURN person.name
 
 #### Triple-stores
 
-* In a triple-store, all information is stored in the form of very simple three-part statements: _subject_, _predicate_, _object_ (peg: _Jim_, _likes_, _bananas_). A triple is equivalent to a vertex in graph.
+* In a triple-store, all information is stored in the form of very simple three-part statements: _subject_, _predicate_, _object_ (eg: _Jim_, _likes_, _bananas_).
 * Subject is equivalent to vertex in graph
 * Object is one of two
     * value in a primitive datatype (string or number). In that case, predicate and object of triple are equivalent to the key and value of a property on the subject. For example `{lucy, age, 33}`
