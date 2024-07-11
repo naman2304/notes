@@ -58,7 +58,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 
 ## Reliable, scalable, and maintainable applications
 
-Applications are today not compute intensive, rather data intensive. A data-intensive application is typically built from standard building blocks. They usually need to:
+Applications are today not compute intensive, rather data intensive. Bigger problem is usually the amount of data, complexity of the data and the speed at which it is changing. A data-intensive application is typically built from standard building blocks. They usually need to:
 * Store data (_databases_)
 * Speed up reads (_caches_) (Memcache)
 * Search data (_search indexes_) (Elasticsearch or Solr)
@@ -67,8 +67,10 @@ Applications are today not compute intensive, rather data intensive. A data-inte
 
 Things are becoming fuzzy too, and boundaries are not obvious. For instance, some datastores are also used as message queues (Redis), and there are message queues which have database like durability (Apache Kafka).
 
+If you have an application managed caching layer (using Memcached or similar), or a full text search server (such as ElasticSearch or Solr) separate from the main database, it is normally the application's responsibility to keep those caches and indexes in sync with the main database.
+
 * **Reliability**. To work _correctly_ even in the face of _adversity_.
-* **Scalability**. Reasonable ways of dealing with growth.
+* **Scalability**. Reasonable ways of dealing with growth (data volume or traffic volume)
 * **Maintainability**. Be able to work on it _productively_.
 
 ### Reliability
@@ -76,20 +78,20 @@ Things are becoming fuzzy too, and boundaries are not obvious. For instance, som
 Typical expectations:
 * Application performs the function the user expected
 * Tolerate the user making mistakes
-* Its performance is good
-* The system prevents abuse
+* Its performance is good (under expected load)
+* The system prevents unauthorised access and abuse
 
 Systems that anticipate faults and can cope with them are called _fault-tolerant_ or _resilient_.
 
 **A fault is usually defined as one component of the system deviating from its spec**, whereas _failure_ is when the system as a whole stops providing the required service to the user.
 
-You should generally **prefer tolerating faults over preventing failures** (there are cases where prevention is better than cure, because there is no cure -- for instance, a security failure which compromises data of users)
+You should generally **prefer tolerating faults over preventing failures** (there are cases where prevention is better than cure, because there is no cure -- for instance, a security failure which compromises data of users). Netflix Chaos Monkey.
 
 * **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults (MTTF of hard disk is 10-50 years, a datacentre with 10k disks on average have 1 disk per day failure). **There is a move towards systems that tolerate the loss of entire machines**. A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
     - Disks: RAID config in disks
     - Servers: dual power supplies or hot swappable CPUs in servers
     - Datacentres: battery generator in datacenters)
-* **Software errors**. It is unlikely that a large number of hardware components will fail at the same time. Software errors are a systematic error within the system, they tend to cause many more system failures than uncorrelated hardware faults.
+* **Software errors**. It is unlikely that a large number of hardware components will fail at the same time. Software errors are a systematic error within the system, they tend to cause many more system failures than uncorrelated hardware faults (leap second bug in 2012 that caused many applications to hang simultaneously)
 * **Human errors**. Humans are known to be unreliable. Configuration errors by operators are a leading cause of outages. You can make systems more reliable:
     - Minimising the opportunities for error, example: with admin interfaces that make easy to do the "right thing" and discourage the "wrong thing".
     - Provide fully featured non-production _sandbox_ environments where people can explore and experiment safely.
@@ -100,7 +102,7 @@ You should generally **prefer tolerating faults over preventing failures** (ther
 
 ### Scalability
 
-This is how do we cope with increased load. We need to succinctly describe the current load on the system (for instance, requests per second, ratio of reads to writes in DB, # of active people in chat room, etc); only then we can discuss growth questions.
+This is how do we cope with increased load. We need to succinctly describe the current load on the system (for instance, requests per second, ratio of reads to writes in DB, cache hit rate on cache, # of active people in chat room, etc); only then we can discuss growth questions.
 
 ---
 
@@ -133,6 +135,14 @@ In a batch processing system such as Hadoop, we usually care about _throughput_,
 > ##### Latency and response time
 > The response time is what the client sees. Latency is the duration that a request is waiting to be handled.
 
+Even in scenarios where we think that all requests will take same amount of time, there is variation due to
+* Network delays (retransmission of packets on TCP)
+* Node delays
+  * Garbage Collection Pause
+  * Context Switch
+  * Page Fault forcing to read from disk
+  * Mechanical vibrations in server rack
+ 
 It's common to see the _average_ response time of a service reported. However, the mean is not very good metric if you want to know your "typical" response time, it does not tell you how many users actually experienced that delay.
 
 **Better to use percentiles.**
@@ -152,7 +162,7 @@ When generating load artificially, the client needs to keep sending requests ind
 
 > ##### Percentiles in practice
 > Calls in parallel, the end-user request still needs to wait for the slowest of the parallel calls to complete.
-> The chance of getting a slow call increases if an end-user request requires multiple backend calls.
+> The chance of getting a slow call increases if an end-user request requires multiple backend calls. Tail latency amplification.
 
 #### Approaches for coping with load
 
@@ -174,14 +184,14 @@ The majority of the cost of software is in its ongoing maintenance. There are th
 A good operations team is responsible for
 * Monitoring and quickly restoring service if it goes into bad state
 * Tracking down the cause of problems
-* Keeping software and platforms up to date
+* Deployment and keeping software and platforms up to date
 * Perform complex maintenance tasks, like platform migration
 * Maintaining the security of the system
 * Keeping tabs on how different systems affect each other
-* Anticipating future problems
+* Anticipating future problems (capacity planning)
 * Establishing good practices and tools for development
 * Defining processes that make operations predictable
-* Preserving the organisation's knowledge about the system
+* Documentation to preserve organisation's knowledge
 
 **Good operability means making routine tasks easy.**
 
@@ -195,7 +205,7 @@ One of the best tools we have for removing accidental complexity is _abstraction
 
 #### Evolvability: making change easy
 
-_Agile_ working patterns provide a framework for adapting to change.
+_Agile_ working patterns provide a framework for adapting to change. Test Driven Development (TDD).
 
 ---
 
