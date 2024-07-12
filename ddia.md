@@ -57,28 +57,33 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Doing the right thing](#doing-the-right-thing)
 
 
-| Database      | Database Model |
-| ----------- | ----------- |
-| MySQL      | Relational       |
-| PostgreSQL   | Relational        |
-| Oracle      | Relational       |
-| SQL Server   | Relational        |
-| Redis      | Key-Value       |
-| Memcached   | Key-Value         |
-| Riak      | Key-Value        |
-| Voldemort   | Key-Value         |
-| MongoDB      | Document       |
-| CouchDB   | Document        |
-| RethinkDB      | Document       |
-| Espresso   | Document        |
-| ElasticSearch      | Document       |
-| Solr   | Document        |
-| Neo4J      | Graph (property)       |
-| Titan   | Graph (property)        |
-| InfiniteGraph      | Graph (property)       |
-| Datomic   | Graph (triple store)        |
-| AllegroGraph      | Graph (triple store)       |
-| Cassandra   | Wide Column        |
+| Database        | Database Model       | Storage Engine |
+| -------------   | -------------------- | -------------- |
+| MySQL           | Relational           | BTree (InnoDB) |
+| PostgreSQL      | Relational           | BTree          |
+| Oracle          | Relational           | BTree          |
+| SQL Server      | Relational           | BTree          |
+| Redis           | Key-Value            | Hash           |
+| Memcached       | Key-Value            | Hash           |
+| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB) |
+| RocksDB         | Key-Value            | LSM            |
+| Voldemort       | Key-Value            |
+| Amazon DynamoDB | Key-Value            | 
+| MongoDB         | Document             |
+| CouchDB         | Document             |
+| RethinkDB       | Document             |
+| Espresso        | Document             |
+| ElasticSearch   | Document             |
+| Solr            | Document             |
+| Neo4J           | Graph (property)     |
+| Titan           | Graph (property)     |
+| InfiniteGraph   | Graph (property)     |
+| Datomic         | Graph (triple store) |
+| AllegroGraph    | Graph (triple store) |
+| Cassandra       | Wide Column          |
+| HBase           | Wide Column          |
+| BigTable        | Wide Column          |
+| Amazon Redshift | Wide Column          |
 
 ## Reliable, scalable, and maintainable applications
 
@@ -396,7 +401,13 @@ RETURN person.name
 #### The foundation: Datalog
 * _Datalog_ provides the foundation that later query languages build upon. Its model is similar to the triple-store model, generalised a bit. Instead of writing a triple (_subject_, _predicate_, _object_), we write as _predicate(subject, object)_.
 * Query language for Datomic
-* Cascalog is the Datalog implementation for querying large datasets in Hadoop. For Hadoop, SQL like query languages are Apache Hive, Apache Pig and Apache Impala. Cascalog is a non-SQL language (but still declarative).
+* Cascalog is the Datalog implementation for querying large datasets in Hadoop. For Hadoop, SQL like query languages are HiveQL (Apache Hive), Pig Latin (Apache Pig), Spark SQL (Apache Spark), Impala (Apache Impala) and HBase QL (Apache HBase). Cascalog is a non-SQL language (but still declarative).
+    * Hive is relational data warehouse
+    * Pig is data flow platform for writing scripts for data processing
+    * Spark is cluster computing system
+    * Impala is query engine
+    * HBase is columnar data warehouse
+    * Hadoop is distributed file system and batch processing framework
 * Datalog is a subset of Prolog
 * We define _rules_ that tell the database about new predicates and rules can refer to other rules, just like functions can call other functions or recursively call themselves.
 * Rules can be combined and reused in different queries. It's less convenient for simple one-off queries, but it can cope better if your data is complex.
@@ -429,7 +440,7 @@ All three models are widely used today. One model can be emulated in terms of an
 
 Example:
 * **Bitcask (the default storage engine in Riak)** does it like that. The only requirement it has is that all the keys fit in the available RAM. Values can use more space than there is available in memory, since they can be loaded from disk. A storage engine like Bitcask is well suited to situations where the value for each key is updated frequently. There are a lot of writes, but there are not too many distinct keys, you have a large number of writes per key, but it's feasible to keep all keys in memory.
-* Redis, Memcached, Amazon DynamoDB
+* Redis, Memcached
 
 
 Some issues that are important in a real implementation:
@@ -534,8 +545,8 @@ LSM-trees are typically faster for writes, whereas B-trees are thought to be fas
 * Disks have two significant advantages: they are durable, and they have lower cost per gigabyte than RAM.
 * It's quite feasible to keep them entirely in memory, this has lead to _in-memory_ databases.
 * When an in-memory database is restarted, it needs to reload its state, either from disk or over the network from a replica. The disk is merely used as an append-only log for durability, and reads are served entirely from memory.
-* Key-value stores, such as Memcached are intended for cache only, it's acceptable for data to be lost if the machine is restarted.
-* Other in-memory databases aim for durability, with special hardware, writing a log of changes to disk, writing periodic snapshots to disk or by replicating in-memory sate to other machines. Redis provide weak durability by writing to disk asynchronously.
+* Key-value stores, such as Memcached are intended for cache only, it's acceptable for data to be lost if the machine is restarted. Memcached is purely memory based (no disk at all).
+* Other in-memory databases aim for durability, with special hardware, writing a log of changes to disk, writing periodic snapshots to disk or by replicating in-memory sate to other machines. Redis provide weak durability by writing every operation to append only log to disk + periodic snapshot to disk. 
 * In-memory databases can be faster because they can avoid the overheads of encoding in-memory data structures in a form that can be written to disk.
 * Another interesting area is that in-memory databases may provide data models that are difficult to implement with disk-based indexes (sets, priority queues, etc)
 
