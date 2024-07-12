@@ -71,6 +71,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | CouchDB   | Document        |
 | RethinkDB      | Document       |
 | Espresso   | Document        |
+| ElasticSearch      | Document       |
+| Solr   | Document        |
 | Neo4J      | Graph (property)       |
 | Titan   | Graph (property)        |
 | InfiniteGraph      | Graph (property)       |
