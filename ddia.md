@@ -80,10 +80,10 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | InfiniteGraph   | Graph (property)     |
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
-| Cassandra       | Wide Column          |
-| HBase           | Wide Column          |
-| BigTable        | Wide Column          |
-| Amazon Redshift | Wide Column          |
+| Cassandra       | Wide Column          | LSM
+| HBase           | Wide Column          | LSM
+| BigTable        | Wide Column          | LSM
+| Amazon Redshift | Wide Column          | BTree
 
 ## Reliable, scalable, and maintainable applications
 
@@ -559,7 +559,7 @@ LSM-trees are typically faster for writes, whereas B-trees are thought to be fas
 ### Data warehousing
 * A _data warehouse_ is a separate database that analysts can query to their heart's content without affecting OLTP operations. It contains read-only copy of the data in all various OLTP systems in the company. Data is extracted out of OLTP databases (through periodic data dump or a continuous stream of update), transformed into an analysis-friendly schema, cleaned up, and then loaded into the data warehouse (process _Extract-Transform-Load_ or ETL).
 * A data warehouse is most commonly relational, but the internals of the systems can look quite different because of different access patterns.
-* Amazon RedShift is hosted version of ParAccel. Apache Hive, Spark SQL, Cloudera Impala, Facebook Presto, Apache Tajo, and Apache Drill. Some of them are based on ideas from Google's Dremel.
+* Amazon RedShift is hosted version of ParAccel.
 * Data warehouses are used in fairly formulaic style known as a _star schema_.
     * Central table is fact table in which each row is a fact -- facts are captured as individual events, because this allows maximum flexibility of analysis later. The fact table can become extremely large.
     * Some of the columns in the fact are attributes, others are foreign key references to other tables called dimension tables. Dimensions represent the _who_, _what_, _where_, _when_, _how_ and _why_ of the event.
