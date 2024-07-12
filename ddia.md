@@ -56,6 +56,28 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Aiming for correctness](#aiming-for-correctness)
   - [Doing the right thing](#doing-the-right-thing)
 
+
+| Database      | Database Model |
+| ----------- | ----------- |
+| MySQL      | Relational       |
+| PostgreSQL   | Relational        |
+| Oracle      | Relational       |
+| SQL Server   | Relational        |
+| Redis      | Key-Value       |
+| Memcached   | Key-Value         |
+| Riak      | Key-Value        |
+| Voldemort   | Key-Value         |
+| MongoDB      | Document       |
+| CouchDB   | Document        |
+| RethinkDB      | Document       |
+| Espresso   | Document        |
+| Neo4J      | Graph (property)       |
+| Titan   | Graph (property)        |
+| InfiniteGraph      | Graph (property)       |
+| Datomic   | Graph (triple store)        |
+| AllegroGraph      | Graph (triple store)       |
+| Cassandra   | Wide Column        |
+
 ## Reliable, scalable, and maintainable applications
 
 Applications are today not compute intensive, rather data intensive. Bigger problem is usually the amount of data, complexity of the data and the speed at which it is changing. A data-intensive application is typically built from standard building blocks. They usually need to:
