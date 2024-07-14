@@ -56,8 +56,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Aiming for correctness](#aiming-for-correctness)
   - [Doing the right thing](#doing-the-right-thing)
 
-| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition |
-| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- |
+| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy |
+| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- |
 | MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi   |
 | PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi   |
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi   |
@@ -65,15 +65,15 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  |
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
-| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  |
+| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
 | RocksDB         | Key-Value            | LSM                                                |
-| Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |
+| Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
 | Amazon DynamoDB | Key-Value            |                                                    |                     |                  |                      | Global Index |
 | MongoDB         | Document             |                                                    |                     |                  | Key Range (<2.4)     | Local Index  |
 | CouchDB         | Document             |                                                    |                     | Multi            | Key Range            |
 | RethinkDB       | Document             |
 | Espresso        | Document             |
-| ElasticSearch   | Document             |                                                    |                     |                  |                      | Local Index  |
+| ElasticSearch   | Document             |                                                    |                     |                  |                      | Local Index  | Fixed number of partitions |
 | Solr            | Document             |                                                    |                     |                  |                      | Local Index  |
 | Neo4J           | Graph (property)     |
 | Titan           | Graph (property)     |
@@ -1208,7 +1208,7 @@ Requirements
 
 Strategies for rebalancing:
 * **How not to do it: Hash mod n.** The problem with _mod N_ is that if the number of nodes _N_ changes, most of the keys will need to be moved from one node to another.
-* **Fixed number of partitions.** Create many more partitions than there are nodes and assign several partitions to each node. If a node is added to the cluster, we can _steal_ a few partitions from every existing node until partitions are fairly distributed once again. The number of partitions does not change, nor does the assignment of keys to partitions. The only thing that change is the assignment of partitions to nodes. This is used in Riak, Elasticsearch, Couchbase, and Voldemport. **You need to choose a high enough number of partitions to accomodate future growth.** Neither too big or too small.
+* **Fixed number of partitions.** Create many more partitions than there are nodes and assign several partitions to each node. If a node is added to the cluster, we can _steal_ a few partitions from every existing node until partitions are fairly distributed once again. The number of partitions does not change, nor does the assignment of keys to partitions. The only thing that change is the assignment of partitions to nodes. This is used in Riak, Elasticsearch, Couchbase, and Voldemort. **You need to choose a high enough number of partitions to accommodate future growth.** Neither too big or too small. Choose too less? Maximum number of nodes is bottlenecked by number of partitions; also rebalancing such a big partition is expensive. Choose too high? More overhead to store this metadata in Zookeeper. 
 * **Dynamic partitioning.** The number of partitions adapts to the total data volume. An empty database starts with an empty partition. While the dataset is small, all writes have to processed by a single node while the others nodes sit idle. HBase and MongoDB allow an initial set of partitions to be configured (_pre-splitting_).
 * **Partitioning proportionally to nodes.** Cassandra and Ketama make the number of partitions proportional to the number of nodes. Have a fixed number of partitions _per node_. This approach also keeps the size of each partition fairly stable.
 
