@@ -332,4 +332,26 @@ Algorithm
      * corresponding values can be either
           *  merged ("on write"). CRDTs.
           *  kept as sibling ("on read")
-     * merging version vectors means taking max of both version vectors at every index  
+     * merging version vectors means taking max of both version vectors at every index
+ 
+#### CRDT (Conflict-free Replication Data Types)
+
+* Where used? Riak.
+* Types
+  * **Operational**
+    * Example: increment(x). Tells database which index of list to increment. Less data to send over network.
+    * Downsides: say DB1 got two updates: add("ham"), and then remove("ham"). And now say these 2 updates get replicated to DB2, but add("ham") get dropped. These were 2 causually dependent messages. So this won't work.
+  * **State based**
+    * Example: merge([5,4], [4,6]) = [5,6]
+    * merge function must be
+      * commutative: f(a,b) = f(b,a)
+      * associative: f(f(a,b),c) = f(a, f(b,c))
+      * idempotent: f(a,b) = f(f(a,b),b)
+    * since order doesn't matter, we can communicate via **gossip protocol** (nodes randomly keep sending message to few neighbour nodes)
+    * How to implement set? Keep two lists: one **adds**, another **removes** [so if adds={1, 2, 3} and removes={3}, then actual set is {1, 2}
+      * merge (adds1, adds2, removes1, removes2) = union(adds1, adds2) difference union(removes1, removes2)
+      * problem: if one element goes to **removes**, we can never add it again. Solution: give each add a unique tag
+        * adds = {1:t1, 2:t2, 1:t3}, removes = {1:t1}, then set is {2:t2, 1:t3} which is {2, 1}
+  * **Sequence CRDTs**
+    * buld eventually consistent ordered list (Etherpad and Google Docs) 
+      
