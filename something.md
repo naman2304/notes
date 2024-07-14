@@ -322,6 +322,8 @@ The server can determine whether two operations are concurrent by looking at the
 * The collection of version numbers from all the replicas is called a _version vector_.
 * Version vector are sent from the database replicas to clients when values are read, and need to be sent back to the database when a value is subsequently written. Riak calls this _casual context_. Version vectors allow the database to distinguish between overwrites and concurrent writes.
 
+![Version vector](/metadata/version_vector.png)
+
 Algorithm
 * every time a client reads from DB, DB gives it's version vector of key
 * every time a client writes to DB, it passes DB its most recently read version vector for key and DB supplies it with new one.
