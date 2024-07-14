@@ -57,13 +57,13 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Doing the right thing](#doing-the-right-thing)
 
 
-| Database        | Database Model       | Storage Engine                                     | Replication log |
-| -------------   | -------------------- | -------------------------------------------------- | --------------- |
-| MySQL           | Relational           | BTree (InnoDB)                                     |
-| PostgreSQL      | Relational           | BTree                                              | WAL based       |
-| Oracle          | Relational           | BTree                                              | WAL based       |
+| Database        | Database Model       | Storage Engine                                     | Replication log     |
+| -------------   | -------------------- | -------------------------------------------------- | ------------------- |
+| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based) |
+| PostgreSQL      | Relational           | BTree                                              | WAL based           |
+| Oracle          | Relational           | BTree                                              | WAL based           |
 | SQL Server      | Relational           | BTree                                              |
-| VoltDB          | Relational           | Hash (in memory database)                          | Statement based |
+| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |
