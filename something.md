@@ -235,6 +235,8 @@ Eventually, all the data is copied to every replica. After a unavailable node co
 * **Read repair.** When a client detect any stale responses, write the newer value back to that replica.
 * **Anti-entropy process.** There is a background process that constantly looks for differences in data between replicas and copies any missing data from one replica to he other. **It does not copy writes in any particular order**. Voldemort does not have anti entropy process. Without it, values that are rarely read may be missing from some replicas and thus have reduced durability.
 
+![Merkle Tree](/metadata/merkle_tree.jpeg)
+
 #### Quorums for reading and writing
 
 * If there are _n_ replicas, every write must be confirmed by _w_ nodes to be considered successful, and we must query at least _r_ nodes for each read. As long as _w_ + _r_ > _n_, we expect to get an up-to-date value when reading. _r_ and _w_ values are called _quorum_ reads and writes. Are the minimum number of votes required for the read or write to be valid.
