@@ -71,20 +71,20 @@ Another complication is that the same user is accessing your service from multip
 
 #### Monotonic reads
 
+![Monotonic Reads](/metadata/monotonic_reads.png)
+
 * Because of followers falling behind, it's possible for a user to see things _moving backward in time_.
 * Lesser guarantee than strong consistency, but a stronger guarantee than eventual consistency.
 * When you read data, you may see an old value; monotonic reads only means that if one user makes several reads in sequence, they will not see time go backward.
 * Solution: Make sure that each user always makes their reads from the same replica. The replica can be chosen based on a hash of the user ID. However, if the replica fails, the user's queries will need to be rerouted to another replica.
 
-![Monotonic Reads](/metadata/monotonic_reads.png)
-
 #### Consistent prefix reads
 
-If a sequence of writes happens in a certain order, then anyone reading those writes will see them appear in the same order.
+![Consistent prefix reads](/metadata/consistent_prefix_reads.png)
 
-This is a particular problem in partitioned (sharded) databases as there is no global ordering of writes.
-
-A solution is to make sure any writes casually related to each other are written to the same partition.
+* If a sequence of writes happens in a certain order, then anyone reading those writes will see them appear in the same order.
+* This is a particular problem in partitioned (sharded) databases as there is no global ordering of writes.
+* A solution is to make sure any writes casually related to each other are written to the same partition.
 
 #### Solutions for replication lag
 
@@ -146,15 +146,16 @@ For these reasons, some operation teams prefer to perform failovers manually, ev
 
 ### Multi-leader replication
 
-Leader-based replication has one major downside: there is only one leader, and all writes must go through it.
-
-A natural extension is to allow more than one node to accept writes (_multi-leader_, _master-master_ or _active/active_ replication) where each leader simultaneously acts as a follower to the other leaders.
+* Leader-based replication has one major downside: there is only one leader, and all writes must go through it.
+* A natural extension is to allow more than one node to accept writes (_multi-leader_, _master-master_ or _active/active_ replication) where each leader simultaneously acts as a follower to the other leaders.
 
 #### Use cases for multi-leader replication
 
 It rarely makes sense to use multi-leader setup within a single datacenter.
 
 ##### Multi-datacenter operation
+
+![Multi Datacenter](/metadata/multi_datacenter.png)
 
 You can have a leader in _each_ datacenter. Within each datacenter, regular leader-follower replication is used. Between datacenters, each datacenter leader replicates its changes to the leaders in other datacenters.
 
@@ -175,13 +176,10 @@ CouchDB is designed for this mode of operation.
 
 #### Collaborative editing
 
-_Real-time collaborative editing_ applications allow several people to edit a document simultaneously. Like Etherpad or Google Docs.
-
-The user edits a document, the changes are instantly applied to their local replica and asynchronously replicated to the server and any other user.
-
-If you want to avoid editing conflicts, you must the lock the document before a user can edit it.
-
-For faster collaboration, you may want to make the unit of change very small (like a keystroke) and avoid locking.
+* _Real-time collaborative editing_ applications allow several people to edit a document simultaneously. Like Etherpad or Google Docs.
+* The user edits a document, the changes are instantly applied to their local replica and asynchronously replicated to the server and any other user.
+* If you want to avoid editing conflicts, you must the lock the document before a user can edit it. But this is equivalent to single leader replication as any user will have to wait for first user to complete it's writes.
+* For faster collaboration, you may want to make the unit of change very small (like a keystroke) and avoid locking.
 
 #### Handling write conflicts
 
