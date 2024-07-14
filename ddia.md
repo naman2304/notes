@@ -71,7 +71,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Amazon DynamoDB | Key-Value            |                                                    |                     |                  |                      | Global Index |
 | MongoDB         | Document             |                                                    |                     |                  | Key Range (<2.4)     | Local Index  |
 | CouchDB         | Document             |                                                    |                     | Multi            | Key Range            |
-| RethinkDB       | Document             |
+| RethinkDB       | Document             |                                                    |                     |                  |                      |              | Dynamic partitioning |
 | Espresso        | Document             |
 | ElasticSearch   | Document             |                                                    |                     |                  |                      | Local Index  | Fixed number of partitions |
 | Solr            | Document             |                                                    |                     |                  |                      | Local Index  |
@@ -81,7 +81,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
 | Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       |                      | Local Index  |
-| HBase           | Wide Column          | LSM                                                |                     |                  | Key Range
+| HBase           | Wide Column          | LSM                                                |                     |                  | Key Range            |              | Dynamic partitioning |
 | BigTable        | Wide Column          | LSM                                                |                     |                  | Key Range
 | Amazon Redshift | Wide Column          | BTree
 
@@ -1159,12 +1159,14 @@ Algorithm
 * Assign a continuous range of keys, like the volumes of a paper encyclopaedia. Boundaries might be chose manually by an administrator, or the database can choose them automatically. On each partition, keys are in sorted order so scans are easy.
 * Advantage: Range queries efficient.
 * Disadvantage: Ranges of keys are not necessarily evenly spaced, because your data may not be evenly distributed. Hence certain access patterns can lead to hot spots.
+* Rebalancing typically done using "Dynamic partitioning"
 
 #### Partitioning by hash of key
 
 * A good hash function takes skewed data and makes it uniformly distributed. There is no need to be cryptographically strong (MongoDB uses MD5 and Cassandra uses Murmur3). You can assign each partition a range of hashes. The boundaries can be evenly spaced or they can be chosen pseudorandomly (_consistent hashing_).
 * Advantage: less hot spots
 * Disadvantage: we lose the ability to do efficient range queries. Keys that were once adjacent are now scattered across all the partitions. Any range query has to be sent to all partitions.
+* Rebalancing typically done using "Fixed number of partitions". Although "Dynamic partitioning" can also be used.
 
 Cassandra achieves a compromise between the two partition strategies. Table in Cassandra can be declared with a _compound primary key_ consisting of several columns. Only first part of key is hashed to determine the partition, but the other columns are used as concatenated index for sorting the data in SSTables. Great then for say queries (user_id, timestamp) => hash the user_id and get the partition on which this user data is present, then scan it's data in the timestamp as data is sorted by timestamp.
 
@@ -1207,27 +1209,41 @@ Requirements
 * Least possible data needs to be moved to minimize network and disk I/O load.
 
 Strategies for rebalancing:
-* **How not to do it: Hash mod n.** The problem with _mod N_ is that if the number of nodes _N_ changes, most of the keys will need to be moved from one node to another.
-* **Fixed number of partitions.** Create many more partitions than there are nodes and assign several partitions to each node. If a node is added to the cluster, we can _steal_ a few partitions from every existing node until partitions are fairly distributed once again. The number of partitions does not change, nor does the assignment of keys to partitions. The only thing that change is the assignment of partitions to nodes. This is used in Riak, Elasticsearch, Couchbase, and Voldemort. **You need to choose a high enough number of partitions to accommodate future growth.** Neither too big or too small. Choose too less? Maximum number of nodes is bottlenecked by number of partitions; also rebalancing such a big partition is expensive. Choose too high? More overhead to store this metadata in Zookeeper. 
-* **Dynamic partitioning.** The number of partitions adapts to the total data volume. An empty database starts with an empty partition. While the dataset is small, all writes have to processed by a single node while the others nodes sit idle. HBase and MongoDB allow an initial set of partitions to be configured (_pre-splitting_).
-* **Partitioning proportionally to nodes.** Cassandra and Ketama make the number of partitions proportional to the number of nodes. Have a fixed number of partitions _per node_. This approach also keeps the size of each partition fairly stable.
+* **How not to do it: Hash mod n.**
+  * The problem with _mod N_ is that if the number of nodes _N_ changes, most of the keys will need to be moved from one node to another.
+* **Fixed number of partitions.**
+  * Create many more partitions than there are nodes and assign several partitions to each node.
+  * If a node is added to the cluster, we can _steal_ a few partitions from every existing node until partitions are fairly distributed once again. The number of partitions does not change, nor does the assignment of keys to partitions. The only thing that change is the assignment of partitions to nodes.
+  * This is used in Riak, Elasticsearch, Couchbase, and Voldemort.
+  * **You need to choose a high enough number of partitions to accommodate future growth.** Neither too big or too small. Choose too less? Maximum number of nodes is bottlenecked by number of partitions; also rebalancing such a big partition is expensive. Choose too high? More overhead to store this metadata in Zookeeper. 
+* **Dynamic partitioning.**
+  * The number of partitions adapts to the total data volume.
+  * An empty database starts with an empty partition. While the dataset is small, all writes have to processed by a single node while the others nodes sit idle. HBase and MongoDB allow an initial set of partitions to be configured (_pre-splitting_).
+* **Partitioning proportionally to nodes.**
+  * Fixed number of partitions: size of dataset increases => size of partition increases. # of partitions is independent of # of nodes.
+  * Dynamic partition: size of dataset increases => # of partition increases. # of partitions is independent of # of nodes.
+  * Cassandra and Ketama make the number of partitions proportional to the number of nodes. Have a fixed number of partitions _per node_.
+  * When a new node joins the cluster, it randomly chooses a fixed number of existing partitions to split, and then takes ownership of one half of each of those split partitions while leaving the other half of each partition in place.
+  * This approach also keeps the size of each partition fairly stable.
 
 #### Automatic versus manual rebalancing
 
-Fully automated rebalancing may seem convenient but the process can overload the network or the nodes and harm the performance of other requests while the rebalancing is in progress.
-
-It can be good to have a human in the loop for rebalancing. You may avoid operational surprises.
+* Fully automated rebalancing may seem convenient but the process can overload the network or the nodes and harm the performance of other requests while the rebalancing is in progress.
+* It can be good to have a human in the loop for rebalancing. You may avoid operational surprises.
 
 ### Request routing
 
+![Routing](/metadata/routing.png)
 This problem is also called _service discovery_. There are different approaches:
-1. Allow clients to contact any node and make them handle the request directly, or forward the request to the appropriate node.
+1. Allow clients to contact any node (round robin) and make them handle the request directly, or forward the request to the appropriate node. Gossip protocol between nodes then.
 2. Send all requests from clients to a routing tier first that acts as a partition-aware load balancer.
 3. Make clients aware of the partitioning and the assignment of partitions to nodes.
 
 In many cases the problem is: how does the component making the routing decision learn about changes in the assignment of partitions to nodes?
 
-Many distributed data systems rely on a separate coordination service such as ZooKeeper to keep track of this cluster metadata. Each node registers itself in ZooKeeper, and ZooKeeper maintains the authoritative mapping of partitions to nodes. The routing tier or the partitioning-aware client, can subscribe to this information in ZooKeeper. HBase, SolrCloud and Kafka use ZooKeeper to track partition assignment. MongoDB relies on its own _config server_. Cassandra and Riak take a different approach: they use a _gossip protocol_.
+![ZooKeeper](/metadata/zookeeper.png)
+* Many distributed data systems rely on a separate coordination service such as ZooKeeper to keep track of this cluster metadata. Each node registers itself in ZooKeeper, and ZooKeeper maintains the authoritative mapping of partitions to nodes. The routing tier or the partitioning-aware client, can subscribe to this information in ZooKeeper. Whenever a partition changes ownership, or a node is added or removed, ZooKeeper notifies the routing tier so that it can keep its routing information up to date.
+* HBase, SolrCloud and Kafka use ZooKeeper to track partition assignment. MongoDB relies on its own _config server_. Cassandra and Riak take a different approach: they use a _gossip protocol_.
 
 #### Parallel query execution
 
