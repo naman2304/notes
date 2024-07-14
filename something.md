@@ -164,7 +164,7 @@ Compared to a single-leader replication model deployed in multi-datacenters
 * **Tolerance of datacenter outages.** In single-leader if the datacenter with the leader fails, failover can promote a follower in another datacenter. In multi-leader, each datacenter can continue operating independently from others.
 * **Tolerance of network problems.** Single-leader is very sensitive to problems in this inter-datacenter link as writes are made synchronously over this link. Multi-leader with asynchronous replication can tolerate network problems better.
 
-Multi-leader replication is implemented with Tungsten Replicator for MySQL, BDR for PostgreSQL or GoldenGate for Oracle.
+Multi-leader replication is implemented with Tungsten Replicator for MySQL (doesn't even try to detect conflicts), BDR for PostgreSQL (does not provide casual ordering of writes) or GoldenGate for Oracle.
 
 It's common to fall on subtle configuration pitfalls. Autoincrementing keys, triggers and integrity constraints can be problematic. Multi-leader replication is often considered dangerous territory and avoided if possible.
 
@@ -176,75 +176,79 @@ CouchDB is designed for this mode of operation.
 
 #### Collaborative editing
 
-* _Real-time collaborative editing_ applications allow several people to edit a document simultaneously. Like Etherpad or Google Docs.
+* _Real-time collaborative editing_ applications allow several people to edit a document simultaneously. Like Etherpad or Google Docs. "Operational transformation" is the conflict resolution algorithm behind both of these.
 * The user edits a document, the changes are instantly applied to their local replica and asynchronously replicated to the server and any other user.
 * If you want to avoid editing conflicts, you must the lock the document before a user can edit it. But this is equivalent to single leader replication as any user will have to wait for first user to complete it's writes.
 * For faster collaboration, you may want to make the unit of change very small (like a keystroke) and avoid locking.
 
 #### Handling write conflicts
 
-The biggest problem with multi-leader replication is when conflict resolution is required. This problem does not happen in a single-leader database.
-
-##### Synchronous vs asynchronous conflict detection
-
-In single-leader the second writer can be blocked and wait the first one to complete, forcing the user to retry the write. On multi-leader if both writes are successful, the conflict is only detected asynchronously later in time.
-
-If you want synchronous conflict detection, you might as well use single-leader replication.
+* The biggest problem with multi-leader replication is when conflict resolution is required. This problem does not happen in a single-leader database.
+* In single-leader the second writer can be blocked and wait the first one to complete, forcing the user to retry the write. On multi-leader if both writes are successful, the conflict is only detected asynchronously later in time.
+* If you want synchronous conflict detection, you might as well use single-leader replication.
 
 ##### Conflict avoidance
 
-The simplest strategy for dealing with conflicts is to avoid them. If all writes for a particular record go through the sae leader, then conflicts cannot occur.
-
-On an application where a user can edit their own data, you can ensure that requests from a particular user are always routed to the same datacenter and use the leader in that datacenter for reading and writing.
+* The simplest strategy for dealing with conflicts is to avoid them. If all writes for a particular record go through the same leader, then conflicts cannot occur. Like partitioning.
+* On an application where a user can edit their own data, you can ensure that requests from a particular user are always routed to the same datacenter and use the leader in that datacenter for reading and writing.
+* However sometimes you may want to change the home datacenter for a user due to
+     * home datacenter failed
+     * user moved to different location
 
 ##### Converging toward a consistent state
 
-On single-leader, the last write determines the final value of the field.
-
-In multi-leader, it's not clear what the final value should be.
-
-The database must resolve the conflict in a _convergent_ way, all replicas must arrive a the same final value when all changes have been replicated.
+* On single-leader, the last write determines the final value of the field.
+* In multi-leader, it's not clear what the final value should be.
+* The database must resolve the conflict in a _convergent_ way, all replicas must arrive a the same final value when all changes have been replicated.
 
 Different ways of achieving convergent conflict resolution.
-* Five each write a unique ID (timestamp, long random number, UUID, or a has of the key and value), pick the write with the highest ID as the _winner_ and throw away the other writes. This is known as _last write wins_ (LWW) and it is dangerously prone to data loss.
+* Give each write a unique ID (timestamp, long random number, UUID, or a hash of the key and value), pick the write with the highest ID as the _winner_ and throw away the other writes. This is known as _last write wins_ (LWW) and it is dangerously prone to data loss.
 * Give each replica a unique ID, writes that originated at a higher-numbered replica always take precedence. This approach also implies data loss.
-* Somehow merge the values together.
-* Record the conflict and write application code that resolves it a to some later time (perhaps prompting the user).
+* Somehow merge the values together. Say if value is string, then concatenate the string?
 
 ##### Custom conflict resolution
 
-Multi-leader replication tools let you write conflict resolution logic using application code.
+Multi-leader replication tools let you write conflict resolution logic using application code. Version Vectors can be used here for both.
 
-* **On write.** As soon as the database system detects a conflict in the log of replicated changes, it calls the conflict handler.
-* **On read.** All the conflicting writes are stored. On read, multiple versions of the data are returned to the application. The application may prompt the user or automatically resolve the conflict. CouchDB works this way.
+* **On write.** As soon as the database system detects a conflict in the log of replicated changes, it calls the conflict handler. CRDTs used here.
+* **On read.** All the conflicting writes are stored. On read, multiple versions of the data are returned to the application. The application may prompt the user or automatically resolve the conflict. CouchDB works this way. 
+
+Note that conflict resolution usually applies at the level of an indivudual row or document, and not at transaction level. Thus, if you have a transaction that atomically makes several different writes, each write is still considered separately for the purposes of conflict resolution.
 
 #### Multi-leader replication topologies
 
-A _replication topology_ describes the communication paths along which writes are propagated from one node to another.
-
-The most general topology is _all-to-all_ in which every leader sends its writes to every other leader. MySQL uses _circular topology_, where each nodes receives writes from one node and forwards those writes to another node. Another popular topology has the shape of a _star_, one designated node forwards writes to all of the other nodes.
-
-In circular and star topologies a write might need to pass through multiple nodes before they reach all replicas. To prevent infinite replication loops each node is given a unique identifier and the replication log tags each write with the identifiers of the nodes it has passed through. When a node fails it can interrupt the flow of replication messages.
-
-In all-to-all topology fault tolerance is better as messages can travel along different paths avoiding a single point of failure. It has some issues too, some network links may be faster than others and some replication messages may "overtake" others. To order events correctly. there is a technique called _version vectors_. PostgresSQL BDR does not provide casual ordering of writes, and Tungsten Replicator for MySQL doesn't even try to detect conflicts.
+* A _replication topology_ describes the communication paths along which writes are propagated from one leader to another.
+* The most general topology is _all-to-all_ in which every leader sends its writes to every other leader. MySQL uses _circular topology_, where each nodes receives writes from one node and forwards those writes to another node. Another popular topology has the shape of a _star_, one designated node forwards writes to all of the other nodes.
+* In circular and star topologies a write might need to pass through multiple nodes before they reach all replicas. To prevent infinite replication loops each node is given a unique identifier and the replication log tags each write with the identifiers of the nodes it has passed through.
+* In all-to-all topology fault tolerance is better as messages can travel along different paths avoiding a single point of failure. It has some issues too, some network links may be faster than others and some replication messages may "overtake" others. Consistent Prefix Reads problem. To order events correctly. there is a technique called _version vectors_.
 
 ### Leaderless replication
 
-Simply put, any replica can directly accept writes from clients. Databases like look like Amazon's in-house _Dynamo_ datastore. _Riak_, _Cassandra_ and _Voldemort_ follow the _Dynamo style_.
+* Simply put, any replica can directly accept writes from clients. Databases like look like Amazon's in-house _Dynamo_ datastore. _Riak_, _Cassandra_ and _Voldemort_ follow the _Dynamo style_.
+* Note: Amazon DynamoDB is based on principles of Dynamo paper, but DynamoDB is single leader replication. The Dynamo paper was describing leaderless replication as a concept.
+* In a leaderless configuration, failover does not exist. Clients send the write to all replicas in parallel.
+* _Read requests are also sent to several nodes in parallel_. The client may get different responses. Version numbers are used to determine which value is newer.
 
-In a leaderless configuration, failover does not exist. Clients send the write to all replicas in parallel.
-
-_Read requests are also sent to several nodes in parallel_. The client may get different responses. Version numbers are used to determine which value is newer.
+![Read repair](/metadata/read_repair.png)
 
 Eventually, all the data is copied to every replica. After a unavailable node come back online, it has two different mechanisms to catch up:
 * **Read repair.** When a client detect any stale responses, write the newer value back to that replica.
-* **Anti-entropy process.** There is a background process that constantly looks for differences in data between replicas and copies any missing data from one replica to he other. It does not copy writes in any particular order.
+* **Anti-entropy process.** There is a background process that constantly looks for differences in data between replicas and copies any missing data from one replica to he other. **It does not copy writes in any particular order**. Voldemort does not have anti entropy process. Without it, values that are rarely read may be missing from some replicas and thus have reduced durability.
 
 #### Quorums for reading and writing
 
-If there are _n_ replicas, every write must be confirmed by _w_ nodes to be considered successful, and we must query at least _r_ nodes for each read. As long as _w_ + _r_ > _n_, we expect to get an up-to-date value when reading. _r_ and _w_ values are called _quorum_ reads and writes. Are the minimum number of votes required for the read or write to be valid.
+* If there are _n_ replicas, every write must be confirmed by _w_ nodes to be considered successful, and we must query at least _r_ nodes for each read. As long as _w_ + _r_ > _n_, we expect to get an up-to-date value when reading. _r_ and _w_ values are called _quorum_ reads and writes. Are the minimum number of votes required for the read or write to be valid.
+* A common choice is to make _n_ and odd number (typically 3 or 5) and to set _w_ = _r_ = (_n_ + 1)/2 (rounded up).
+* Quoram does not mean strong consistency.
 
-A common choice is to make _n_ and odd number (typically 3 or 5) and to set _w_ = _r_ = (_n_ + 1)/2 (rounded up).
+```sql
+# 3 clients writing to all 3 DBs, but due to network delays reach in weird state
+L1 L2 L3
+W1 W1 W2 t1
+W2 W3 W3 t2
+W3 W2 W1 t3
+# State is above line eventually at the end. Two clients reading from say these will see different results. Hence, not strongly consistent.
+```
 
 Limitations:
 * Sloppy quorum, the _w_ writes may end up on different nodes than the _r_ reads, so there is no longer a guaranteed overlap.
@@ -255,19 +259,19 @@ Limitations:
 
 **Dynamo-style databases are generally optimised for use cases that can tolerate eventual consistency.**
 
+* It is important to monitor whether databases are running with up-to-date values.
+* For leader-based, we can calculate replication lag (L2 log sequence number minus L1 log sequence number)
+* But in leaderless, there is no fixed order in which writes are applied, which makes monitoring more difficult.
+
 #### Sloppy quorums and hinted handoff
 
-Leaderless replication may be appealing for use cases that require high availability and low latency, and that can tolerate occasional stale reads.
-
-It's likely that the client won't be able to connect to _some_ database nodes during a network interruption.
+* Leaderless replication may be appealing for use cases that require high availability and low latency, and that can tolerate occasional stale reads.
+* It's likely that the client won't be able to connect to _some_ database nodes during a network interruption.
 * Is it better to return errors to all requests for which we cannot reach quorum of _w_ or _r_ nodes?
 * Or should we accept writes anyway, and write them to some nodes that are reachable but aren't among the _n_ nodes on which the value usually lives?
-
-The latter is known as _sloppy quorum_: writes and reads still require _w_ and _r_ successful responses, but those may include nodes that are not among the designated _n_ "home" nodes for a value.
-
-Once the network interruption is fixed, any writes are sent to the appropriate "home" nodes (_hinted handoff_).
-
-Sloppy quorums are useful for increasing write availability: as long as any _w_ nodes are available, the database can accept writes. This also means that you cannot be sure to read the latest value for a key, because it may have been temporarily written to some nodes outside of _n_.
+* The latter is known as _sloppy quorum_: writes and reads still require _w_ and _r_ successful responses, but those may include nodes that are not among the designated _n_ "home" nodes for a value.
+* Once the network interruption is fixed, any writes are sent to the appropriate "home" nodes (_hinted handoff_).
+* Sloppy quorums are useful for increasing write availability: as long as any _w_ nodes are available, the database can accept writes. This also means that you cannot be sure to read the latest value for a key, because it may have been temporarily written to some nodes outside of _n_.
 
 ##### Multi-datacenter operation
 
@@ -275,33 +279,45 @@ Each write from a client is sent to all replicas, regardless of datacenter, but 
 
 #### Detecting concurrent writes
 
-In order to become eventually consistent, the replicas should converge toward the same value. If you want to avoid losing data, you application developer, need to know a lot about the internals of your database's conflict handling.
+* In Dynamo style database (leaderless), conflicts can also arise during read repair or hinted handoff.
+* In order to become eventually consistent, the replicas should converge toward the "same" value. If you want to avoid losing data, you application developer, need to know a lot about the internals of your database's conflict handling.
 
-* **Last write wins (discarding concurrent writes).** Even though the writes don' have a natural ordering, we can force an arbitrary order on them. We can attach a timestamp to each write and pick the most recent. There are some situations such caching on which lost writes are acceptable. If losing data is not acceptable, LWW is a poor choice for conflict resolution.
-* **The "happens-before" relationship and concurrency.** Whether one operation happens before another operation is the key to defining what concurrency means. **We can simply say that to operations are _concurrent_ if neither happens before the other.** Either A happened before B, or B happened before A, or A and B are concurrent.
+* **Last write wins (discarding concurrent writes).** Even though the writes don't have a natural ordering, we can force an arbitrary order on them. We can attach a timestamp to each write and pick the most recent. There are some situations such as caching on which lost writes are acceptable. If losing data is not acceptable, LWW is a poor choice for conflict resolution. Cassandra only supports this.
+* **The "happens-before" relationship and concurrency.** Whether one operation happens before another operation is the key to defining what concurrency means.
+     * An operation A happens before another operation B if B knows about A, or depends on A, or builds upon A in some way (consistent prefix reads).
+     *  **We can simply say that to operations are _concurrent_ if neither happens before the other.** For defining concurrency, exact time doesn't matter; we simply say two operations are concurrent, if they are both unaware of each other
+     *  Either A happened before B, or B happened before A, or A and B are concurrent.
+     *  If one operation happened before another, later operation should overwrite the earlier operation, but if the operations are concurrent, we have a conflict that needs to be resolved.
 
 ##### Capturing the happens-before relationship
+
+![Happen before](/metadata/happen_before.png)
+1. Client 1 adds milk to cart.
+   * Server: [Version: 1 {1: milk}]
+2. Client 2 adds eggs to cart (not knowing that client 1 concurrently added milk). Server assigns version 2 to this write, and stores eggs and milk as two separate values. Returns both values to client with version number 2
+   * Server: [Version: 2 {1: milk, 2: eggs}]
+3. Client 1, oblivious to client 2's write, adds flour to cart. Sends [milk, flour] with version 1, server sees [milk, flour] supersedes [milk] but is concurrent with [eggs]
+   * Server: [Version: 3 {3: [milk, flour], 2:eggs}]
+4. Client 2, oblivious to client 1's write, adds ham to cart. Sends [milk, eggs, ham] with version number 2
+   * Server: [Version: 4 {3: [milk, flour], 4: [milk, eggs, ham]}]
+5. Client 1, adds bacon to cart. Sends [milk, flour, eggs, bacon] with version number 3
+   * Server: [Version: 5 {5: [milk, flour, eggs, bacon], 4:[milk, eggs, ham]}]
 
 The server can determine whether two operations are concurrent by looking at the version numbers.
 * The server maintains a version number for every key, increments the version number every time that key is written, and stores the new version number along the value written.
 * Client reads a key, the server returns all values that have not been overwrite, as well as the latest version number. A client must read a key before writing.
 * Client writes a key, it must include the version number from the prior read, and it must merge together all values that it received in the prior read.
-* Server receives a write with a particular version number, it can overwrite all values with that version number or below, but it must keep all values with a higher version number.
+* Server receives a write with a particular version number, it can overwrite all values with that version number or **"below"** (since it knows that they have been merged into the new value), but it must keep all values with a higher version number.
 
 ##### Merging concurrently written values
 
-No data is silently dropped. It requires clients do some extra work, they have to clean up afterward by merging the concurrently written values. Riak calls these concurrent values _siblings_.
-
-Merging sibling values is the same problem as conflict resolution in multi-leader replication. A simple approach is to just pick one of the values on a version number or timestamp (last write wins). You may need to do something more intelligent in application code to avoid losing data.
-
-If you want to allow people to _remove_ things, union of siblings may not yield the right result. An item cannot simply be deleted from the database when it is removed, the system must leave a marker with an appropriate version number to indicate that the item has been removed when merging siblings (_tombstone_).
-
-Merging siblings in application code is complex and error-prone, there are efforts to design data structures that can perform this merging automatically (CRDTs).
+* No data is silently dropped. It requires clients do some extra work, they have to clean up afterward by merging the concurrently written values. Riak calls these concurrent values _siblings_.
+* Merging sibling values is the same problem as conflict resolution in multi-leader replication. A simple approach is to just pick one of the values on a version number or timestamp (last write wins). You may need to do something more intelligent in application code to avoid losing data.
+* If you want to allow people to _remove_ things, union of siblings may not yield the right result. An item cannot simply be deleted from the database when it is removed, the system must leave a marker with an appropriate version number to indicate that the item has been removed when merging siblings (_tombstone_).
+* Merging siblings in application code is complex and error-prone, there are efforts to design data structures that can perform this merging automatically (CRDTs).
 
 #### Version vectors
 
-We need a version number _per replica_ as well as per key. Each replica increments its own version number when processing a write, and also keeps track of the version numbers it has seen from each of the other replicas.
-
-The collection of version numbers from all the replicas is called a _version vector_.
-
-Version vector are sent from the database replicas to clients when values are read, and need to be sent back to the database when a value is subsequently written. Riak calls this _casual context_. Version vectors allow the database to distinguish between overwrites and concurrent writes.
+* We need a version number _per replica_ as well as per key. Each replica increments its own version number when processing a write, and also keeps track of the version numbers it has seen from each of the other replicas.
+* The collection of version numbers from all the replicas is called a _version vector_.
+* Version vector are sent from the database replicas to clients when values are read, and need to be sent back to the database when a value is subsequently written. Riak calls this _casual context_. Version vectors allow the database to distinguish between overwrites and concurrent writes.
