@@ -59,7 +59,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- |
-| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based) | Single + Multi   |
+| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi   |
 | PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi   |
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi   |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
