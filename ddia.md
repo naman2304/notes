@@ -57,16 +57,17 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Doing the right thing](#doing-the-right-thing)
 
 
-| Database        | Database Model       | Storage Engine |
-| -------------   | -------------------- | -------------- |
-| MySQL           | Relational           | BTree (InnoDB) |
-| PostgreSQL      | Relational           | BTree          |
-| Oracle          | Relational           | BTree          |
-| SQL Server      | Relational           | BTree          |
-| Redis           | Key-Value            | Hash           |
-| Memcached       | Key-Value            | Hash           |
-| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB) |
-| RocksDB         | Key-Value            | LSM            |
+| Database        | Database Model       | Storage Engine                                     | Replication log |
+| -------------   | -------------------- | -------------------------------------------------- | --------------- |
+| MySQL           | Relational           | BTree (InnoDB)                                     |
+| PostgreSQL      | Relational           | BTree                                              | WAL based       |
+| Oracle          | Relational           | BTree                                              | WAL based       |
+| SQL Server      | Relational           | BTree                                              |
+| VoltDB          | Relational           | Hash (in memory database)                          | Statement based |
+| Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
+| Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
+| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |
+| RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |
 | Amazon DynamoDB | Key-Value            | 
 | MongoDB         | Document             |
