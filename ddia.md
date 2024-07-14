@@ -66,12 +66,12 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
-| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |
+| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       |
 | RocksDB         | Key-Value            | LSM                                                |
-| Voldemort       | Key-Value            |
+| Voldemort       | Key-Value            |                                                    |                     | Leaderless       |
 | Amazon DynamoDB | Key-Value            | 
 | MongoDB         | Document             |
-| CouchDB         | Document             |                                                    |                     | Multi           |
+| CouchDB         | Document             |                                                    |                     | Multi            |
 | RethinkDB       | Document             |
 | Espresso        | Document             |
 | ElasticSearch   | Document             |
@@ -81,7 +81,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | InfiniteGraph   | Graph (property)     |
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
-| Cassandra       | Wide Column          | LSM
+| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       |
 | HBase           | Wide Column          | LSM
 | BigTable        | Wide Column          | LSM
 | Amazon Redshift | Wide Column          | BTree
