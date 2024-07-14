@@ -321,3 +321,13 @@ The server can determine whether two operations are concurrent by looking at the
 * We need a version number _per replica_ as well as per key. Each replica increments its own version number when processing a write, and also keeps track of the version numbers it has seen from each of the other replicas.
 * The collection of version numbers from all the replicas is called a _version vector_.
 * Version vector are sent from the database replicas to clients when values are read, and need to be sent back to the database when a value is subsequently written. Riak calls this _casual context_. Version vectors allow the database to distinguish between overwrites and concurrent writes.
+
+Algorithm
+* every time a client reads from DB, DB gives it's version vector of key
+* every time a client writes to DB, it passes DB its most recently read version vector for key and DB supplies it with new one.
+* two values have "happen before" relationship if one version vector is strictly greater than other (for all i, v1[i] >= v2[i])
+* all other version vectors are concurrent
+     * corresponding values can be either
+          *  merged ("on write"). CRDTs.
+          *  kept as sibling ("on read")
+     * merging version vectors means taking max of both version vectors at every index  
