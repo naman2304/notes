@@ -57,8 +57,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Doing the right thing](#doing-the-right-thing)
 
 
-| Database        | Database Model       | Storage Engine                                     | Replication log     |
-| -------------   | -------------------- | -------------------------------------------------- | ------------------- |
+| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type |
+| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- |
 | MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based) |
 | PostgreSQL      | Relational           | BTree                                              | WAL based           |
 | Oracle          | Relational           | BTree                                              | WAL based           |
@@ -71,7 +71,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Voldemort       | Key-Value            |
 | Amazon DynamoDB | Key-Value            | 
 | MongoDB         | Document             |
-| CouchDB         | Document             |
+| CouchDB         | Document             |                                                    |                     | Multi leader    |
 | RethinkDB       | Document             |
 | Espresso        | Document             |
 | ElasticSearch   | Document             |
