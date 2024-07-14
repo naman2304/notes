@@ -59,10 +59,10 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- |
-| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based) |
-| PostgreSQL      | Relational           | BTree                                              | WAL based           |
-| Oracle          | Relational           | BTree                                              | WAL based           |
-| SQL Server      | Relational           | BTree                                              |
+| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based) | Single + Multi   |
+| PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi   |
+| Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi   |
+| SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
 | VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
@@ -71,7 +71,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Voldemort       | Key-Value            |
 | Amazon DynamoDB | Key-Value            | 
 | MongoDB         | Document             |
-| CouchDB         | Document             |                                                    |                     | Multi leader    |
+| CouchDB         | Document             |                                                    |                     | Multi           |
 | RethinkDB       | Document             |
 | Espresso        | Document             |
 | ElasticSearch   | Document             |
