@@ -795,7 +795,7 @@ This type of replication has some problems:
 * Statements that depend on existing data (`UPDATE ... WHERE <some condition>`), or if statement uses auto-incrementing columns, must be executed in the same order in each replica. This can be limiting when there are multiple concurrently executing transactions.
 * Statements with side effects (triggers, stored procedures, user definted functions) may result on different results on each replica, unless the side effects are absolutely deterministic.
 
-A solution to this is to replace any nondeterministic function with a fixed return value in the leader. VoltDB does this and uses statement based replication.
+A solution to this is to replace any nondeterministic function with a fixed return value in the leader. VoltDB does this and uses statement based replication. MySQL before version 5.1 used statement based replication.
 
 ##### Write-ahead log (WAL) shipping
 
