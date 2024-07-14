@@ -1234,6 +1234,7 @@ Strategies for rebalancing:
 ### Request routing
 
 ![Routing](/metadata/routing.png)
+
 This problem is also called _service discovery_. There are different approaches:
 1. Allow clients to contact any node (round robin) and make them handle the request directly, or forward the request to the appropriate node. Gossip protocol between nodes then.
 2. Send all requests from clients to a routing tier first that acts as a partition-aware load balancer.
