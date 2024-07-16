@@ -1003,6 +1003,7 @@ Note that conflict resolution usually applies at the level of an indivudual row 
 * Note: Amazon DynamoDB is based on principles of Dynamo paper, but DynamoDB is single leader replication. The Dynamo paper was describing leaderless replication as a concept.
 * In a leaderless configuration, failover does not exist. Clients send the write to all replicas in parallel.
 * _Read requests are also sent to several nodes in parallel_. The client may get different responses. Version numbers are used to determine which value is newer.
+* In reality, the client does not send reads and writes to these n nodes, rather client talk to a coordinator node, which in turn talks to these n nodes (has the logic for read repair, etc) and then sends back the final result to the client. Cassandra does this.
 
 ![Read repair](/metadata/read_repair.png)
 
@@ -1021,15 +1022,15 @@ Eventually, all the data is copied to every replica. After a unavailable node co
 ```sql
 # 3 clients writing to all 3 DBs, but due to network delays reach in weird state
 L1 L2 L3
-W1 W1 W2 t1
-W2 W3 W3 t2
-W3 W2 W1 t3
+W1 W1 W2 v1
+W2 W3 W3 v2
+W3 W2 W1 v3
 # State is above line eventually at the end. Two clients reading from say these will see different results. Hence, not strongly consistent.
 ```
 
 Limitations:
 * Sloppy quorum, the _w_ writes may end up on different nodes than the _r_ reads, so there is no longer a guaranteed overlap.
-* If two writes occur concurrently, and is not clear which one happened first, the only safe solution is to merge them. Writes can be lost due to clock skew.
+* If two writes occur concurrently, and is not clear which one happened first, the only safe solution is to merge them (above code snippet). Writes can be lost due to clock skew.
 * If a write happens concurrently with a read, the write may be reflected on only some of the replicas.
 * If a write succeeded on some replicas but failed on others, it is not rolled back on the replicas where it succeeded. Reads may or may not return the value from that write.
 * If a node carrying a new value fails, and its data is restored from a replica carrying an old value, the number of replicas storing the new value may break the quorum condition.
@@ -1138,7 +1139,10 @@ Algorithm
 ## Partitioning
 
 * Replication, for very large datasets or very high query throughput is not sufficient, we need to break the data up into _partitions_ (_sharding_).
-* MongoDB, ElasticSearch adn SolrCloud (shard); HBase (region); Bigtable (tablet); Cassandra and Riak (vnode);
+* Two types of partitioning
+  * Horizontal - by rows (relational and non-relational DBs)
+  * Vertical - by columns (data warehouses)
+* MongoDB, ElasticSearch and SolrCloud (shard); HBase (region); Bigtable (tablet); Cassandra and Riak (vnode);
 * Basically, each partition is a small database of its own.
 * The main reason for wanting to partition data is _scalability_, query load can be distributed across many processors. Throughput can be scaled by adding more nodes.
 
@@ -1191,6 +1195,7 @@ The situation gets more complicated if secondary indexes are involved. A seconda
 
 * We construct a _global index_ that covers data in all partitions. The global index must also be partitioned so it doesn't become the bottleneck.
 * It is called the _term-partitioned_ because the term we're looking for determines the partition of the index.
+* It is a kind of re-partitioning of data on a different partition key.
 * Partitioning by term can be useful for range scans, whereas partitioning on a hash of the term gives a more even distribution load.
 * Advantage: Reads more efficient; rather than doing scatter/gather over all partitions, a client only needs to make a request to the partition containing the term that it wants.
 * Disadvantage: writes are slower and complicated.
