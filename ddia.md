@@ -68,7 +68,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
 | RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
-| Amazon DynamoDB | Key-Value            |                                                    |                     |                  |                      | Global Index |
+| Amazon DynamoDB | Key-Value            |                                                    |                     | Single           | Hash+Key combo       | Global Index |
 | MongoDB         | Document             |                                                    |                     |                  | Key Range (<2.4)     | Local Index  |
 | CouchDB         | Document             |                                                    |                     | Multi            | Key Range            |
 | RethinkDB       | Document             |                                                    |                     |                  |                      |              | Dynamic partitioning |
@@ -80,7 +80,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | InfiniteGraph   | Graph (property)     |
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
-| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       |                      | Local Index  |
+| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       | Hash+Key combo       | Local Index  |
 | HBase           | Wide Column          | LSM                                                |                     |                  | Key Range            |              | Dynamic partitioning |
 | BigTable        | Wide Column          | LSM                                                |                     |                  | Key Range
 | Amazon Redshift | Wide Column          | BTree
@@ -808,7 +808,7 @@ A solution to this is to replace any nondeterministic function with a fixed retu
     * For an inserted row, the new values of all columns.
     * For a deleted row, the information that uniquely identifies that column (primary key)
     * For an updated row, the information to uniquely identify that row and all the new values of the columns.
-* A transaction that modifies several rows, generates several of such logs, followed by a record indicating that the transaction was committed. MySQL binlog uses this approach.
+* A transaction that modifies several rows, generates several of such logs (this can be cited as disadvantage as it takes lots of storage), followed by a record indicating that the transaction was committed. MySQL binlog uses this approach.
 * Since logical log is decoupled from the storage engine internals, it's easier to make it backwards compatible (allowing leader and follower to run different version of database software or even different storage engines).
 * Logical logs are also easier for external applications to parse, useful for data warehouses, custom indexes and caches (this is called _change data capture_).
 
@@ -825,7 +825,7 @@ A solution to this is to replace any nondeterministic function with a fixed retu
 * With an asynchronous approach, a follower may fall behind, leading to inconsistencies in the database (_eventual consistency_).
 * The _replication lag_ could be a fraction of a second or several seconds or even minutes.
 
-The problems that may arise and how to solve them.
+The problems that may arise in asynchronous replication (eventual consistency) and how to solve them are as follows
 
 #### Reading your own writes
 
@@ -835,7 +835,7 @@ _Read-after-write consistency_, also known as _read-your-writes consistency_ is 
 
 How to implement it:
 * **When reading something that the user may have modified, read it from the leader.** For example, user profile information on a social network is normally only editable by the owner. A simple rule is always read the user's "own" profile from the leader, and any other users' profiles from a follower.
-* If most things are potentially editable by the user, above approach won't work as everything will go to leader only, negating the benefit of read scaling. You could track the time of the latest update and, for one minute till after the last update, make all reads from the leader.
+* If most things are potentially editable by the user, above approach won't work as everything will go to leader only, negating the benefit of read scaling. You could track the time of the latest update and, for one minute till after the last update, make all reads from the leader (i.e. pin the user to master for one minute after they made the update so that all (or relevant APIs) reads goes to master)
 * The client can remember the timestamp of the most recent write, then the system can ensure that the replica serving any reads for that user reflects updates at least until that timestamp. Timestamp can be logical timestamp (something that indicates ordreing of writes such as log sequence number) or actual system clock (unreliable)
 * If your replicas are distributed across multiple datacenters, then any request needs to be routed to the datacenter that contains the leader.
 
@@ -1055,7 +1055,7 @@ Limitations:
 Each write from a client is sent to all replicas, regardless of datacenter, but the client usually only waits for acknowledgement from a quorum of nodes within its local datacenter so that it is unaffected by delays and interruptions on cross-datacenter link.
 
 #### Detecting concurrent writes
-
+* Applicable for multi-leader setup + leaderless setup.
 * In Dynamo style database (leaderless), conflicts can also arise during read repair or hinted handoff.
 * In order to become eventually consistent, the replicas should converge toward the "same" value. If you want to avoid losing data, you application developer, need to know a lot about the internals of your database's conflict handling.
 
@@ -1156,7 +1156,7 @@ Algorithm
 
 #### Partition by key range
 
-* Assign a continuous range of keys, like the volumes of a paper encyclopaedia. Boundaries might be chose manually by an administrator, or the database can choose them automatically. On each partition, keys are in sorted order so scans are easy.
+* Assign a continuous range of keys, like the volumes of a paper encyclopaedia. Boundaries might be chose manually by an administrator, or the database can choose them automatically. On each partition, keys are in sorted order so scans are easy. A classic use-case where range-based partitioning fails is when we range-partition the time-series data on timestamp because load comes on the latest partition as writes are done on that only. Hence, for time series data paritioning by time is not good.
 * Advantage: Range queries efficient.
 * Disadvantage: Ranges of keys are not necessarily evenly spaced, because your data may not be evenly distributed. Hence certain access patterns can lead to hot spots.
 * Rebalancing typically done using "Dynamic partitioning"
@@ -1168,7 +1168,7 @@ Algorithm
 * Disadvantage: we lose the ability to do efficient range queries. Keys that were once adjacent are now scattered across all the partitions. Any range query has to be sent to all partitions.
 * Rebalancing typically done using "Fixed number of partitions". Although "Dynamic partitioning" can also be used.
 
-Cassandra achieves a compromise between the two partition strategies. Table in Cassandra can be declared with a _compound primary key_ consisting of several columns. Only first part of key is hashed to determine the partition, but the other columns are used as concatenated index for sorting the data in SSTables. Great then for say queries (user_id, timestamp) => hash the user_id and get the partition on which this user data is present, then scan it's data in the timestamp as data is sorted by timestamp.
+Cassandra (and Amazon DynamoDB) achieves a compromise between the two partition strategies. Table in Cassandra can be declared with a _compound primary key_ consisting of several columns. Only first part of key is hashed to determine the partition, but the other columns are used as concatenated index for sorting the data in SSTables. Great then for say queries (user_id, timestamp) => hash the user_id and get the partition on which this user data is present, then scan it's data in the timestamp as data is sorted by timestamp.
 
 #### Skewed workloads and relieving hot spots
 
