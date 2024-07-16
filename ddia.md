@@ -258,6 +258,13 @@ _Not Only SQL_ has a few driving forces:
 **Relational model**
 * Way to lay out all the data in the open -- a relation (table) is simply a collection of tuples (rows).
 * The roots of relational databases lie in _business data processing_ in 1960s and 70s (_transaction processing_ and _batch processing_). The goal was to hide the implementation details behind a cleaner interface.
+* Use B-Trees mostly
+* Use 2 phase locking for transactions (or serializable snapshot isolation)
+* Scaling
+  * Vertical: easier (specialized hardware => mainframe)
+  * Horizontal: sharding (generalized hardware). Might have to do distributed transaction (super tough!):
+    * Involves multiple shards with one value incrementing on one, decrementing on another (like money transfer)
+    * Joins involving multiple shards
 * **Impedance Mismatch** - With a SQL model, if data is stored in a relational tables, an awkward translation layer is translated, this is called _impedance mismatch_.
 * **Joins** - In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. Great for many-to-many relationships.
 * **Schema Flexibility** - schema-on-write, like static (compile time) type checking (C++, Java) where schema is handled at DB layer
@@ -557,12 +564,12 @@ LSM-trees are typically faster for writes, whereas B-trees are thought to be fas
 
 
 ### Data warehousing
-* A _data warehouse_ is a separate database that analysts can query to their heart's content without affecting OLTP operations. It contains read-only copy of the data in all various OLTP systems in the company. Data is extracted out of OLTP databases (through periodic data dump or a continuous stream of update), transformed into an analysis-friendly schema, cleaned up, and then loaded into the data warehouse (process _Extract-Transform-Load_ or ETL).
+* Also called analytics database. A _data warehouse_ is a separate database that analysts can query to their heart's content without affecting OLTP operations. It contains read-only copy of the data in all various OLTP systems in the company. Data is extracted out of OLTP databases (through periodic data dump or a continuous stream of update), transformed into an analysis-friendly schema, cleaned up, and then loaded into the data warehouse (process _Extract-Transform-Load_ or ETL).
 * A data warehouse is most commonly relational, but the internals of the systems can look quite different because of different access patterns.
 * Amazon RedShift is hosted version of ParAccel.
 * Data warehouses are used in fairly formulaic style known as a _star schema_.
-    * Central table is fact table in which each row is a fact -- facts are captured as individual events, because this allows maximum flexibility of analysis later. The fact table can become extremely large.
-    * Some of the columns in the fact are attributes, others are foreign key references to other tables called dimension tables. Dimensions represent the _who_, _what_, _where_, _when_, _how_ and _why_ of the event.
+    * Central table is "fact table" in which each row is a fact -- facts are captured as individual events, because this allows maximum flexibility of analysis later. The fact table can become extremely large.
+    * Some of the columns in the fact are attributes, others are foreign key references to other tables called "dimension tables". Dimensions represent the _who_, _what_, _where_, _when_, _how_ and _why_ of the event.
     * The name "star schema" comes from the fact than when the table relationships are visualised, the fact table is in the middle, surrounded by its dimension tables, like the rays of a star.
     * Fact tables often have over 100 columns, sometimes several hundred. Dimension tables can also be very wide.
     * Variation of this template is _snowflake_ schema where dimensions are further broken down into subdimensions.
