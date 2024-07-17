@@ -737,6 +737,13 @@ Different process on how data flows between processes
 | HTTP only      | HTTP, SMTP, etc       |
 | Best for web APIs and services needing a lightweight, scalable, and easily maintainable solution | Ideal for enterprise-level services needing robust security, ACID-compliance, and reliable transactions. |
 
+Here are some other differences between gRPC and REST:
+
+* Protocol: gRPC uses HTTP/2 for transport, while REST typically uses HTTP/1.1.
+* Data format: gRPC employs Protocol Buffers for serialization, while REST usually leverages JSON or XML.
+* API design: gRPC is based on the RPC (Remote Procedure Call) paradigm, while REST follows the architectural constraints of the Representational State Transfer model.
+* Streaming: gRPC supports bidirectional streaming, whereas REST is limited to request-response communication patterns.
+
 **Remote procedure calls (RPC)**
 
 RPC tries to make a request to a remote network service look the same as calling a function or method in your programming language, it seems convenient at first but the approach is flawed:
