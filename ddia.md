@@ -1661,7 +1661,7 @@ Problems in above code:
 * Problems in network cannot reliably be distinguished from problems at a node.
 * A node cannot necessarily trust its own judgement of a situation. Many distributed systems rely on a _quorum_ (voting among the nodes). That includes decisions about declaring nodes dead. IF a quorum of nodes declared another node dead, it must be considered dead, even if that node still very much feels alive. Individual node must abide by the quorum decision and step down. Commonly, the quorum is an absolute majority of more than half of the nodes.
 
-![Bad dist locks](/metadata/bad_dist_locks.png)
+![Bad dist lock](/metadata/bad_dist_lock.png)
 
 Client holding the lease is paused for too long, its lease expires. Another client can obtain a lease for the same file, and start writing to the file. When the paused client comes back, it believes (incorrectly) that it still has a valid lease and proceeds to also write to the file. As a result, the clients' writes clash and corrupt the file.
 
