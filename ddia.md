@@ -1613,7 +1613,7 @@ The internet and most internal networks are _asynchronous packet networks_. A me
 * If some piece of software is relying on an accurately synchronised clock, the result is more likely to be silent and subtle data loss than a dramatic crash.
 * **Timestamps for ordering events**
    * **It is tempting, but dangerous to rely on clocks for ordering of events across multiple nodes.** This usually imply that _last write wins_ (LWW), often used in both multi-leader replication and leaderless databases like Cassandra and Riak, and data-loss may happen.
-   * _Logical clocks_, based on counters instead of oscillating quartz crystal, are safer alternative for ordering events. Logical clocks do not measure time of the day or elapsed time, only relative ordering of events. This contrasts with time-of-the-day and monotonic clocks (also known as _physical clocks_).
+   * _Logical clocks_, based on counters instead of oscillating quartz crystal, are safer alternative for ordering events. Logical clocks do not measure time of the day or elapsed time, only relative ordering of events. This contrasts with time-of-the-day and monotonic clocks (also known as _physical clocks_). Other example of logical clocks include version vectors and lamport timestamp.
 * **Clock readings have a confidence interval**
    * It doesn't make sense to think of a clock reading as a point in time, it is more like a range of times, within a confidence interval: for example, 95% confident that the time now is between 10.3 and 10.5. 
    * Spanner
@@ -1660,6 +1660,7 @@ Problems in above code:
 * Unreliable networks with variable delays, unreliable clocks and process pauses makes distributed systems tough.
 * Problems in network cannot reliably be distinguished from problems at a node.
 * A node cannot necessarily trust its own judgement of a situation. Many distributed systems rely on a _quorum_ (voting among the nodes). That includes decisions about declaring nodes dead. IF a quorum of nodes declared another node dead, it must be considered dead, even if that node still very much feels alive. Individual node must abide by the quorum decision and step down. Commonly, the quorum is an absolute majority of more than half of the nodes.
+* Unreliable networks and nodes make it very problematic when we need "one" of something -- one leader, one process holding a distributed lock, one account with username "xyz123!".
 
 ![Bad dist lock](/metadata/bad_dist_lock.png)
 
