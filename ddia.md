@@ -61,7 +61,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication) | | | | serializable (SSI)
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
-| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  | serializable (actual serial execution)
+| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
