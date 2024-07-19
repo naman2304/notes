@@ -7,18 +7,17 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Scalability](#scalability)
   - [Maintainability](#maintainability)
 - [Data models and query language](#data-models-and-query-language)
-  - [Relational model vs document model](#relational-model-vs-document-model)
+  - [Relational model vs document model vs network model](#relational-model-vs-document-model-vs-network-model)
   - [Query languages for data](#query-languages-for-data)
   - [Graph-like data models](#graph-like-data-models)
 - [Storage and retrieval](#storage-and-retrieval)
-  - [Data structures that power up your database](#data-structures-that-power-up-your-database)
   - [Transaction processing or analytics?](#transaction-processing-or-analytics)
   - [Column-oriented storage](#column-oriented-storage)
 - [Encoding and evolution](#encoding-and-evolution)
   - [Formats for encoding data](#formats-for-encoding-data)
   - [Modes of dataflow](#modes-of-dataflow)
 - [Replication](#replication)
-  - [Leaders and followers](#leaders-and-followers)
+  - [Implementation of replication logs](#implementation-of-replication-logs)
   - [Problems with replication lag](#problems-with-replication-lag)
   - [Multi-leader replication](#multi-leader-replication)
   - [Leaderless replication](#leaderless-replication)
@@ -265,20 +264,21 @@ _Not Only SQL_ has a few driving forces:
   * Horizontal: sharding (generalized hardware). Might have to do distributed transaction (super tough!):
     * Involves multiple shards with one value incrementing on one, decrementing on another (like money transfer)
     * Joins involving multiple shards
+* **Normalization** -- data is mostly normalized using foreign keys.
 * **Impedance Mismatch** - With a SQL model, if data is stored in a relational tables, an awkward translation layer is translated, this is called _impedance mismatch_.
 * **Joins** - In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. Great for many-to-many relationships.
 * **Schema Flexibility** - schema-on-write, like static (compile time) type checking (C++, Java) where schema is handled at DB layer
-* **Locality** - not so great locality as tables are stored physically at different place on disk. Some databases do it differently -- Google Spanner offers great locality properties by allowing schema to declare that a table's rows should be interleaved (nested) within a parent table.
-* **Example** - MySQL, PostgreSQL, Oracle, SQL Server
+* **Locality** - not so great locality as tables are stored physically at different place on disk. Bad data locality can lead to distributed transactions like two-phase commit or do joins across datacenters (which is slow). Some databases do it differently -- Google Spanner offers great locality properties by allowing schema to declare that a table's rows should be interleaved (nested) within a parent table.
+* **Example** - MySQL, PostgresSQL, Oracle, SQL Server
 
 **Document model**
 * The most popular database for business data processing in the 1970s was the IBM's _Information Management System_ (IMS).
 * IMS used a _hierarchical model_ and like document databases worked well for one-to-many relationships, but it made many-to-any relationships difficult, and it didn't support joins.
+* **Normalization** -- data is mostly denormalized
 * **Impedance Mismatch** - JSON model reduces the impedance mismatch and the lack of schema is often cited as an advantage.
-* JSON representation has better _locality_ than the multi-table SQL schema. All the relevant information is in one place, and one query is sufficient.
 * **Joins** - In document databases, joins are not needed for one-to-many tree structures, and support for joins is poor. If the database itself does not support joins, you have to emulate a join in application code by making multiple queries (poor performance) (foreign key i.e. document reference concept is there, but have limitation that you cannot refer directly to a nested item within a document)
 * **Schema Flexibility** - schema-on-read, like dynamic (runtime) type checking (Python) where schema is handled at application layer while reading (client have no guarantees what data they will get; called schemaless but that's misleading).
-* **Locality** - great locality as all data of a document is stored at one place. The database typically needs to load the entire document, even if you access only a small portion of it. On updates, the entire document usually needs to be rewritten, it is recommended that you keep documents fairly small.
+* **Locality** - JSON representation has better _locality_ than the multi-table SQL schema. All the relevant information is in one place, and one query is sufficient. The database typically needs to load the entire document, even if you access only a small portion of it. On updates, the entire document usually needs to be rewritten, it is recommended that you keep documents fairly small.
 * **Example** - MongoDB, CouchDB, RethinkDB, Espresso
 
 **PostgreSQL does support storing JSON documents in a single cell. RethinkDB supports relational-like joins in its query language. Relational and document databases are becoming more similar over time**
