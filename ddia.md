@@ -55,13 +55,13 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Aiming for correctness](#aiming-for-correctness)
   - [Doing the right thing](#doing-the-right-thing)
 
-| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy |
-| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- |
-| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi (Tungsten Replicator)   |
-| PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication)   |
+| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation |
+| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- |
+| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi (Tungsten Replicator)   | | | | serializable (2PL)
+| PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication) | | | | serializable (SSI)
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
-| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  |
+| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  | | | serializable (actual serial execution)
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
@@ -1513,7 +1513,7 @@ Two-phase locking is called _pessimistic_ concurrency control because if anythin
 
 Serial execution is also _pessimistic_ as is equivalent to each transaction having an exclusive lock on the entire database.
 
-Serializable snapshot isolation is _optimistic_ concurrency control technique. Instead of blocking if something potentially dangerous happens, transactions continue anyway, in the hope that everything will turn out all right. The database is responsible for checking whether anything bad happened. If so, the transaction is aborted and has to be retried.
+Serializable snapshot isolation is _optimistic_ concurrency control (OCC) technique. Instead of blocking if something potentially dangerous happens, transactions continue anyway, in the hope that everything will turn out all right. The database is responsible for checking whether anything bad happened. If so, the transaction is aborted and has to be retried.
 
 If there is enough spare capacity, and if contention between transactions is not too high, optimistic concurrency control techniques tend to perform better than pessimistic ones.
 
@@ -1531,6 +1531,7 @@ Compared to serial execution, SSI is not limited to the throughput of a single C
 
 The rate of aborts significantly affects the overall performance of SSI. SSI requires that read-write transactions be fairly short (long-running read-only transactions may be okay).
 
+** MySQL uses 2PL, and PostgreSQL uses SSI**. MySQL is ACID compliant with few storage engines like InnoDB, but PostgreSQL is ACID compliant from ground up.
 ---
 ---
 
