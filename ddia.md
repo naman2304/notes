@@ -57,9 +57,9 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- |
-| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi   |
-| PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi   |
-| Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi   |
+| MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi (Tungsten Replicator)   |
+| PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication)   |
+| Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
 | VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  |
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
@@ -269,7 +269,7 @@ _Not Only SQL_ has a few driving forces:
 * **Joins** - In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. Great for many-to-many relationships.
 * **Schema Flexibility** - schema-on-write, like static (compile time) type checking (C++, Java) where schema is handled at DB layer
 * **Locality** - not so great locality as tables are stored physically at different place on disk. Bad data locality can lead to distributed transactions like two-phase commit or do joins across datacenters (which is slow). Some databases do it differently -- Google Spanner offers great locality properties by allowing schema to declare that a table's rows should be interleaved (nested) within a parent table.
-* **Example** - MySQL, PostgresSQL, Oracle, SQL Server
+* **Example** - MySQL, PostgreSQL, Oracle, SQL Server
 
 **Document model**
 * The most popular database for business data processing in the 1970s was the IBM's _Information Management System_ (IMS).
@@ -812,7 +812,7 @@ A solution to this is to replace any nondeterministic function with a fixed retu
 
 ##### Write-ahead log (WAL) shipping
 
-* The log is an append-only sequence of bytes containing all writes to the database. The leader can send it to its followers. This way of replication is used in PostgresSQL and Oracle.
+* The log is an append-only sequence of bytes containing all writes to the database. The leader can send it to its followers. This way of replication is used in PostgreSQL and Oracle.
 * The main disadvantage is that the log describes the data at a very low level (like which bytes were changed in which disk blocks), coupling it to the storage engine. If the database changes its storage format from one version to another, it is typically not possible to run different versions of database software on the leader and the followers. This can have a big operational impact, like making it impossible to have a zero-downtime upgrade of the database.
 
 ##### Logical (row-based) log replication
