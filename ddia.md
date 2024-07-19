@@ -61,7 +61,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication) | | | | serializable (SSI)
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
-| VoltDB          | Relational           | Hash (in memory database)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
+| VoltDB          | Relational           | Hash (in memory database - but maintains durability by WAL)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
 | Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
@@ -269,7 +269,9 @@ _Not Only SQL_ has a few driving forces:
 * **Joins** - In relational databases, it's normal to refer to rows in other tables by ID, because joins are easy. Great for many-to-many relationships.
 * **Schema Flexibility** - schema-on-write, like static (compile time) type checking (C++, Java) where schema is handled at DB layer
 * **Locality** - not so great locality as tables are stored physically at different place on disk. Bad data locality can lead to distributed transactions like two-phase commit or do joins across datacenters (which is slow). Some databases do it differently -- Google Spanner offers great locality properties by allowing schema to declare that a table's rows should be interleaved (nested) within a parent table.
-* **Example** - MySQL, PostgreSQL, Oracle, SQL Server
+* **Example**
+  * traditional: MySQL, PostgreSQL, Oracle, SQL Server
+  * NewSQL: VoltDB, Spanner
 
 **Document model**
 * The most popular database for business data processing in the 1970s was the IBM's _Information Management System_ (IMS).
@@ -1445,8 +1447,10 @@ There are three techniques for achieving this:
 
 The simplest way of removing concurrency problems is to remove concurrency entirely and execute only one transaction at a time, in serial order, on a single thread. This approach is implemented by VoltDB/H-Store, Redis and Datomic.
 
-##### Encapsulating transactions in stored procedures
+for network latency: stored procedure
+for disk latency: keep in memory
 
+##### Encapsulating transactions in stored procedures
 With interactive style of transaction, a lot of time is spent in network communication between the application and the database.
 
 For this reason, systems with single-threaded serial transaction processing don't allow interactive multi-statement transactions. The application must submit the entire transaction code to the database ahead of time, as a _stored procedure_, so all the data required by the transaction is in memory and the procedure can execute very fast.
@@ -1463,7 +1467,7 @@ Executing all transactions serially limits the transaction throughput to the spe
 
 In order to scale to multiple CPU cores you can potentially partition your data and each partition can have its own transaction processing thread. You can give each CPU core its own partition.
 
-For any transaction that needs to access multiple partitions, the database must coordinate the transaction across all the partitions. They will be vastly slower than single-partition transactions.
+For any transaction that needs to access multiple partitions, the database must coordinate the transaction across all the partitions (distributed transactions using say 2 phase commit). They will be vastly slower than single-partition transactions.
 
 #### Two-phase locking (2PL)
 
