@@ -1630,8 +1630,8 @@ The internet and most internal networks are _asynchronous packet networks_. A me
       * ![NTP](/metadata/ntp.png)
       * Way of handling clock skew depends on its amount:
         * |θ| < 125 ms, **slew** the clock (slightly speed it up or down by upto 500 ppm -- brings back clock in sync within 5 minutes)
-        * 125 ms ≤ |θ| < 1000 ms, **step** the clock (sudden reset to correct time)
-        * |θ| ≥ 1000 ms, **panic** (do nothing, and let user do it manually -- hence clock skew needs to be carefully monitored)
+        * 125 ms ≤ |θ| < 1000 seconds, **step** the clock (sudden reset to correct time)
+        * |θ| ≥ 1000 seconds, **panic** (do nothing, and let user do it manually -- hence clock skew needs to be carefully monitored)
     * Hence to synchronise clocks, computers do this via Network Time Protocol (NTP)
       * NTP is a stratum of clock servers
         * Stratum 0: atomic clocks or GPS receiver
