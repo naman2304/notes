@@ -1643,11 +1643,13 @@ The internet and most internal networks are _asynchronous packet networks_. A me
      * `clock_gettime(CLOCK_REALTIME)` on Linux and `System.currentTimeMillis()` in Java.
      * Due to **step**, it may be forcibly reset and appear to jump back to a previous point in time.
      * Unsuitable for measuring elapsed time on a single node
+     * Suitable for measuring time across nodes.
    * **Monotonic clocks**
      * Return the current date and time since some arbitrary point. The _absolute_ value of the clock is meaningless (as it might be number of nanoseconds since computer was started, or something similarly arbitrary)
      * `clock_gettime(CLOCK_MONOTONIC)` on Linux and `System.nanoTime()` in Java.
      * Only **skew**, no **step**, hence are guaranteed to always move forward. The difference between clock reads can tell you how much time elapsed beween two checks.
-     * Suitable for measuring elapsed time on a single node
+     * Suitable for measuring elapsed time on a single node.
+     * Unsuitable for measuring time across nodes.
     
 ```java
 // BAD
