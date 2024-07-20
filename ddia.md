@@ -1603,18 +1603,66 @@ The internet and most internal networks are _asynchronous packet networks_. A me
    * We have to assume that network congestion, queueing, and unbounded delays will happen. Consequently, there's no "correct" value for timeouts, they need to be determined experimentally.
 
 ### Unreliable clocks
-* The time when a message is received is always later than the time when it is sent, we don't know how much later due to network delays. This makes difficult to determine the order of which things happened when multiple machines are involved.
-* Each machine on the network has its own clock (actual hardware device usually a quartz crystal oscillator), slightly faster or slower than the other machines. It is possible to synchronise clocks with Network Time Protocol (NTP).
-* Modern computers have 2 different types of clocks:
+* Distributed systems often need to measure time:
+  * Determining order of events across several nodes (time when a message is received is always later than the time when it is sent, we don't know how much later due to network delays. This makes difficult to determine the order of which things happened when multiple machines are involved)
+  * Cache time invalidation
+  * Logging
+  * Schedulers, timeouts, failure detector, retry timers
+* **Physical Clock**
+  * Each machine on the network has its own clock (actual hardware device usually a quartz crystal oscillator), but they are not accurate, due to following reasons:
+    * **Clock Drift**
+      * The rate by which it is fast or slow is called drift, measured in ppm (parts per million)
+      * 1 ppm = 1 microsecond per second = 86 millisecond per day = 32 second per year
+      * Most computers are correct within 50 ppm.
+      * ![Temperature clock drift](/metadata/temp_clock_drift.png)
+    * **Leap seconds**
+      * UTC (Universal Coordinated Time) is how time is defined.
+        * GMT (Greenwhich Mean Time) -- based on astronomy -- it's noon when the son is in south as seen from Greenwhich Meridian
+        * TAI (Time Atomic International) -- based on caesium atomic clocks resonant frequency
+        * Above 2 don't match up, because speed of Earth's rotation is not constant.
+        * Hence, UTC is TAI with corrections to account for Earth's rotation -- these corrections are called leap seconds.
+        * Timezones, etc are then defined on UTC.
+      * every year on 30 June and 31 Dec, 1 second is either added, removed or unchanged (immediate jump)
+      * poor handling of leap seconds caused outage on 30 June 2012
+  * Clock Synchronisation
+    * Computer tracks time, but due to clock drift + leap seconds, they are not perfectly synchronized.
+    * Difference between two clocks at any point in time is called clock skew. We calculate using following:
+      * ![NTP](/metadata/ntp.png)
+      * Way of handling clock skew depends on its amount:
+        * |θ| < 125 ms, **slew** the clock (slightly speed it up or down by upto 500 ppm -- brings back clock in sync within 5 minutes)
+        * 125 ms ≤ |θ| < 1000 ms, **step** the clock (sudden reset to correct time)
+        * |θ| ≥ 1000 ms, **panic** (do nothing, and let user do it manually -- hence clock skew needs to be carefully monitored)
+    * Hence to synchronise clocks, computers do this via Network Time Protocol (NTP)
+      * NTP is a stratum of clock servers
+        * Stratum 0: atomic clocks or GPS receiver
+        * Stratum 1: synced directly with stratum 0
+        * Stratum 2: synced directly with stratum 1
+* Modern computers have 2 different types of physical clocks
    * **Time-of-day clocks**
-     * Return the current date and time according to some calendar (_wall-clock time_).
+     * Return the current date and time according to some calendar (_wall-clock time_) (example UNIX timestamp gives number of seconds since epoch: 1 Jan 1970). Also, they ignore leap seconds
      * `clock_gettime(CLOCK_REALTIME)` on Linux and `System.currentTimeMillis()` in Java.
-     * If the local clock is too far ahead of the NTP server, it may be forcibly reset and appear to jump back to a previous point in time. Also, then ignore leap seconds. **This makes it is unsuitable for measuring elapsed time.**
+     * Due to **step**, it may be forcibly reset and appear to jump back to a previous point in time.
+     * Unsuitable for measuring elapsed time on a single node
    * **Monotonic clocks**
-     * The _absolute_ value of the clock is meaningless (as it might be number of nanoseconds since computer was started, or something similarly arbitrary)
+     * Return the current date and time since some arbitrary point. The _absolute_ value of the clock is meaningless (as it might be number of nanoseconds since computer was started, or something similarly arbitrary)
      * `clock_gettime(CLOCK_MONOTONIC)` on Linux and `System.nanoTime()` in Java.
-     * They are guaranteed to always move forward. The difference between clock reads can tell you how much time elapsed beween two checks.
-     * NTP allows the clock rate to be speeded up or slowed down by up to 0.05%, but **NTP cannot cause the monotonic clock to jump forward or backward**. **In a distributed system, using a monotonic clock for measuring elapsed time (eg: timeouts), is usually fine**.
+     * Only **skew**, no **step**, hence are guaranteed to always move forward. The difference between clock reads can tell you how much time elapsed beween two checks.
+     * Suitable for measuring elapsed time on a single node
+    
+```java
+// BAD
+long startTime = System.currentTimeMillis();
+doSomething();
+long endTime = System.currentTimeMillis();
+long elapsedTime = endTime - startTime; // may be negative!
+
+// GOOD
+long startTime = System.nanoTime();
+doSomething();
+long endTime = System.nanoTime();
+long elapsedTime = endTime - startTime; // always >= 0
+```
+
 * If some piece of software is relying on an accurately synchronised clock, the result is more likely to be silent and subtle data loss than a dramatic crash.
 * **Timestamps for ordering events**
    * **It is tempting, but dangerous to rely on clocks for ordering of events across multiple nodes.** This usually imply that _last write wins_ (LWW), often used in both multi-leader replication and leaderless databases like Cassandra and Riak, and data-loss may happen.
