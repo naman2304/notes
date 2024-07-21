@@ -1077,11 +1077,21 @@ Each write from a client is sent to all replicas, regardless of datacenter, but 
 * In order to become eventually consistent, the replicas should converge toward the "same" value. If you want to avoid losing data, you application developer, need to know a lot about the internals of your database's conflict handling.
 
 * **Last write wins (discarding concurrent writes).** Even though the writes don't have a natural ordering, we can force an arbitrary order on them. We can attach a timestamp to each write and pick the most recent. There are some situations such as caching on which lost writes are acceptable. If losing data is not acceptable, LWW is a poor choice for conflict resolution. Cassandra only supports this.
-* **The "happens-before" relationship and concurrency.** Whether one operation happens before another operation is the key to defining what concurrency means.
+* **Ordering of messages: "happens-before" relationship and concurrency.** Whether one operation happens before another operation is the key to defining what concurrency means.
      * An operation A happens before another operation B if B knows about A, or depends on A, or builds upon A in some way (consistent prefix reads).
-     *  **We can simply say that to operations are _concurrent_ if neither happens before the other.** For defining concurrency, exact time doesn't matter; we simply say two operations are concurrent, if they are both unaware of each other
-     *  Either A happened before B, or B happened before A, or A and B are concurrent.
-     *  If one operation happened before another, later operation should overwrite the earlier operation, but if the operations are concurrent, we have a conflict that needs to be resolved.
+       * An event is something happening at one node (local execution step, or sending a message, or receiving a message)
+       * We say that `a` happens before event `b` (writtern `a` &#8594; `b`) iff:
+         * `a` and `b` occurred at same node (assume single threaded), and `a` occurred before `b` in that node's local execution order (there is a _strict total order_ on the events that occur at the same node); or
+         * event `a` is the sending of message m, and event `b` is the receipt of that same message m (assuming sent messages are unique, we can make messages unique say using UUID OR sender node ID + sequence number for each message); or
+         * there exists an event `c` such that `a` &#8594; `c` and `c` &#8594; `b`
+       * Happens-before is a **partial order**
+     * **We can simply say that to operations are _concurrent_ if neither happens before the other.** Concurrent does not mean literally at the exact same time; we simply say two operations are concurrent, if they are both unaware of each other (or they are independent)
+       * It is possible that neither `a` &#8594; `b` and `b` &#8594; `a`, in that case we say that `a` and `b` are concurrent (`a` || `b`)
+     * Either A happened before B, or B happened before A, or A and B are concurrent.
+     * Example:
+       * ![Happens-before-concurrent](/metadata/happens-before-concurrent.png)
+     * We can't just use time-of-day clock for ordering the messages as timestamp across different nodes are not synchronized perfectly. Also, monotonic clocks can't be compared across nodes, so that can't be used either.
+     * If one operation happened before another, later operation should overwrite the earlier operation, but if the operations are concurrent, we have a conflict that needs to be resolved.
 
 ##### Capturing the happens-before relationship
 
