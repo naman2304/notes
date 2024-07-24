@@ -1755,11 +1755,12 @@ end on
   * T < K iff T ≤ K and T != K
   * T || K iff neither T ≤ K nor K ≤ T
 * Properties
-  * V(a) < V(b) ⬌ (a &#8594; b)
-  * V(a) = V(b) ⬌ (a = b)
+  * V(a) <  V(b) ⬌ (a &#8594; b)
+  * V(a) =  V(b) ⬌ (a = b)
   * V(a) || V(b) ⬌ (a || b)
 
-Clock readings have a confidence interval
+
+#### Clock readings have a confidence interval
   * It doesn't make sense to think of a clock reading as a point in time, it is more like a range of times, within a confidence interval: for example, 95% confident that the time now is between 10.3 and 10.5. 
   * Spanner
     * Google's TrueTime API in Spanner when asked for time, explicitly gives confidence interval [earliest, latest], which are the earliest possible and the latest possible timestamp.
