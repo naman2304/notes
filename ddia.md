@@ -1718,7 +1718,7 @@ end on
     * If we need a unique timestamp for every event, each timestamp can be extended with the name or identifier of the node on which that event occurred.
     * Within the scope of a single node, each event is assigned a unique timestamp; thus, assuming each node has a unique name, the combination of timestamp and node name is globally unique (across all nodes).
     * Here, it is **total order**.
-  * ![Lamport clock example](/metadata/lamport_clock_example.png)
+  * ![Lamport clock example](/metadata/lamport_example.png)
  
 ##### Vector Clocks
 
