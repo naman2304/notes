@@ -1686,7 +1686,7 @@ long elapsedTime = endTime - startTime; // always >= 0
     
 ##### Lamport Clocks
 ```java
-// Lamport algorithm
+// Lamport Clocks Algorithm.
 // The algorithm assumes a crash-stop model (or a crash-recovery model if the timestamp is maintained in stable storage, i.e. on disk).
 
 on initialisation do
@@ -1715,21 +1715,58 @@ end on
   * Possible that for `a` != `b`, `L(a)` = `L(b)`
   * It is **partial order** here.
   * Forceful
-    * If we need a unique timestamp for every event, each timestamp can be extended with the name or identifier of the node on which that event occurred.
+    * If we need a unique timestamp for every event, each timestamp can be extended with the name or identifier of the node on which that event occurred (trying to define a total order)
     * Within the scope of a single node, each event is assigned a unique timestamp; thus, assuming each node has a unique name, the combination of timestamp and node name is globally unique (across all nodes).
     * Here, it is **total order**.
   * ![Lamport clock example](/metadata/lamport_example.png)
  
 ##### Vector Clocks
+* Given the Lamport timestamps of two events, it is in general not possible to tell whether those events are concurrent or whether one happened before the other (if `L(a)` < `L(b)`, we can't tell whether `a` &#8594; `b` OR `a` || `b`).
+* If we do want to detect when events are concurrent, we need a different type of logical time: a vector clock.
 
-* **Clock readings have a confidence interval**
-   * It doesn't make sense to think of a clock reading as a point in time, it is more like a range of times, within a confidence interval: for example, 95% confident that the time now is between 10.3 and 10.5. 
-   * Spanner
-     * Google's TrueTime API in Spanner when asked for time, explicitly gives confidence interval [earliest, latest], which are the earliest possible and the latest possible timestamp.
-     * The most common implementation of snapshot isolation requires a monotonically increasing transaction ID. ON single node DB, simple counter is sufficient for generating transaction IDs. On distributed DBs, a globally monotonically increasing transaction ID is difficult to generate, because it requires coordination
-     * Spanner implements snapshot isolation across datacenters by using clock's confidence interval. If you have two confidence internvals where `A = [A earliest, A latest]` and `B = [B earliest, B latest]` and those two intervals do not overlap (`A earliest` < `A latest` < `B earliest` < `B latest`), then B definitely happened after A.
-     * For solving for overlapping case, Spanner deliberately waits for the length of the confidence interval before commiting a read-write transaction. By doing so, it ensures that any transaction that may read the data is at a sufficiently later time, so their confidence intervals do not overlap.
-     * Spanner needs to keep the clock uncertainty as small as possible, that's why Google deploys a GPS receiver or atomic clock in each datacenter, allowing clocks to be synchronized to within 7 ms as opposed to ~100 ms for a normal computer.
+```java
+// Vector Clocks Algorithm.
+
+on initialisation at node Ni do
+  // T[i] is the number of events observed by node Ni
+  T := <0, 0, . . . , 0> // local variable at node Ni
+end on
+
+on any event occurring at node Ni do
+  T[i] := T[i] + 1 
+end on
+
+on request to send message m at node Ni do
+  T[i] := T[i] + 1;
+  send (T, m) via network
+end on
+
+on receiving (K, m) at node Ni via the network do
+  T[j] := max(T[j], K[j]) for every j ∈ {1, . . . , n}
+  T[i] := T[i] + 1; deliver m to the application
+end on
+```
+
+* ![Vector Clocks example](/metadata/vector_clock_example.png)
+* This defines a **partial order** (happens-before relationship)
+* Defining the order
+  * T = K iff T[i] = K[i] for all i ∈ {1, . . . , n}
+  * T ≤ K iff T[i] ≤ K[i] for all i ∈ {1, . . . , n}
+  * T < K iff T ≤ K and T != K
+  * T || K iff neither T ≤ K nor K ≤ T
+* Properties
+  * V(a) < V(b) ⬌ (a &#8594; b)
+  * V(a) = V(b) ⬌ (a = b)
+  * V(a) || V(b) ⬌ (a || b)
+
+Clock readings have a confidence interval
+  * It doesn't make sense to think of a clock reading as a point in time, it is more like a range of times, within a confidence interval: for example, 95% confident that the time now is between 10.3 and 10.5. 
+  * Spanner
+    * Google's TrueTime API in Spanner when asked for time, explicitly gives confidence interval [earliest, latest], which are the earliest possible and the latest possible timestamp.
+    * The most common implementation of snapshot isolation requires a monotonically increasing transaction ID. ON single node DB, simple counter is sufficient for generating transaction IDs. On distributed DBs, a globally monotonically increasing transaction ID is difficult to generate, because it requires coordination
+    * Spanner implements snapshot isolation across datacenters by using clock's confidence interval. If you have two confidence internvals where `A = [A earliest, A latest]` and `B = [B earliest, B latest]` and those two intervals do not overlap (`A earliest` < `A latest` < `B earliest` < `B latest`), then B definitely happened after A.
+    * For solving for overlapping case, Spanner deliberately waits for the length of the confidence interval before commiting a read-write transaction. By doing so, it ensures that any transaction that may read the data is at a sufficiently later time, so their confidence intervals do not overlap.
+    * Spanner needs to keep the clock uncertainty as small as possible, that's why Google deploys a GPS receiver or atomic clock in each datacenter, allowing clocks to be synchronized to within 7 ms as opposed to ~100 ms for a normal computer.
 
 ### Process pauses
 
