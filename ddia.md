@@ -1677,8 +1677,51 @@ long elapsedTime = endTime - startTime; // always >= 0
 
 * If some piece of software is relying on an accurately synchronised clock, the result is more likely to be silent and subtle data loss than a dramatic crash.
 * **Timestamps for ordering events**
-   * **It is tempting, but dangerous to rely on clocks for ordering of events across multiple nodes.** This usually imply that _last write wins_ (LWW), often used in both multi-leader replication and leaderless databases like Cassandra and Riak, and data-loss may happen.
-   * _Logical clocks_, based on counters instead of oscillating quartz crystal, are safer alternative for ordering events. Logical clocks do not measure time of the day or elapsed time, only relative ordering of events. This contrasts with time-of-the-day and monotonic clocks (also known as _physical clocks_). Other example of logical clocks include version vectors and lamport timestamp.
+   * **It is tempting, but dangerous to rely on physical clocks for ordering of events across multiple nodes.** This usually imply that _last write wins_ (LWW), often used in both multi-leader replication and leaderless databases like Cassandra and Riak, and data-loss may happen.
+   * **_Logical clocks_**
+     * counts number of events occurred (rather than number of seconds elapsed in case of physical clocks)
+     * based on counters instead of oscillating quartz crystal, are safer alternative for ordering events. Logical clocks do not measure time of the day or elapsed time, only relative ordering of events. This contrasts with time-of-the-day and monotonic clocks (also known as _physical clocks_).
+     * designed to capture causal dependencies. e1 &#8594; e2 ⮕ T(e1) < T(e2)
+     * Examples: lamport clocks and vector clocks.
+    
+##### Lamport Clocks
+```java
+// Lamport algorithm
+// The algorithm assumes a crash-stop model (or a crash-recovery model if the timestamp is maintained in stable storage, i.e. on disk).
+
+on initialisation do
+  t := 0 // each node has its own local variable t
+end on
+
+on any event occurring at the local node do
+  t := t + 1
+end on
+
+on request to send message m do
+  t := t + 1;
+  send (t, m) via the underlying network link
+end on
+
+on receiving (T, m) via the underlying network link do
+  t := max(t, T) + 1
+  deliver m to the application
+end on
+```
+* each node maintains a counter `t`, incremented on every local event `e`
+* Let `L(e)` be the value of `t` after the increment
+* Properties of this schema
+  * If `a` &#8594; `b`, then `L(a)` < `L(b)`
+  * If `L(a)` < `L(b)`, does not imply `a` &#8594; `b` (it's definitely not `b` &#8594; `a`, but both possibilities are there i.e. `a` happened before `b` [`a` &#8594; `b`] OR `a` and `b` are concurrent [`a` || `b`]
+  * Possible that for `a` != `b`, `L(a)` = `L(b)`
+  * It is **partial order** here.
+  * Forceful
+    * If we need a unique timestamp for every event, each timestamp can be extended with the name or identifier of the node on which that event occurred.
+    * Within the scope of a single node, each event is assigned a unique timestamp; thus, assuming each node has a unique name, the combination of timestamp and node name is globally unique (across all nodes).
+    * Here, it is **total order**.
+  * ![Lamport clock example](/metadata/lamport_clock_example.png)
+ 
+##### Vector Clocks
+
 * **Clock readings have a confidence interval**
    * It doesn't make sense to think of a clock reading as a point in time, it is more like a range of times, within a confidence interval: for example, 95% confident that the time now is between 10.3 and 10.5. 
    * Spanner
