@@ -1605,7 +1605,7 @@ The internet and most internal networks are _asynchronous packet networks_. A me
       * TCP performs _flow control_ (also known as congestion avoidance or backpressure), in which a node limits its own rate of sending in order to avoid overloading a network link or the receiving node. This means additional queuing at the sender.
    * You can choose timeouts experimentally by measuring the distribution of network round-trip times over an extended period. TCP considers packet to be lost if it is not acknowledged within some timeout, and hence lost packets are automatically retransmitted. Systems can continually measure response times and their variability (_jitter_), and automatically adjust timeouts according to the observed response time distribution.
    * **TCP vs UDP**: UDP does not perform _flow control_ and retransmission of packets.
-* **Synchronous vs ashynchronous networks**
+* **Synchronous vs asynchronous networks**
    * A telephone network estabilishes a _circuit_, a fixed guaranteed amount of bandwidth is allocated for the call, we say is _synchronous_ even as the data passes through several routers as it does not suffer from queuing. The maximum end-to-end latency of the network is fixed (_bounded delay_).
    * A circuit is a fixed amount of reserved bandwidth which nobody else can use while the circuit is established, whereas packets of a TCP connection opportunistically use whatever network bandwidth is available. While TCP connection is idle, it doesn't use any bandwidth.
    * Internet networks are optimized for bursty traffic.
