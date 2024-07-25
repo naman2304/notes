@@ -830,6 +830,33 @@ The difficulty in replication lies in handling _changes_ to replicated data. Pop
           * On-read (siblings)
           * On-write (CRDTs)
 
+State machine replication (SMR)
+* FIFO-total order broadcast every update to all replicas
+* Replica delivers update messages: apply to its own state
+* Applying an update is deterministic
+* Replica is a state machine: starts in fixed initial state, goes through same sequence of state transitions in the same order => all replicas end in the same state
+* Closely related idea
+  * Serializable transactions (execute in delivery order)
+  * Blockchains, distributed ledgers, smart contracts (the “chain of blocks” in a blockchain is nothing other than the sequence of messages delivered by a total order broadcast protocol)
+* Limitations
+  * If update happens on node A, then A cannot update state immediately, have to wait for delivery through broadcast (by coordinating with other nodes)
+  * Need fault-tolerant total order broadcast (will see in future)
+
+```python
+on request to perform update u do
+ send u via FIFO-total order broadcast
+end on
+
+on delivering u through FIFO-total order broadcast do
+ update state using arbitrary deterministic logic!
+end on
+```
+
+* Can we use other weak broadcast protocols for replication? YES with care
+  * Total Order Broadcast: deterministic SMR
+  * Causal Broadcast: deterministic, concurrent updates are commutative (f(g(x)) = (g(f(x))
+  * Reliable Broadcast: deterministic, all updates commutative
+  * Best effort Broadcast: deterministic, commutative, idempotent, tolerates message loss
 
 #### Implementation of replication logs
 
