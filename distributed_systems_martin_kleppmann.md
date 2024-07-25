@@ -212,3 +212,45 @@ Now, we will implement ordering on top of reliable broadcast
      * Attach Lamport timestamp to every message
      * Deliver messages in _total order_ of timestamps
      * Problem: how do you know if you have seen all messages with timestamp < T? Need to use FIFO links and wait for message with timestamp ≥ T from every node
+
+
+### Consensus
+
+* Fault-tolerant total order broadcast
+  * total order broadcast is very useful for stateful machine replication
+  * can implement via single leader approach
+  * Problem was what if the leader crashes or becomes unavailable? Can we choose the new leader automatically
+* Consensus and total order broadcast
+  * traditional formulation of consensus: several nodes want to come to agreement about a single value. One or more nodes may propose a value, and then the consensus algorithm will decide on one of those values
+  * in context of total order broadcast: this value is the next message to deliver
+  * once one node decides on a certain message order, all nodes will decide the same order
+  * consensus and total order broadcast are formally equivalent
+  * common consensus algorithms
+    * Paxos: single value consensus
+    * Multi Paxos: generalisation to FIFO-total order broadcast
+    * Raft, Viewstamped Replication, ZAB (zookeeper atomic broadcast): FIFO-total order broadcast by default
+* Consensus system models
+  * Paxos, Raft, etc assume **fairloss links, crash recovery nodes and partially synchronous** system model
+  * Why not asynchronous?
+    * **FLP result** (Fischer, Lynch, Paterson) -- there is no deterministic consensus algorithm that is guaranteed to terminate in an asynchronous crash stop system model
+    * Paxos, Raft, etc use clocks only used for timeouts/failure detector to ensure progress. Safety (correctness) does not depend on timing (boundness). Only thing that timing dictates is the time to "deliver" a message, so timing affects "liveliness" and not "safety" guarantee.
+  * There are also consensus algorithms for Byzantine partially synchronous system models (blockchain)
+* Leader election
+  * Multi-Paxos, Raft, etc use a leader to sequence messages
+    * Use a failure detector (timeout) to determine suspected crash or unavailability of leader
+    * On suspected leader crash, elect a new one
+    * Prevent two leaders at the same time (split brain)
+  * Ensure <=1 leader per **term**
+    * Term is just an integer that is incremented every time a leader election is started. 
+    * A node can only vote once per term
+    * Require a quorum of nodes to elect a leader in a term
+* Can we guarantee there is only one leader?
+  * If a leader is elected, the voting algorithm guarantees that that it is the only leader within that particular term. 
+  * **Cannot** prevent having multiple leaders from different terms.
+  * Example: node 1 is leader in term t, but due to network partition it can no longer communicate to node 2 & 3, and node 2 & 3 may elect a new leader in term t+1. Node 1 may not even know that a new leader has been elected.
+* How to solve above?
+  * Even after a node has been elected as leader, it must act carefully, since at any moment the system might contain be another leader with a later term that it has not yet heard about
+    * first roundtrip, node is elected as leader thanks to votes from other nodes
+    * second roundtrip, leader proposes next message to deliver, and the followers acknowledge that they do not know of any leader with a later term than t. **This is the trip that really solves the problem of split brain because if another leader has been elected, the old leader will find out from at least one of the acks**
+    * third roundtrip, the leader actually delivers m and broadcasts this fact to the followers, so that they can do the same.
+  * ![Checking if leader is voted out](/metadata/.png)
