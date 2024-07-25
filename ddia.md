@@ -116,7 +116,7 @@ Systems that anticipate faults and can cope with them are called _fault-tolerant
 You should generally **prefer tolerating faults over preventing failures** (there are cases where prevention is better than cure, because there is no cure -- for instance, a security failure which compromises data of users). Netflix Chaos Monkey.
 
 * **Hardware faults**. Until recently redundancy of hardware components was sufficient for most applications. As data volumes increase, more applications use a larger number of machines, proportionally increasing the rate of hardware faults (MTTF of hard disk is 10-50 years, a datacentre with 10k disks on average have 1 disk per day failure). **There is a move towards systems that tolerate the loss of entire machines**. A system that tolerates machine failure can be patched one node at a time, without downtime of the entire system (_rolling upgrade_).
-    - Disks: RAID config in disks
+    - Disks: RAID (Redundant Array of Independent Disks) config in disks
     - Servers: dual power supplies or hot swappable CPUs in servers
     - Datacentres: battery generator in datacenters)
 * **Software errors**. It is unlikely that a large number of hardware components will fail at the same time. Software errors are a systematic error within the system, they tend to cause many more system failures than uncorrelated hardware faults (leap second bug in 2012 that caused many applications to hang simultaneously)
@@ -799,6 +799,38 @@ Reasons why you might want to replicate data:
 
 The difficulty in replication lies in handling _changes_ to replicated data. Popular algorithms for replicating changes between nodes: _single-leader_, _multi-leader_, and _leaderless_ replication.
 
+##### Retrying State Updates
+* say on social media website, you want to "like" a post made by some user. The request may be lost or the acknowledgement may be lost. If we are not careful, the retry could lead to the request being processed multiple times, leading to an incorrect state in the database.
+* ![Retrying state updates](/metadata/retrying_state_updates.png)
+* or say we want to deduct 100 rupees, a retry shouldn't cause it to be deducted twice.
+* Solution
+  * **Deduplicate requests**:  However, in a crash-recovery system model, this requires storing requests (or some metadata about requests, such as a vector clock) _in stable storage_, so that duplicates can be accurately detected even after a crash
+  * **Idempotency**
+    * Make requests idempotent
+    * Incrementing a counter is not idempotent, but adding an element to a set is
+    * Therefore, if a counter is required (as in the number of likes), it might be better to actually maintain the set of elements in the database, and to derive the counter value from the set by computing its cardinality.
+    * allows an update to have "exactly-once semantics" i.e. the update may actually be applied multiple times, but the effect is the same as if it had been applied exactly once
+    * idempotence has a limitation that becomes apparent when there are multiple updates in progress
+    * Example 1
+      * ![Idempotency limitation 1](/metadata/idempotency_limitation_1.png)
+      * Client 1 adds a user ID to the set of likes to the post, but ack is lost. Client 2 reads the set of likes from DB (including the user ID added by client 1), and then makes a request to remove the user ID. Meanwhile, client 1 makes request again (unaware of client 2), which adds user ID again. Retry therefore has the effect of adding user ID -- this is unexpected because client 2 causally saw client 1's change, so the removal happened after the addition of the set element, and therefore we expect that in final state, user ID should NOT be present.
+      * In this case, the fact that adding an element to a set is idempotent is not sufficient to make the retry safe.
+    * Example 2
+      * ![Idempotency limitation 2](/metadata/idempotency_limitation_2.png)
+      * In both scenarios the outcome is the same: x is present on replica B, and absent from replica A. Yet the intended effect is different: in the first scenario, the client wanted x to be removed from both replicas, whereas in the second scenario, the client wanted x to be present on both replicas. When the two replicas reconcile their inconsistent states, we want them to both end up in the state that the client intended. However, this is not possible if the replicas cannot distinguish between these two scenarios.
+    * To solve, we can do two things
+      * First, we attach logical timestamp to every update operation, and store the timestamp in DB as part of the data written by the update.
+      * Second, when asked to remove a record from the database, we don’t actually remove it, but rather write a special type of update (called a tombstone) marking it as deleted.
+      * ![Timestamps and tombstones](/metadata/timestamps_and_tombstones.png)
+      * In many replicated systems, replicas run a protocol to detect and reconcile any differences (this is called anti-entropy) so that the replicas eventually hold consistent copies of the same data. Using timestamps and tombstones, we can differentiate b/w two scenarios given in idempotency example 2.
+      * Using timestamps and tombstones also helps in handling concurrent updates
+        * [Concurrent writes](/metadata/concurrent_writes.png)
+        * Last Write Wins [use logical timestamps like lamport clocks with **total order** -- data loss as two concurrent updatates are ordered arbitrarily]
+        * Version Vectors [**partial order** -- v2 replaces v1 if v2>v1, preserves both v1 and v2 if v1 || v2]
+          * On-read (siblings)
+          * On-write (CRDTs)
+
+
 #### Implementation of replication logs
 
 ##### Statement-based replication
@@ -1004,7 +1036,7 @@ Multi-leader replication tools let you write conflict resolution logic using app
 * **On write.** As soon as the database system detects a conflict in the log of replicated changes, it calls the conflict handler. CRDTs used here.
 * **On read.** All the conflicting writes are stored. On read, multiple versions of the data are returned to the application. The application may prompt the user or automatically resolve the conflict. CouchDB works this way. 
 
-Note that conflict resolution usually applies at the level of an indivudual row or document, and not at transaction level. Thus, if you have a transaction that atomically makes several different writes, each write is still considered separately for the purposes of conflict resolution.
+**Note that conflict resolution usually applies at the level of an indivudual row or document, and not at transaction level. Thus, if you have a transaction that atomically makes several different writes, each write is still considered separately for the purposes of conflict resolution.**
 
 #### Multi-leader replication topologies
 
