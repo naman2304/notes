@@ -127,3 +127,42 @@ fetch('https://example.com/payments', request)
 * For example, FIFO-total order broadcast is a strictly stronger model than causal broadcast; in other words, every valid FIFO-total order broadcast protocol is also a valid causal broadcast protocol (but not the opposite)
 
 #### Broadcast Algorithms
+Break down into two layers
+1. Make best-effort broadcast reliable by retransmitting dropped messages
+2. Enforce delivery order on top of reliable broadcast (which allows us to do either FIFO, Causal, Total Order or FIFO-Total Order)
+
+We will first look at reliable broadcast algorithms.
+* First Attempt
+  * broadcasting node sends message directly to every other node
+  * use reliable links (retry + deduplicate)
+  * Problem: node may crash before all messages are delivered (A sends m1 to B and C. m1 gets delivered to B. m1 does not get delivered to C due to temporary network failure between A and C resulting in dropping of m1 reaching C. And then A crashes. How will A retransmit m1 to C?). Hence, not reliable
+* Second Attempt
+  * Eager reliable broadcast
+  * Idea: **first time** a node receives a particular message, it re-broadcasts to each other node (via reliable links)
+  * Problem: O(n^2) messages. Reliable, but uses too much bandwidth.
+  * ![Eager Reliable Broadcast](/metadata/eager_reliable_broadcast.png)
+* Third Attempt
+  * Gossip Protocol aka epidemic protocol
+  * Idea: when a node receives a message for the **first time**, forward it to 3 other nodes, chosen randomly.
+  * A message reaches all nodes (with very high probability -- there is a chance that a message may not reach some nodes, but can be minimized by tuning the parameters of algorithm like sending to say 5 nodes)
+ 
+Now, we will implement ordering on top of reliable broadcast
+1. FIFO broadcast
+   ```python
+   on initialisation do
+    sendSeq := 0; delivered := h0, 0, . . . , 0i; buffer := {}
+   end on
+   
+   on request to broadcast m at node Ni do
+    send (i, sendSeq, m) via reliable broadcast
+    sendSeq := sendSeq + 1
+   end on
+   
+   on receiving msg from reliable broadcast at node Ni do
+    buffer := buffer ∪ {msg}
+    while ∃sender , m. (sender , delivered[sender ], m) ∈ buffer do
+     deliver m to the application
+     delivered[sender ] := delivered[sender ] + 1
+    end while
+   end on
+   ```
