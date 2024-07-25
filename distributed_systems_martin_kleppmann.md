@@ -80,3 +80,48 @@ fetch('https://example.com/payments', request)
     * Interface Definition Language (IDL)
   * When different programming languages are used, the RPC framework needs to convert datatypes such that the caller’s arguments are understood by the code being called, and likewise for the function’s return value. A typical solution is to use an Interface Definition Language (IDL) to provide language independent type signatures of the functions that are being made available over RPC.
   * gRPC is an implementation of RPC paradigm, and uses IDL called Protocol Buffers.
+
+
+#### Delivery order in broadcast protocols
+##### Broadcast Protocol
+ * message is sent to all nodes in the group
+ * set of group members can be fixed (static) or dynamic
+ * system model
+   * Network assumptions: best effort (may drop messages) OR reliable (retransmit dropped messages)
+   * Timing assumptions: Asynchronous/Partially synchronous
+ * **Note**: After broadcast algorithm receives message from network, it may buffer/queue it before delivering to the application
+ * ![Receiving versus delivering](/metadata/receiving_versus_delivering.png)
+
+##### Forms of reliable broadcast
+* all of these are reliable (network) + asynchronous (timing)
+* four different type (they differ in terms of the order in which messages may be delivered at each node)
+
+**FIFO broadcast**
+* If m1 and m2 are broadcast by the same node, and broadcast(m1) → broadcast(m2), then m1 must be delivered before m2
+* weakest form of broadcast
+* when a node broadcasts a message, it is always possible to immediately deliver that message to itself
+* Example:
+  * m1 must be delivered before m3, since they were both sent by A. However, m2 can be delivered at any time before, between, or after m1 and m3.
+  * ![FIFO Broadcast example](/metadata/fifo_broadcast_example.png)
+
+**Causal broadcast**
+* If broadcast(m1) → broadcast(m2) then m1 must be delivered before m2. If two messages are broadcast concurrently, a node may deliver them in either order.
+* stricter than FIFO broadcast
+* when a node broadcasts a message, it is always possible to immediately deliver that message to itself
+* Example:
+  * in above FIFO example, it violates causality, because node C delivers m2 before m1, even though B broadcast m2 after delivering m1.
+  * ![Causal Broadcast example](/metadata/causal_broadcast_example.png)
+
+**Total order broadcast** (aka atomic broadcast)
+* FIFO and causal broadcast allow different nodes to deliver messages in different orders, total order broadcast enforces consistency across the nodes, ensuring that all nodes deliver messages in the same order. The precise delivery order is not defined, as long as it is the same on all nodes (If m1 is delivered before m2 on one node, then m1 must be delivered before m2 on all nodes)
+* when a node broadcasts a message, it is NOT always possible to immediately deliver that message to itself
+* Example:
+  * ![Total Order Broadcast example 1](/metadata/total_order_broadcast_example_1.png)
+  * ![Total Order Broadcast example 2](/metadata/total_order_broadcast_example_2.png)
+
+**FIFO-total order broadcast**
+* like total order broadcast, but with the additional FIFO requirement that any messages broadcast by the same node are delivered in the order they were sent
+
+**Relationship between broadcast models**
+* ![Relationshiop between broadcast models](/metadata/relationship_between_broadcast_models.png)
+* For example, FIFO-total order broadcast is a strictly stronger model than causal broadcast; in other words, every valid FIFO-total order broadcast protocol is also a valid causal broadcast protocol (but not the opposite)
