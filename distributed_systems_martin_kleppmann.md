@@ -82,8 +82,8 @@ fetch('https://example.com/payments', request)
   * gRPC is an implementation of RPC paradigm, and uses IDL called Protocol Buffers.
 
 
-#### Delivery order in broadcast protocols
-##### Broadcast Protocol
+### Delivery order in broadcast protocols
+#### Broadcast Protocol
  * message is sent to all nodes in the group
  * set of group members can be fixed (static) or dynamic
  * system model
@@ -125,3 +125,5 @@ fetch('https://example.com/payments', request)
 **Relationship between broadcast models**
 * ![Relationshiop between broadcast models](/metadata/relationship_between_broadcast_models.png)
 * For example, FIFO-total order broadcast is a strictly stronger model than causal broadcast; in other words, every valid FIFO-total order broadcast protocol is also a valid causal broadcast protocol (but not the opposite)
+
+#### Broadcast Algorithms
