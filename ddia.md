@@ -824,7 +824,7 @@ The difficulty in replication lies in handling _changes_ to replicated data. Pop
       * ![Timestamps and tombstones](/metadata/timestamps_and_tombstones.png)
       * In many replicated systems, replicas run a protocol to detect and reconcile any differences (this is called anti-entropy) so that the replicas eventually hold consistent copies of the same data. Using timestamps and tombstones, we can differentiate b/w two scenarios given in idempotency example 2.
       * Using timestamps and tombstones also helps in handling concurrent updates
-        * [Concurrent writes](/metadata/concurrent_writes.png)
+        * ![Concurrent writes](/metadata/concurrent_writes.png)
         * Last Write Wins [use logical timestamps like lamport clocks with **total order** -- data loss as two concurrent updatates are ordered arbitrarily]
         * Version Vectors [**partial order** -- v2 replaces v1 if v2>v1, preserves both v1 and v2 if v1 || v2]
           * On-read (siblings)
