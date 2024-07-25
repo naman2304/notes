@@ -253,4 +253,4 @@ Now, we will implement ordering on top of reliable broadcast
     * first roundtrip, node is elected as leader thanks to votes from other nodes
     * second roundtrip, leader proposes next message to deliver, and the followers acknowledge that they do not know of any leader with a later term than t. **This is the trip that really solves the problem of split brain because if another leader has been elected, the old leader will find out from at least one of the acks**
     * third roundtrip, the leader actually delivers m and broadcasts this fact to the followers, so that they can do the same.
-  * ![Checking if leader is voted out](/metadata/.png)
+  * ![Checking if leader is voted out](/metadata/checking_if_leader_is_voted_out.png)
