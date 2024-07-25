@@ -150,19 +150,65 @@ Now, we will implement ordering on top of reliable broadcast
 1. FIFO broadcast
    ```python
    on initialisation do
-    sendSeq := 0; delivered := h0, 0, . . . , 0i; buffer := {}
+    // number of messages broadcast by this node
+    sendSeq := 0;
+    // vector of integers indicating how many messages from each sender that we have delivered on this node.
+    delivered := <0, 0, . . . , 0>;
+    // holdback queue of messages until they are delivered on this node
+    buffer := {}
    end on
    
    on request to broadcast m at node Ni do
+    // attaching node number (i) of sender
     send (i, sendSeq, m) via reliable broadcast
     sendSeq := sendSeq + 1
    end on
    
    on receiving msg from reliable broadcast at node Ni do
+    // msg = {sender, sendSeq, m}
     buffer := buffer ∪ {msg}
-    while ∃sender , m. (sender , delivered[sender ], m) ∈ buffer do
-     deliver m to the application
-     delivered[sender ] := delivered[sender ] + 1
+    while ∃(sender, sendSeq, m) ∈ buffer such that sendSeq == delivered[sender] do 
+      deliver m to application
+      delivered[sender] := delivered[sender] + 1
+      buffer := buffer - {(sender, sendSeq, m)}
     end while
    end on
    ```
+2. Causal broadcast (also called vector clock algorithm)
+   *  In traditional vector clocks, the vector elements count the number of events that have occurred at each node, while in the causal broadcast algorithm, the vector elements count the number of messages from each sender that have been delivered on this node
+
+   ```python
+   on initialisation do
+    sendSeq := 0;
+    delivered := <0, 0, . . . , 0>;
+    buffer := {}
+   end on
+   
+   on request to broadcast m at node Ni do
+    deps := delivered;
+    deps[i] := sendSeq
+    send (i, deps, m) via reliable broadcast
+    sendSeq := sendSeq + 1
+   end on
+   
+   on receiving msg from reliable broadcast at node Ni do
+    buffer := buffer ∪ {msg}
+    while ∃(sender, deps, m) ∈ buffer such that deps ≤ delivered do
+     deliver m to the application
+     delivered[sender] := delivered[sender] + 1
+     buffer := buffer - {(sender , deps, m)}
+    end while
+   end on
+   ```
+3. Total order broadcast
+   * both total order and FIFO-total order are harder.
+   * neither of below 2 algorithm is fault tolerant
+   * Single leader approach
+     * One node is designated as leader (sequencer; one who decides the unique sequence of messages that needs to be adhered to all nodes)
+     * To broadcast message, send it to the leader; leader broadcasts it via FIFO broadcast
+     * Problem: leader crashes ⇒ no more messages delivered
+     * Changing the leader safely is difficult
+   * Leaderless (lamport clocks)
+     * Attach Lamport timestamp to every message
+     * Deliver messages in _total order_ of timestamps
+     * Problem: how do you know if you have seen all messages with timestamp < T? Need to use FIFO links and wait for message with timestamp ≥ T from every node
