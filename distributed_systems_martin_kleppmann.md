@@ -254,3 +254,139 @@ Now, we will implement ordering on top of reliable broadcast
     * second roundtrip, leader proposes next message to deliver, and the followers acknowledge that they do not know of any leader with a later term than t. **This is the trip that really solves the problem of split brain because if another leader has been elected, the old leader will find out from at least one of the acks**
     * third roundtrip, the leader actually delivers m and broadcasts this fact to the followers, so that they can do the same.
   * ![Checking if leader is voted out](/metadata/checking_if_leader_is_voted_out.png)
+
+
+## Replica Consistency
+
+Distributed Transactions
+* Recall atomicity in the context of ACID txn
+  * A txn either commits or aborts
+  * If it commits, its updates are durable
+  * If it aborts, it has no visible side effects
+* If the txn updates data on multiple nodes, this implies
+  * either all the nodes must commit, or all must abort
+  * if any node crashes, all must abort
+  * ensuring this is the **atomic commitment** problem
+  * looks similar to consensus?
+
+| Consensus                                | Atomic Commit                             |
+| ---------                                | ----------------------------------------- |
+| one or more node propose a value         | every node votes whether to commit or not |
+| any one of the proposed value is decided | must commit if all nodes vote to commit; must abort if >=1 nodes vote to abort |
+| crashed nodes can be tolerated, as long as the quorum is working | must abort if a participating node crashes |
+
+### Two phase commit (2PC)
+* 2PL ensures serializable isolation, 2PC ensures atomic commitment
+* algorithm
+  * client starts a regular single-node txn on each replica that is participating in the txn, and performs the usual reads and writes within those txns.
+  * when the client is ready to commit the txn, it sends a commit request to the txn coordinator, a designated node that manages the 2PC protocol
+  * **First phase** - coordinator first sends a **prepare** message to each replica participating in the txn, and each replica replies with a message indicating whether it is able to commit the txn. The replicas do not actually commit the txn yet, but they must ensure that they will definitely be able to commit the txn in the second phase if instructed by the coordinator. This means, in particular, that the replica must write all of the txn’s updates to disk and check any integrity constraints before replying ok to the prepare message, while continuing to hold any locks for the txn
+  * **Second phase** - The coordinator collects the responses, and decides whether or not to actually commit the txn. If all nodes reply ok, the coordinator decides to commit; if any node wants to abort, or if any node fails to reply within some timeout, the coordinator decides to abort. The coordinator then sends its decision to each of the replicas, who all commit or abort as instructed. If the decision was to commit, each replica is guaranteed to be able to commit its txn because the previous prepare request laid the groundwork. If the decision was to abort, the replica rolls back the txn.
+* ![Two phase commit](/metadata/two_phase_commit.png)
+* Coordinator - SPOF - what if it crashes?
+  * Coordinator writes its decision (commit/abort) to disk
+  * When it recovers, read decision from disk and send it to replicas (or abort if no decision was made before crash)
+  * Problem: if coordinator crashes after "prepare", but before broadcasting decision, other nodes do not know how it has decided ("in doubt txns")
+  * Replicas participating in txn cannot commit or abort after responding “ok” to the prepare request (otherwise we risk violating atomicity)
+  * Algorithm is blocked until coordinator recovers
+  * Solution
+    * use total order broadcast algorithm to disseminate each nodes' vote whether to commit or abort
+
+```python
+on initialisation for transaction T do
+  # replica IDs of nodes that have voted in favour of commiting a txn T
+  commitVotes[T] := {};
+  # all replicas participating in txn T
+  replicas[T] := {};
+  # flag telling if we have decided or not.
+  decided[T] := false
+end on
+
+# Coordinator work
+on request to commit transaction T with participating nodes R do
+  for each r ∈ R do send (Prepare, T, R) to r
+end on
+
+on receiving (Prepare, T, R) at node replicaId do
+  replicas[T] := R
+  ok = “is transaction T able to commit on this replica?”
+  # every node that is participating in the txn uses total order broadcast (TOB) to disseminate its vote on whether to commit or abort.
+  total order broadcast (Vote, T, replicaId, ok) to replicas[T]
+end on
+
+# if node A suspects that node B has failed (because no vote from B was received within some timeout), then A may try to vote to abort on behalf of B.
+# this introduces a race condition: if node B is slow, it might be that node B broadcasts its own vote to commit around the same time that node A suspects B to have failed and votes abort on B’s behalf.
+on a node suspects node replicaId to have crashed do
+  for each transaction T in which replicaId participated do
+    total order broadcast (Vote, T, replicaId, false) to replicas[T]
+  end for
+end on
+
+# These votes are delivered to each node by TOB, and each recipient independently counts the votes.
+# Hence, we count only the first vote from any given replica, and ignore any subsequent votes from the same replica.
+# Since TOB guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
+# If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
+# Otherwise a node must wait until it has delivered at least one vote from each replica.
+# Once these votes have been delivered, and none of the replicas vote to abort in their first delivered message, then the transaction can be committed.
+# Thanks to TOB, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
+on delivering (Vote, T, replicaId, ok) by total order broadcast do
+  if replicaId ∈/ commitVotes[T] ∧ replicaId ∈ replicas[T] ∧ ¬decided[T] then
+    if ok = true then
+      commitVotes[T] := commitVotes[T] ∪ {replicaId}
+      if commitVotes[T] = replicas[T] then
+        decided[T] := true
+        commit transaction T at this node
+      end if
+    else
+      decided[T] := true
+      abort transaction T at this node
+    end if
+  end if
+end on
+```
+
+### Linearizability
+* Atomic commitment preserves consistency across multiple replicas in face of faults, by ensuring that a transaction either commits or aborts on all participating replicas. However, when there are concurrent operations going on, we need to reason about that too.
+* Linearizability (aka strong consistency) is the strongest consistency model.
+* Relation to serializability
+  * Not equal to serializability.
+  * Serializability means transaction has the same effect as if they are executed in serial order, but it does not define what that order should be.
+  * Linearizability defines the value that operations must return, depending on concurrency and relative ordering of those operations. If system is both, that combination is called strict serializability or one-copy serializability
+* Properties
+  * every operation takes affect **atomically** sometime after it started and before it finished.
+  * all operations behave as if executed on a single copy of data
+  * this is from perspective of client
+  * when two operations overlap, then we don't necessarily know the order in which the operation takes effect, so either is fine
+  * not equal to **happens before** relation -- which is based on message sent and received, so possible that two operations that do not overlap in time, but are still concurrent, because no commmunication has happened before those two operations.
+  * On the other hand, linearizability is defined in terms of real time: that is, a hypothetical global observer who can instantaneously see the state of all nodes
+* Quorum consistency
+  * Quorum consistency is not equal to linearizability due to network delays
+  * Can be made linearizable though
+    * read operation(**get**) has to do read repair so that atleast quorum nodes (say n/2 + 1) have updated value, and only then return the value to application (this is called ABD algorithm)
+    * write operation (**set**) -- first read and do read repair, and then write
+  * ![ABD algorithm](/metadata/abd_algorithm.png)
+  * Can we implement **cas** (compare and set) operation as linearizable -- YES, by using total order broadcast (TOB gives us this single threaded view such that all operations are delivered in the same order on all of the nodes, we have state machine replication)
+
+```python
+on request to perform get(x) do
+ total order broadcast (get, x) and wait for delivery
+end on
+
+on request to perform CAS(x, old, new) do
+ total order broadcast (CAS, x, old, new) and wait for delivery
+end on
+
+on delivering (get, x) by total order broadcast do
+ return localState[x] as result of operation get(x)
+end on
+
+on delivering (CAS, x, old, new) by total order broadcast do
+ success := false
+ if localState[x] = old then
+  localState[x] := new; success := true
+ end if
+ return success as result of operation CAS(x, old, new)
+end on
+```
+
+### Eventual Consistency
