@@ -399,7 +399,7 @@ end on
     * Scalability limits: in algorithms where all updates need to be sequenced through a leader, such as Raft, the leader can become a bottleneck that limits the number of operations that can be processed per second
     * Availability problems: if you can’t contact a quorum of nodes, you can’t process any operations
 * Hence, eventual consistency, which is a weak consistency model
-  * if no new updates are made to an object, eventually all reads will return the last updated value (no guarantee on how long)
+  * if no new updates are made to an object, eventually all reads will return the last updated value (no guarantee on how long, also what if updates don't stop)
   * **Strong eventual consistency**
     * Eventual delivery: every update made to one non-faulty replica is eventually processed by every non-faulty replica.
     * Convergence: any two replicas that have processed the same set of updates are in the same state (even if updates were processed in a different order).
