@@ -390,3 +390,28 @@ end on
 ```
 
 ### Eventual Consistency
+* Linearizability
+  * Advantages
+    * Makes a distributed system behave as if it were non-distributed
+    * Simple for applications to use
+  * Disadvantages:
+    * Performance cost: lots of messages and waiting for responses
+    * Scalability limits: in algorithms where all updates need to be sequenced through a leader, such as Raft, the leader can become a bottleneck that limits the number of operations that can be processed per second
+    * Availability problems: if you can’t contact a quorum of nodes, you can’t process any operations
+* Hence, eventual consistency, which is a weak consistency model
+  * if no new updates are made to an object, eventually all reads will return the last updated value (no guarantee on how long)
+  * **Strong eventual consistency**
+    * Eventual delivery: every update made to one non-faulty replica is eventually processed by every non-faulty replica.
+    * Convergence: any two replicas that have processed the same set of updates are in the same state (even if updates were processed in a different order).
+    * Properties:
+      * Does not require waiting for network communication
+      * Causal broadcast (or weaker) can disseminate updates
+      * Concurrent updates =⇒ conflicts need to be resolved
+
+| Problem                                       | Must wait for communication         | Requires synchrony  |
+| --------------------------------------------- | ----------------------------------- | ------------------  |
+| atomic commit                                 | all participating nodes             | partial synchronous |
+| consensus, linearizable CAS, TOB              | quorum nodes                        | partial synchronous |
+| linearizable get and set                      | quorum nodes                        | asynchronous        |
+| eventual consistency, FIFO, Causal broadcast  | local replica only                  | asynchronous        |
+
