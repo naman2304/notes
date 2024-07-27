@@ -36,15 +36,15 @@ Distributed Transactions
 
 ```python
 on initialisation for transaction T do
-  // replica IDs of nodes that have voted in favour of commiting a txn T
+  # replica IDs of nodes that have voted in favour of commiting a txn T
   commitVotes[T] := {};
-  // all replicas participating in txn T
+  # all replicas participating in txn T
   replicas[T] := {};
-  // flag telling if we have decided or not.
+  # flag telling if we have decided or not.
   decided[T] := false
 end on
 
-// Coordinator work
+# Coordinator work
 on request to commit transaction T with participating nodes R do
   for each r ∈ R do send (Prepare, T, R) to r
 end on
@@ -52,25 +52,25 @@ end on
 on receiving (Prepare, T, R) at node replicaId do
   replicas[T] := R
   ok = “is transaction T able to commit on this replica?”
-  // every node that is participating in the txn uses total order broadcast (TOB) to disseminate its vote on whether to commit or abort.
+  # every node that is participating in the txn uses total order broadcast (TOB) to disseminate its vote on whether to commit or abort.
   total order broadcast (Vote, T, replicaId, ok) to replicas[T]
 end on
 
-// if node A suspects that node B has failed (because no vote from B was received within some timeout), then A may try to vote to abort on behalf of B.
-// this introduces a race condition: if node B is slow, it might be that node B broadcasts its own vote to commit around the same time that node A suspects B to have failed and votes abort on B’s behalf.
+# if node A suspects that node B has failed (because no vote from B was received within some timeout), then A may try to vote to abort on behalf of B.
+# this introduces a race condition: if node B is slow, it might be that node B broadcasts its own vote to commit around the same time that node A suspects B to have failed and votes abort on B’s behalf.
 on a node suspects node replicaId to have crashed do
   for each transaction T in which replicaId participated do
     total order broadcast (Vote, T, replicaId, false) to replicas[T]
   end for
 end on
 
-// These votes are delivered to each node by TOB, and each recipient independently counts the votes.
-// Hence, we count only the first vote from any given replica, and ignore any subsequent votes from the same replica.
-// Since TOB guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
-// If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
-// Otherwise a node must wait until it has delivered at least one vote from each replica.
-// Once these votes have been delivered, and none of the replicas vote to abort in their first delivered message, then the transaction can be committed.
-// Thanks to TOB, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
+# These votes are delivered to each node by TOB, and each recipient independently counts the votes.
+# Hence, we count only the first vote from any given replica, and ignore any subsequent votes from the same replica.
+# Since TOB guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
+# If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
+# Otherwise a node must wait until it has delivered at least one vote from each replica.
+# Once these votes have been delivered, and none of the replicas vote to abort in their first delivered message, then the transaction can be committed.
+# Thanks to TOB, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
 on delivering (Vote, T, replicaId, ok) by total order broadcast do
   if replicaId ∈/ commitVotes[T] ∧ replicaId ∈ replicas[T] ∧ ¬decided[T] then
     if ok = true then
