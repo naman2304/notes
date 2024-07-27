@@ -32,7 +32,6 @@ Distributed Transactions
   * Replicas participating in txn cannot commit or abort after responding “ok” to the prepare request (otherwise we risk violating atomicity)
   * Algorithm is blocked until coordinator recovers
   * Solution
-    * fault tolerant consensus algo or total order broadcast
     * use total order broadcast algorithm to disseminate each nodes' vote whether to commit or abort
 
 ```python
@@ -57,13 +56,22 @@ on receiving (Prepare, T, R) at node replicaId do
   total order broadcast (Vote, T, replicaId, ok) to replicas[T]
 end on
 
-//  if node A suspects that node B has failed (because no vote from B was received within some timeout), then A may try to vote to abort on behalf of B. This introduces a race condition: if node B is slow, it might be that node B broadcasts its own vote to commit around the same time that node A suspects B to have failed and votes on B’s behalf.
+//  if node A suspects that node B has failed (because no vote from B was received within some timeout), then A may try to vote to abort on behalf of B.
+// This introduces a race condition: if node B is slow, it might be that node B broadcasts its own vote to commit around the same time that node A suspects B to have failed and votes on B’s behalf.
 on a node suspects node replicaId to have crashed do
   for each transaction T in which replicaId participated do
     total order broadcast (Vote, T, replicaId, false) to replicas[T]
   end for
 end on
 
+// These votes are delivered to each node by total order broadcast, and each recipient independently counts the votes.
+// In doing so, we count only the first vote from any given replica, and ignore any
+subsequent votes from the same replica.
+// Since total order broadcast guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote
+or an abort vote, even in the case of a race condition between multiple nodes broadcasting contradictory votes for the same replica
+// If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
+// Otherwise a node must wait until it has delivered at least one vote from each replica. // Once these votes have been delivered, and none of the replicas vote to abort in their first delivered message, then the transaction can be committed.
+// Thanks to total order broadcast, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
 on delivering (Vote, T, replicaId, ok) by total order broadcast do
   if replicaId ∈/ commitVotes[T] ∧ replicaId ∈ replicas[T] ∧ ¬decided[T] then
     if ok = true then
