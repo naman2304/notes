@@ -65,8 +65,7 @@ on a node suspects node replicaId to have crashed do
 end on
 
 // These votes are delivered to each node by total order broadcast, and each recipient independently counts the votes.
-// Hence, we count only the first vote from any given replica, and ignore any
-subsequent votes from the same replica.
+// Hence, we count only the first vote from any given replica, and ignore any subsequent votes from the same replica.
 // Since total order broadcast guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote
 or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
 // If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
