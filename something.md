@@ -52,7 +52,7 @@ end on
 on receiving (Prepare, T, R) at node replicaId do
   replicas[T] := R
   ok = “is transaction T able to commit on this replica?”
-  // every node that is participating in the txn uses total order broadcast to disseminate its vote on whether to commit or abort.
+  // every node that is participating in the txn uses total order broadcast (TOB) to disseminate its vote on whether to commit or abort.
   total order broadcast (Vote, T, replicaId, ok) to replicas[T]
 end on
 
@@ -64,14 +64,13 @@ on a node suspects node replicaId to have crashed do
   end for
 end on
 
-// These votes are delivered to each node by total order broadcast, and each recipient independently counts the votes.
+// These votes are delivered to each node by TOB, and each recipient independently counts the votes.
 // Hence, we count only the first vote from any given replica, and ignore any subsequent votes from the same replica.
-// Since total order broadcast guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote
-or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
+// Since TOB guarantees the same delivery order on each node, all nodes will agree on whether the first delivered vote from a given replica was a commit vote or an abort vote, even in the case of a race condition b/w multiple nodes broadcasting contradictory votes for the same replica
 // If a node observes that the first delivered vote from some replica is a vote to abort, then the transaction can immediately be aborted.
 // Otherwise a node must wait until it has delivered at least one vote from each replica.
 // Once these votes have been delivered, and none of the replicas vote to abort in their first delivered message, then the transaction can be committed.
-// Thanks to total order broadcast, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
+// Thanks to TOB, all nodes are guaranteed to make the same decision on whether to abort or to commit, which preserves atomicity
 on delivering (Vote, T, replicaId, ok) by total order broadcast do
   if replicaId ∈/ commitVotes[T] ∧ replicaId ∈ replicas[T] ∧ ¬decided[T] then
     if ok = true then
