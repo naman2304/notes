@@ -406,7 +406,7 @@ end on
     * Properties:
       * Does not require waiting for network communication
       * Causal broadcast (or weaker) can disseminate updates
-      * Concurrent updates =⇒ conflicts need to be resolved
+      * Concurrent updates ⇒ conflicts need to be resolved
 
 | Problem                                       | Must wait for communication         | Requires synchrony  |
 | --------------------------------------------- | ----------------------------------- | ------------------  |
