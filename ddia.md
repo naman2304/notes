@@ -1315,6 +1315,11 @@ Strategies for rebalancing:
   * Cassandra and Ketama make the number of partitions proportional to the number of nodes. Have a fixed number of partitions _per node_.
   * When a new node joins the cluster, it randomly chooses a fixed number of existing partitions to split, and then takes ownership of one half of each of those split partitions while leaving the other half of each partition in place.
   * This approach also keeps the size of each partition fairly stable.
+* **Consistent Hashing**
+  * distributes keys evenly, minimal data sent over networks on rebalance
+  * ring is the range of hash function (say 0 to 2^32 - 1), and then we put nodes randomly on the ring (can put a node at **multiples places** (this number is same for all nodes say K) on the ring at the same time) -- we can think each node having fixed number of partitions (K)
+  * this is equivalent to **partition proportionally to nodes**
+  * when we want to remove or add a node, just put it randomly on the ring
 
 #### Automatic versus manual rebalancing
 
