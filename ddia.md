@@ -1895,7 +1895,7 @@ Client holding the lease is paused for too long, its lease expires. Another clie
  * Timing assumptions:
    * Synchronous model: Bounded network delays, bounded process pauses and bounded clock error. All within a known upper bound. Non realistic model.
    * Partially synchronous model: System behaves like synchronous most of the time, but sometimes exceeds the bounds. Realistic model.
-   * Asynchronous model: No bounds at all
+   * Asynchronous model: No bounds at all. **There is not even a clock, so no concept of timeout**
  * Nodes assumptions:
    * Crash-stop faults: Node suddenly stop responding at any moment, and then it never comes back.
    * Crash-recovery faults: Nodes suddently stop responding at any moment, and perhaps start responding again after some unknown time. Nodes are assumed to have stable storage (i.e. nonvolatile disk storage) that is preserved across crashes, whil in memory state is assumed to be lost. Realistic model.
