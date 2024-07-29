@@ -1544,89 +1544,93 @@ There are some situations that cannot tolerate such temporal inconsistencies (es
 
 #### Write skew and phantoms
 
-Imagine Alice and Bob are two on-call doctors for a particular shift. Imagine both the request to leave because they are feeling unwell. Unfortunately they happen to click the button to go off call at approximately the same time.
+* Write skew can occur if two transactions read the same objects, and then update some of those objects (different transactions may update different objects). In the special case where different transactions update the same object, you get a dirty write or lost update anomaly (depending on the timing).
+* Nature
+  * SELECT query checks whether some requirement is satisfied
+  * Depending on result, application code decides how to continue
+  * If application decides to go ahead, it makes a write (INSERT, UPDATE, DELETE). Effect of write is that it changes result of the SELECT query above
+* Example
+  * Imagine Alice and Bob are two on-call doctors for a particular shift. Imagine both the request to leave because they are feeling unwell. Unfortunately they happen to click the button to go off call at approximately the same time.
+  * Since database is using snapshot isolation, both checks return 2. Both transactions commit, and now no doctor is on call. The requirement of having at least one doctor has been violated.
 
-    ALICE                                   BOB
+    ```sql
+        ALICE                                   BOB
+    
+        ┌─ BEGIN TRANSACTION                    ┌─ BEGIN TRANSACTION
+        │                                       │
+        ├─ currently_on_call = (                ├─ currently_on_call = (
+        │   select count(*) from doctors        │    select count(*) from doctors
+        │   where on_call = true                │    where on_call = true
+        │   and shift_id = 1234                 │    and shift_id = 1234
+        │  )                                    │  )
+        │  // now currently_on_call = 2         │  // now currently_on_call = 2
+        │                                       │
+        ├─ if (currently_on_call >= 2) {        │
+        │    update doctors                     │
+        │    set on_call = false                │
+        │    where name = 'Alice'               │
+        │    and shift_id = 1234                ├─ if (currently_on_call >= 2) {
+        │  }                                    │    update doctors
+        │                                       │    set on_call = false
+        └─ COMMIT TRANSACTION                   │    where name = 'Bob'  
+                                                │    and shift_id = 1234
+                                                │  }
+                                                │
+                                                └─ COMMIT TRANSACTION
+    ```
 
-    ┌─ BEGIN TRANSACTION                    ┌─ BEGIN TRANSACTION
-    │                                       │
-    ├─ currently_on_call = (                ├─ currently_on_call = (
-    │   select count(*) from doctors        │    select count(*) from doctors
-    │   where on_call = true                │    where on_call = true
-    │   and shift_id = 1234                 │    and shift_id = 1234
-    │  )                                    │  )
-    │  // now currently_on_call = 2         │  // now currently_on_call = 2
-    │                                       │
-    ├─ if (currently_on_call >= 2) {        │
-    │    update doctors                     │
-    │    set on_call = false                │
-    │    where name = 'Alice'               │
-    │    and shift_id = 1234                ├─ if (currently_on_call >= 2) {
-    │  }                                    │    update doctors
-    │                                       │    set on_call = false
-    └─ COMMIT TRANSACTION                   │    where name = 'Bob'  
-                                            │    and shift_id = 1234
-                                            │  }
-                                            │
-                                            └─ COMMIT TRANSACTION
+* Solution
+  * Atomic operations don't help as things involve more objects.
+  * Automatically prevent write skew requires true serializable isolation.
+  * The second-best option in this case is probably to explicitly lock the rows that the transaction depends on.
+    ```sql
+    BEGIN TRANSACTION;
+  
+    SELECT * FROM doctors
+    WHERE on_call = true
+    AND shift_id = 1234 FOR UPDATE;
+  
+    UPDATE doctors
+    SET on_call = false
+    WHERE name = 'Alice'
+    AND shift_id = 1234;
+  
+    COMMIT;
+    ```
 
-Since database is using snapshot isolation, both checks return 2. Both transactions commit, and now no doctor is on call. The requirement of having at least one doctor has been violated.
-
-Write skew can occur if two transactions read the same objects, and then update some of those objects. You get a dirty write or lost update anomaly.
-
-Ways to prevent write skew are a bit more restricted:
-* Atomic operations don't help as things involve more objects.
-* Automatically prevent write skew requires true serializable isolation.
-* The second-best option in this case is probably to explicitly lock the rows that the transaction depends on.
-  ```sql
-  BEGIN TRANSACTION;
-
-  SELECT * FROM doctors
-  WHERE on_call = true
-  AND shift_id = 1234 FOR UPDATE;
-
-  UPDATE doctors
-  SET on_call = false
-  WHERE name = 'Alice'
-  AND shift_id = 1234;
-
-  COMMIT;
-  ```
+**Phantoms**
+* Nature -- in SELECT query as above in write skew, we are checking for **absence of rows**. Thus, we can't event lock the SELECT query using FOR UPDATE.
+* Examples
+  * want to enforce that there cannot be two bookings for the same room at the same time.
+  * no two users can get same username
+* Solution (**materializing conflicts**)
+  * artificially introduce lock object into the database.
+  * For example, in the meeting room booking case you could imagine creating a table of time slots and rooms. Each row in this table corresponds to a particular room for a particular time period (say, 15 minutes). You create rows for all possible combinations of rooms and time periods ahead of time, e.g. for the next six months
 
 ### Serializability
 
-This is the strongest isolation level. It guarantees that even though transactions may execute in parallel, the end result is the same as if they had executed one at a time, _serially_, without concurrency. Basically, the database prevents _all_ possible race conditions.
-
-There are three techniques for achieving this:
-* Executing transactions in serial order
-* Two-phase locking
-* Serializable snapshot isolation.
+This is the strongest isolation level. It guarantees that even though transactions may execute in parallel, the end result is the same as if they had executed one at a time, _serially_, without concurrency. Basically, the database prevents _all_ possible race conditions. There are three techniques for achieving this
 
 #### Actual serial execution
 
-The simplest way of removing concurrency problems is to remove concurrency entirely and execute only one transaction at a time, in serial order, on a single thread. This approach is implemented by VoltDB/H-Store, Redis and Datomic.
+The simplest way of removing concurrency problems is to remove concurrency entirely and execute only one transaction at a time, in serial order, on a single thread. This approach is implemented by VoltDB/H-Store, Redis and Datomic. Have to do 2 things to make this perfomant:
+1. For disk latency: keep data in memory
+   * Put entire dataset in memory
+2. For network latency: stored procedure
+   * OLTP transactions are usually short and only make a small number of reads and writes. Long-running analytic queries are typically readonly, so they can be run on a consistent snapshot (using snapshot isolation) outside of the serial execution loop
+   * With interactive style of transaction, a lot of time is spent in network communication between the application and the database.
+   * For this reason, systems with single-threaded serial transaction processing don't allow interactive multi-statement transactions. The application must submit the entire transaction code to the database ahead of time, as a _stored procedure_, so all the data required by the transaction is in memory and the procedure can execute very fast.
 
-for network latency: stored procedure
-for disk latency: keep in memory
-
-##### Encapsulating transactions in stored procedures
-With interactive style of transaction, a lot of time is spent in network communication between the application and the database.
-
-For this reason, systems with single-threaded serial transaction processing don't allow interactive multi-statement transactions. The application must submit the entire transaction code to the database ahead of time, as a _stored procedure_, so all the data required by the transaction is in memory and the procedure can execute very fast.
-
-There are a few pros and cons for stored procedures:
+There are a few cons for stored procedures:
 * Each database vendor has its own language for stored procedures. They usually look quite ugly and archaic from today's point of view, and they lack the ecosystem of libraries.
 * It's harder to debug, more awkward to keep in version control and deploy, trickier to test, and difficult to integrate with monitoring.
 
-Modern implementations of stored procedures include general-purpose programming languages instead: VoltDB uses Java or Groovy, Datomic uses Java or Clojure, and Redis uses Lua.
+Modern implementations of stored procedures include general-purpose programming languages instead: VoltDB uses Java or Groovy, Datomic uses Java or Clojure, and Redis uses Lua. VoltDB also uses stored procedure for replication: instead of copying a transaction's writes from one node to another, it executes the same stored procedure on each replica, ensuring that stored procedures are deterministic.
 
 ##### Partitioning
-
-Executing all transactions serially limits the transaction throughput to the speed of a single CPU.
-
-In order to scale to multiple CPU cores you can potentially partition your data and each partition can have its own transaction processing thread. You can give each CPU core its own partition.
-
-For any transaction that needs to access multiple partitions, the database must coordinate the transaction across all the partitions (distributed transactions using say 2 phase commit). They will be vastly slower than single-partition transactions.
+* Executing all transactions serially limits the transaction throughput to the speed of a single CPU.
+* In order to scale to multiple CPU cores you can potentially partition your data and each partition can have its own transaction processing thread. You can give each CPU core its own partition.
+* For any transaction that needs to access multiple partitions, the database must coordinate the transaction across all the partitions (distributed transactions using say 2 phase commit). They will be vastly slower than single-partition transactions.
 
 #### Two-phase locking (2PL)
 
@@ -1637,7 +1641,7 @@ Several transactions are allowed to concurrently read the same object as long as
 Writers don't just block other writers; they also block readers and vice versa. It protects against all the race conditions discussed earlier.
 
 Blocking readers and writers is implemented by a having lock on each object in the database. The lock is used as follows:
-* if a transaction want sot read an object, it must first acquire a lock in shared mode.
+* if a transaction wants to read an object, it must first acquire a lock in shared mode.
 * If a transaction wants to write to an object, it must first acquire the lock in exclusive mode.
 * If a transaction first reads and then writes an object, it may upgrade its shared lock to an exclusive lock.
 * After a transaction has acquired the lock, it must continue to hold the lock until the end of the transaction (commit or abort). **First phase is when the locks are acquired, second phase is when all the locks are released.**
