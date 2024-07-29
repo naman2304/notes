@@ -1350,42 +1350,61 @@ _Massively parallel processing_ (MPP) relational database products are much more
 ---
 ## Transactions
 
-Implementing fault-tolerant mechanisms is a lot of work.
+In data systems, things can go wrong
+* DB software or hardware can fail
+* Application server can fail
+* Network problems (interruptions b/w server and DB OR DB and DB
+* concurrent writes/reads from several clients
+
+Implementing fault-tolerant mechanisms is a lot of work. So, we have transactions.
 
 ### The slippery concept of a transaction
 
-_Transactions_ have been the mechanism of choice for simplifying these issues. Conceptually, all the reads and writes in a transaction are executed as one operation: either the entire transaction succeeds (_commit_) or it fails (_abort_, _rollback_).
-
-The application is free to ignore certain potential error scenarios and concurrency issues (_safety guarantees_).
+* _Transactions_ have been the mechanism of choice for simplifying these issues. Conceptually, all the reads and writes in a transaction are executed as one operation: either the entire transaction succeeds (_commit_) or it fails (_abort_, _rollback_).
+* The application is free to ignore certain potential error scenarios and concurrency issues, because DB takes care of them (_safety guarantees_). For example, if a transaction fails, the application can safely retry and don't have to worry about partial failures
+* Not all applications actually need transaction, because it comes at a cost.
+* Wrong belief: transactions means reduced scalability, so any large application has to abandon transaction to achieve performance and high availability. Not entirely true!
 
 #### ACID
 
-* **Atomicity.** Is _not_ about concurrency. It is what happens if a client wants to make several writes, but a fault occurs after some of the writes have been processed. _Abortability_ would have been a better term than _atomicity_.
-* **Consistency.** _Invariants_ on your data must always be true. The idea of consistency depends on the application's notion of invariants. Atomicity, isolation, and durability are properties of the database, whereas consistency (in an ACID sense) is a property of the application.
-* **Isolation.** Concurrently executing transactions are isolated from each other. It's also called _serializability_, each transaction can pretend that it is the only transaction running on the entire database, and the result is the same as if they had run _serially_ (one after the other).
-* **Durability.** Once a transaction has committed successfully, any data it has written will not be forgotten, even if there is a hardware fault or the database crashes. In a single-node database this means the data has been written to nonvolatile storage. In a replicated database it means the data has been successfully copied to some number of nodes.
+ACID is the "safety guarantee" provided by transaction. There is another term called BASE (Basically Available, Soft State, Eventually Consistent)
+* **Atomicity**
+  * refers to something that cannot be broken into parts. In multithreaded programming, one thread executes an atomic operation, meaning another thread could not see half-finished result of the operation. System can only in the staet it was before the operation or after the operation, not something in between.
+  * But here, atomicity is _not_ about concurrency (that is "isolation"). It is what happens if a client wants to make several writes, but a fault occurs after some of the writes have been processed. Then the transaction is aborted, and DB must undo any writes it has made so far. So application can safely retry if transaction was aborted, because there is no half state. _Abortability_ would have been a better term than _atomicity_.
+* **Consistency**
+  * _Invariants_ on your data must always be true. The idea of consistency depends on the application's notion of invariants. DB checks some kind of invariants (uniqueness, foreign key) -- however, in general, the application defines what data is valid or invalid -- the database just stores it.
+  * Atomicity, isolation, and durability are properties of the database, whereas consistency (in an ACID sense) is a property of the application. Application may rely on DB's atomicity and isolation properties in order to achieve consistency, but it's not up to the database alone. 
+* **Isolation**
+  * Concurrently executing transactions are isolated from each other. It's also called _serializability_, each transaction can pretend that it is the only transaction running on the entire database, and the result is the same as if they had run _serially_ (one after the other). Serializability comes at performance penalty.
+* **Durability**
+  * Once a transaction has committed successfully, any data it has written will not be forgotten, even if there is a hardware fault or the database crashes.
+  * In a single-node database this means the data has been written to nonvolatile storage. In a replicated database it means the data has been successfully copied to some number of nodes.
 
-Atomicity can be implemented using a log for crash recovery, and isolation can be implemented using a lock on each object, allowing only one thread to access an object at any one time.
+#### Single Object and Multi Object Operations
+* Both atomicity and isolation assumes that there are multiple operations we are doing in a transaction (modifying multiple objects i.e. rows, documents or records)
+* DBs first ensures that single object writes are atomic (using WAL) and isolated (using locks) -- so that such thing doesn't happen like a row is updated partially and then node goes down.
+* Then we group many such single object operations to transactions (aka multi object transaction) using `BEGIN TRANSACTION` and `COMMIT` statement
+* Need for multi object transaction
+  * Foreign key references needs to be maintained
+  * Denormalized data needs to be updated
+  * Secondary index needs to be updated
 
-**A transaction is a mechanism for grouping multiple operations on multiple objects into one unit of execution.**
+* Note: many non-relational DBs provide multi-object API (like taking multiple key-value pairs to overwrite), but they don't follow transaction semantics; the command may fail for some keys and succeed for others.
 
 #### Handling errors and aborts
 
-A key feature of a transaction is that it can be aborted and safely retried if an error occurred.
-
-In datastores with leaderless replication is the application's responsibility to recover from errors.
-
-The whole point of aborts is to enable safe retries.
+* A key feature of a transaction is that it can be aborted and safely retried if an error occurred (atomicity)
+* In datastores with leaderless replication is the application's responsibility to recover from errors.
+* The whole point of aborts is to enable safe retries. However, sometimes retying an aborted transaction is troublesome
+  * Transaction actually succeeded, but network failed when served tried to sent ack of successful commit to client. So client sends again -- need to have application level deduplication
+  * Transaction aborted because system was overloaded -- limit the number of retries using exponential backoff
+  * Transaction aborted was not due to transient error (deadlock, isolation violation) but permanent error (invariant violation)
 
 ### Weak isolation levels
 
-Concurrency issues (race conditions) come into play when one transaction reads data that is concurrently modified by another transaction, or when two transactions try to simultaneously modify the same data.
-
-Databases have long tried to hide concurrency issues by providing _transaction isolation_.
-
-In practice, is not that simple. Serializable isolation has a performance cost. It's common for systems to use weaker levels of isolation, which protect against _some_ concurrency issues, but not all.
-
-Weak isolation levels used in practice:
+* Concurrency issues (race conditions) come into play when one transaction reads data that is concurrently modified by another transaction, or when two transactions try to simultaneously modify the same data.
+* Databases have long tried to hide concurrency issues by providing _transaction isolation_.
+* In practice, is not that simple. Serializable isolation has a performance cost. It's common for systems to use weaker levels of isolation, which protect against _some_ concurrency issues, but not all.
 
 #### Read committed
 
