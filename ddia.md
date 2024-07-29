@@ -1671,33 +1671,54 @@ Properties
 
 #### Serializable snapshot isolation (SSI)
 
-It provides full serializability and has a small performance penalty compared to snapshot isolation. SSI is fairly new and might become the new default in the future.
+* It provides full serializability and has a small performance penalty compared to snapshot isolation. SSI is fairly new and might become the new default in the future.
+* Pessimistic versus optimistic concurrency control
+  * Two-phase locking is called _pessimistic_ concurrency control because if anything might possibly go wrong, it's better to wait.
+  * Serial execution is also _pessimistic_ as is equivalent to each transaction having an exclusive lock on the entire database.
+  * Serializable snapshot isolation is _optimistic_ concurrency control (OCC) technique. Instead of blocking if something potentially dangerous happens, transactions continue anyway, in the hope that everything will turn out all right. When a transaction wants to commit, database checks whether anything bad happened. If so, the transaction is aborted and has to be retried.
+* If contention between transactions is not too high, optimistic concurrency control techniques tend to perform better than pessimistic ones. For cases of high contention (say creating counter), SSI is bad.
+* SSI is based on snapshot isolation, reads within a transaction are made from a consistent snapshot of the database. On top of snapshot isolation, SSI adds an algorithm for detecting serialization conflicts among writes and determining which transactions to abort.
 
-##### Pesimistic versus optimistic concurrency control
+The database needs to assume that any change in the query result (the premise) means thata writes in that transaction may be invalid. In other words there is a causal dependency between the queries and the writes in the transaction:
+* **Detecting reads of a stale MVCC object version.**
+  * Another txn modifies data, but is not yet committed, which is read by another txn
+  * The database needs to track when a transaction ignores another transaction's writes due to MVCC visibility rules. When a transaction wants to commit, the database checks whether any of the ignored writes have now been committed. If so, the transaction must be aborted.
 
-Two-phase locking is called _pessimistic_ concurrency control because if anything might possibly go wrong, it's better to wait.
+    ```sql
+        # say before k value was 100
+        BEGIN T1
+                                             BEGIN T2 
+        SELECT * // query
+        UPDATE some val
+                                             SELECT * // query -- here I will see that a previous uncommitted txn has changed the data.
+                                             UPDATE some val
+        COMMIT
+                                             COMMIT // database checks whether any of the ignored writes have now been committed. If so, txn must be aborted
+    ```
 
-Serial execution is also _pessimistic_ as is equivalent to each transaction having an exclusive lock on the entire database.
+* **Detecting writes that affect prior reads.**
+  * Another txn modifies data after it is read by another txn
+  * As with two-phase locking, SSI uses index-range locks except that it does not block other transactions. When a transaction writes to the database, it must look in the indexes for any other transactions that have recently read the affected data. It simply notifies the transactions that the data they read may no longer be up to date.
 
-Serializable snapshot isolation is _optimistic_ concurrency control (OCC) technique. Instead of blocking if something potentially dangerous happens, transactions continue anyway, in the hope that everything will turn out all right. The database is responsible for checking whether anything bad happened. If so, the transaction is aborted and has to be retried.
-
-If there is enough spare capacity, and if contention between transactions is not too high, optimistic concurrency control techniques tend to perform better than pessimistic ones.
-
-SSI is based on snapshot isolation, reads within a transaction are made from a consistent snapshot of the database. On top of snapshot isolation, SSI adds an algorithm for detecting serialization conflicts among writes and determining which transactions to abort.
-
-The database knows which transactions may have acted on an outdated premise and need to be aborted by:
-* **Detecting reads of a stale MVCC object version.** The database needs to track when a transaction ignores another transaction's writes due to MVCC visibility rules. When a transaction wants to commit, the database checks whether any of the ignored writes have now been committed. If so, the transaction must be aborted.
-* **Detecting writes that affect prior reads.** As with two-phase locking, SSI uses index-range locks except that it does not block other transactions. When a transaction writes to the database, it must look in the indexes for any other transactions that have recently read the affected data. It simply notifies the transactions that the data they read may no longer be up to date.
-
+    ```sql
+        # say before k value was 100
+        BEGIN T1
+                                             BEGIN T2 
+        SELECT * // query
+                                             SELECT * // query
+        UPDATE some val // we see that this previous val was seen by T2, so it notifies T2 that T1 is going to change the val 
+                                             UPDATE some val // // we see that this previous val was seen by T1, so it notifies T1 that T2 is going to change the val
+        COMMIT
+                                             COMMIT // database checks the notifications it got, and if those are committed, abort our txn 
+    ```
 ##### Performance of serializable snapshot isolation
 
-Compared to two-phase locking, the big advantage of SSI is that one transaction doesn't need to block waiting for locks held by another transaction. Writers don't block readers, and vice versa.
+* Compared to two-phase locking, the big advantage of SSI is that one transaction doesn't need to block waiting for locks held by another transaction. Writers don't block readers, and vice versa.
+* Compared to serial execution, SSI is not limited to the throughput of a single CPU core. Transactions can read and write data in multiple partitions while ensuring serializable isolation.
+* The rate of aborts significantly affects the overall performance of SSI. SSI requires that read-write transactions be fairly short (long-running read-only transactions may be okay).
 
-Compared to serial execution, SSI is not limited to the throughput of a single CPU core. Transactions can read and write data in multiple partitions while ensuring serializable isolation.
+**MySQL uses 2PL, and PostgreSQL uses SSI. MySQL is ACID compliant with few storage engines like InnoDB which implements 2PL, but PostgreSQL is ACID compliant from ground up**
 
-The rate of aborts significantly affects the overall performance of SSI. SSI requires that read-write transactions be fairly short (long-running read-only transactions may be okay).
-
-** MySQL uses 2PL, and PostgreSQL uses SSI**. MySQL is ACID compliant with few storage engines like InnoDB, but PostgreSQL is ACID compliant from ground up.
 ---
 ---
 
