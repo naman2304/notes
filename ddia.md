@@ -1634,41 +1634,40 @@ Modern implementations of stored procedures include general-purpose programming 
 
 #### Two-phase locking (2PL)
 
-> Two-phase locking (2PL) sounds similar to two-phase _commit_ (2PC) but be aware that they are completely different things.
-
-Several transactions are allowed to concurrently read the same object as long as nobody is writing it. When somebody wants to write (modify or delete) an object, exclusive access is required.
-
-Writers don't just block other writers; they also block readers and vice versa. It protects against all the race conditions discussed earlier.
+* Two-phase locking (2PL) sounds similar to two-phase _commit_ (2PC) but be aware that they are completely different things.
+* Several transactions are allowed to concurrently read the same object as long as nobody is writing it. When somebody wants to write (modify or delete) an object, exclusive access is required.
+* Writers don't just block other writers; they also block readers and vice versa. It protects against all the race conditions discussed earlier.
 
 Blocking readers and writers is implemented by a having lock on each object in the database. The lock is used as follows:
-* if a transaction wants to read an object, it must first acquire a lock in shared mode.
-* If a transaction wants to write to an object, it must first acquire the lock in exclusive mode.
-* If a transaction first reads and then writes an object, it may upgrade its shared lock to an exclusive lock.
+* if a transaction wants to read an object, it must first acquire a lock in shared mode. Several txns are allowed to hold the lock in shared mode simultaneously, but if another txn already has an exclusive lock on the object, these txns must wait
+* If a transaction wants to write to an object, it must first acquire the lock in exclusive mode. No other txn may hold the lock at the same time; so if there is any existing lock (shared or exclusive), txn must wait.
+* If a transaction first reads and then writes an object, it may upgrade its shared lock to an exclusive lock. Applicable if only this txn has the shared lock on the object.
 * After a transaction has acquired the lock, it must continue to hold the lock until the end of the transaction (commit or abort). **First phase is when the locks are acquired, second phase is when all the locks are released.**
 
-It can happen that transaction A is stuck waiting for transaction B to release its lock, and vice versa (_deadlock_).
-
-**The performance for transaction throughput and response time of queries are significantly worse under two-phase locking than under weak isolation.**
-
-A transaction may have to wait for several others to complete before it can do anything.
-
-Databases running 2PL can have unstable latencies, and they can be very slow at high percentiles. One slow transaction, or one transaction that accesses a lot of data and acquires many locks can cause the rest of the system to halt.
+Properties
+* It can happen that transaction A is stuck waiting for transaction B to release its lock, and vice versa (_deadlock_). DB automatically detects deadlocks and aborts one of them so that others can progress. Aborted txn has to be retried by the application.
+* The performance for transaction throughput and response time of queries are significantly worse under two-phase locking than under weak isolation.
+  * due to overhead of acquiring and releasing locks
+  * reduced concurrency
+  * too many deadlocks, hence txn has to be aborted and retried again
+* A transaction may have to wait for several others to complete before it can do anything.
+* Databases running 2PL can have unstable latencies, and they can be very slow at high percentiles. One slow transaction, or one transaction that accesses a lot of data and acquires many locks can cause the rest of the system to halt.
 
 ##### Predicate locks
 
-With _phantoms_, one transaction may change the results of another transaction's search query.
-
-In order to prevent phantoms, we need a _predicate lock_. Rather than a lock belonging to a particular object, it belongs to all objects that match some search condition.
-
-Predicate locks applies even to objects that do not yet exist in the database, but which might be added in the future (phantoms).
+* With _phantoms_, one transaction may change the results of another transaction's search query.
+* In order to prevent phantoms, we need a _predicate lock_. Rather than a lock belonging to a particular object, it belongs to all objects that match some search condition.
+* Predicate locks applies even to objects that do not yet exist in the database, but which might be added in the future (phantoms).
+* Algorithm
+  * If txn A wants to read objects matching some conditions, it must acquire shared mode predicate lock on the conditions of the query. If another txn B currently has an exclusive lock on any object matching those conditions, A must wait until B releases its lock before it is allowed to make the query
+  * If txn A wants to write (insert, update, delete) any object, it must first check whether either the old or new value matches any existing predicate lock. If there is a matching predicate lock held by txn B, then A must wait until B has committed or aborted before it can continue. 
 
 ##### Index-range locks
 
-Predicate locks do not perform well. Checking for matching locks becomes time-consuming and for that reason most databases implement _index-range locking_.
-
-It's safe to simplify a predicate by making it match a greater set of objects.
-
-These locks are not as precise as predicate locks would be, but since they have much lower overheads, they are a good compromise.
+* Predicate locks do not perform well. Checking for matching locks becomes time-consuming and for that reason most databases implement _index-range locking_.
+* It's safe to simplify a predicate by making it match a greater set of objects.
+* Example: if predicate lock is to lock rooms from 12pm to 1pm for room 123, then either I can lock room 123 for entire day, or lock all rooms from 12pm to 1pm
+* These locks are not as precise as predicate locks would be, but since they have much lower overheads, they are a good compromise.
 
 #### Serializable snapshot isolation (SSI)
 
