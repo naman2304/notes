@@ -1468,55 +1468,79 @@ There are some situations that cannot tolerate such temporal inconsistencies (es
 
 * Solution
   * _Snapshot isolation_. Each transaction reads from a _consistent snapshot_ of the database.
-
-The implementation of snapshots typically use write locks to prevent dirty writes.
-
-The database must potentially keep several different committed versions of an object (_multi-version concurrency control_ or MVCC).
-
-Read committed uses a separate snapshot for each query, while snapshot isolation uses the same snapshot for an entire transaction.
-
-How do indexes work in a multi-version database? One option is to have the index simply point to all versions of an object and require an index query to filter out any object versions that are not visible to the current transaction.
-
-Snapshot isolation is called _serializable_ in Oracle, and _repeatable read_ in PostgreSQL and MySQL.
+  * The implementation of snapshots typically use write locks to prevent dirty writes (writes blocks writes). However, reads does not require locks (thus, readers don't block writers, and writes don't block readers)
+  * The database must potentially keep several different committed versions of an object (_multi-version concurrency control_ or MVCC).
+  * Read committed uses a separate snapshot for each query, while snapshot isolation uses the same snapshot for an entire transaction.
+  * When a transaction is started, it is given always increasing transaction ID (**txid**)
+* Implementation
+  * ![Snapshot Isolation Implementation](/metadata/snapshot_isolation_implementation.png)
+  * Each row in a table has a created_by field, containing the ID of the transaction that inserted this row into the table. Moreover, each row has a deleted_by field, which is initially empty.
+  * If a transaction deletes a row, the row isn’t actually deleted from the database, but it is marked for deletion by setting the deleted_by field to the ID of the transaction that requested the deletion. At some later time, when it is certain that no transaction can any longer access the deleted data, a garbage collection process in the database removes any rows marked for deletion and frees their space.
+  * An update is internally translated into a delete and a create.
+  * MVCC don't take much space, because it is sparse.
+* Algorithm
+  * **at the start of the transaction**, create list of transactions ongoing
+  * consider data only till those transactions whose ID is less than ongoing transaction's ID. Also remove those transaction which are in above list. 
+* Indexes and snapshot isolation
+  * How do indexes work in a multi-version database? One option is to have the index simply point to all versions of an object and require an index query to filter out any object versions that are not visible to the current transaction. When garbage collection removes old object versions that are no longer visible to any transaction, the corresponding index entries can also be removed.
+  * Another approach: **copy on write** variant. With append-only B-trees, every write transaction (or batch of transactions) creates a new B-tree root, and a particular root is a consistent snapshot of the database at the point in time when it was created. There is no need to filter out objects based on transaction IDs because subsequent writes cannot modify an existing B-tree; they can only create new tree roots. However, this approach also requires a background process for compaction and garbage collection
 
 #### Preventing lost updates
 
-This might happen if an application reads some value from the database, modifies it, and writes it back. If two transactions do this concurrently, one of the modifications can be lost (later write _clobbers_ the earlier write).
-
-##### Atomic write operations
-
-A solution for this it to avoid the need to implement read-modify-write cycles and provide atomic operations such us
-
 ```sql
-UPDATE counters SET value = value + 1 WHERE key = 'foo';
+    # say before k value was 100
+    BEGIN T1
+                                         BEGIN T2 
+    read k # returns 100
+                                         read k # returns 100
+    write k = k + 1 // k is 101
+    COMMIT
+                                         write k = k + 1 // k is 101
+                                         COMMIT
 ```
 
-MongoDB provides atomic operations for making local modifications, and Redis provides atomic operations for modifying data structures.
+* Till now, except dirty writes, we have only discussed how concurrent read and writes affect each other. Now will talk about concurrent writes affecting each other.
+* Definition
+  * if an application reads some value from the database, modifies it, and writes it back (_read-modify-write_ cycle)
+  * If two transactions do this concurrently, one of the modifications can be lost (later write _clobbers_ the earlier write).
+  * Example: incrementing a counter, making a local change in JSON document.
+* Solutions
+  * Atomic write operations
+    * Avoid the need to implement read-modify-write cycles and provide atomic operations
+    * MongoDB provides atomic operations for making local modifications, and Redis provides atomic operations for modifying data structures such as priority queues
+    * Implemented by taking exclusive lock on object when it is read so that no other transaction can read it, until the update has been committed. Called _cursor stability_.
 
-##### Explicit locking
+      ```sql
+      UPDATE counters SET value = value + 1 WHERE key = 'foo';
+      ```
+  * Explicit locking
+    * The application explicitly lock objects that are going to be updated.
+    * The **FOR UPDATE** clause indicates that the database should take a lock on all rows returned by this query.
 
-The application explicitly lock objects that are going to be updated.
+      ```sql
+      BEGIN TRANSACTION;
+      
+      SELECT * FROM figures WHERE name = 'robot' AND game_id = 222 FOR UPDATE;
+      
+      -- Check whether move is valid, then update the position
+      -- of the piece that was returned by the previous SELECT.
+      UPDATE figures SET position = 'c4' WHERE id = 1234;
+      
+      COMMIT;
+      ```
 
-##### Automatically detecting lost updates
+  * Automatically detecting lost updates
+    * Allow them to execute in parallel, if the transaction manager detects a lost update, abort the transaction and force it to retry its read-modify-write cycle.
+    * An advantage of this approach is that databases can perform this check efficiently in conjunction with snapshot isolation. When writing to a value, we can check if original value (value at beginning of transaction) is same as pre-overwritten value
+  * Compare-and-set
+    * If the current value does not match with what you previously read, the update has no effect.
 
-Allow them to execute in parallel, if the transaction manager detects a lost update, abort the transaction and force it to retry its read-modify-write cycle.
+    ```SQL
+    UPDATE wiki_pages SET content = 'new content'
+      WHERE id = 1234 AND content = 'old content';
+    ```
 
-MySQL/InnoDB's repeatable read does not detect lost updates.
-
-##### Compare-and-set
-
-If the current value does not match with what you previously read, the update has no effect.
-
-```SQL
-UPDATE wiki_pages SET content = 'new content'
-  WHERE id = 1234 AND content = 'old content';
-```
-
-##### Conflict resolution and replication
-
-With multi-leader or leaderless replication, compare-and-set do not apply.
-
-A common approach in replicated databases is to allow concurrent writes to create several conflicting versions of a value (also know as _siblings_), and to use application code or special data structures to resolve and merge these versions after the fact.
+**With multi-leader or leaderless replication, compare-and-set and explict lock do not apply. A common approach in replicated databases is to allow concurrent writes to create several conflicting versions of a value (also know as _siblings_), and to use application code or special data structures to resolve and merge these versions after the fact.**
 
 #### Write skew and phantoms
 
@@ -1533,7 +1557,7 @@ Imagine Alice and Bob are two on-call doctors for a particular shift. Imagine bo
     │  )                                    │  )
     │  // now currently_on_call = 2         │  // now currently_on_call = 2
     │                                       │
-    ├─ if (currently_on_call  2) {          │
+    ├─ if (currently_on_call >= 2) {        │
     │    update doctors                     │
     │    set on_call = false                │
     │    where name = 'Alice'               │
