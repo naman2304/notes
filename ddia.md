@@ -1406,27 +1406,68 @@ ACID is the "safety guarantee" provided by transaction. There is another term ca
 * Databases have long tried to hide concurrency issues by providing _transaction isolation_.
 * In practice, is not that simple. Serializable isolation has a performance cost. It's common for systems to use weaker levels of isolation, which protect against _some_ concurrency issues, but not all.
 
-#### Read committed
+#### Read committed (no dirty read and writes)
 
-It makes two guarantees:
-1. When reading from the database, you will only see data that has been committed (no _dirty reads_). Writes by a transaction only become visible to others when that transaction commits.
-2. When writing to the database, you will only overwrite data that has been committed (no _dirty writes_). Dirty writes are prevented usually by delaying the second write until the first write's transaction has committed or aborted.
+##### Dirty Writes
+* Definition: Overwrite data that has been uncommitted
 
-Most databases prevent dirty writes by using row-level locks that hold the lock until the transaction is committed or aborted. Only one transaction can hold the lock for any given object.
+```sql
+# say two values k1 and k2 have to be in consistent state
+    BEGIN T1
+                                         BEGIN T2
+    write k1 = x         
+                                         write k1 = y
+                                         write k2 = b
+    write k2 = a
+    COMMIT
+                                         COMMIT
 
-On dirty reads, requiring read locks does not work well in practice as one long-running write transaction can force many read-only transactions to wait. For every object that is written, the database remembers both the old committed value and the new value set by the transaction that currently holds the write lock. While the transaction is ongoing, any other transactions that read the object are simply given the old value.
+# now k1 is y and k2 is a ==> inconsistent state
+```
+
+* Solution
+  * when writing, take lock and hold it until transaction is committed or aborted
+  * deadlock may happen
+ 
+```sql
+    BEGIN T1
+                                         BEGIN T2
+    write k1 = x # get lock on k1      
+                                         write k2 = b # get lock on k2
+    write k2 = a # waiting before this operation for k2 to be released
+                                         write k1 = y # waiting before this operation for k1 to be released 
+    COMMIT
+                                         COMMIT
+```
+
+##### Dirty Read
+* Definition: Read data that has been uncommitted
+* Solution
+  * in addition to above, hold the lock before reading a value and release it again immediately after reading (is some other uncommitted transaction wrote the value, lock will be held by that, and we won't be able to acquire the lock for read)
+  * However, a long running write will force read-only transactions to wait until long running transaction has completed. Hence for every object that is written, the database remembers both the old committed value and the new value set by the transaction that currently holds the write lock. While the transaction is ongoing, any other transactions that read the object are simply given the old value.
 
 #### Snapshot isolation and repeatable read
 
-There are still plenty of ways in which you can have concurrency bugs when using this isolation level.
+* There are still plenty of ways in which you can have concurrency bugs when using this isolation level.
+* _Nonrepeatable read_ or _read skew_, when during the course of a transaction, a row is retrieved twice and the values within the row differ between reads.
 
-_Nonrepeatable read_ or _read skew_, when you read at the same time you committed a change you may see temporal and inconsistent results.
+```sql
+    # say before k value was 100
+    BEGIN T1
+    read k # returns 100
+                                         BEGIN T2  
+                                         write k = 200
+                                         COMMIT
+    read k # returns 200. Non repeatable read.
+    COMMIT
+```
 
-There are some situations that cannot tolerate such temporal inconsistencies:
+There are some situations that cannot tolerate such temporal inconsistencies (essentially long running read operations)
 * **Backups.** During the time that the backup process is running, writes will continue to be made to the database. If you need to restore from such a backup, inconsistencies can become permanent.
 * **Analytic queries and integrity checks.** You may get nonsensical results if they observe parts of the database at different points in time.
 
-_Snapshot isolation_ is the most common solution. Each transaction reads from a _consistent snapshot_ of the database.
+* Solution
+  * _Snapshot isolation_. Each transaction reads from a _consistent snapshot_ of the database.
 
 The implementation of snapshots typically use write locks to prevent dirty writes.
 
