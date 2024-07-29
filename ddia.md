@@ -1318,8 +1318,9 @@ Strategies for rebalancing:
 * **Consistent Hashing**
   * distributes keys evenly, minimal data sent over networks on rebalance
   * ring is the range of hash function (say 0 to 2^32 - 1), and then we put nodes randomly on the ring (can put a node at **multiples places** (this number is same for all nodes say K) on the ring at the same time) -- we can think each node having fixed number of partitions (K)
-  * this is equivalent to **partition proportionally to nodes**
   * when we want to remove or add a node, just put it randomly on the ring
+  * this is equivalent to **partition proportionally to nodes**
+  * apart from rebalancing partitions, consistent hashing is also used in load balancers (to create requests sticky such that request from user goes to one application server only, say to leverage caching benefits etc) (ring is hash of user IDs, and then application server is put on the ring) 
 
 #### Automatic versus manual rebalancing
 
