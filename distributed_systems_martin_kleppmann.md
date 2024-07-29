@@ -145,6 +145,7 @@ We will first look at reliable broadcast algorithms.
   * Gossip Protocol aka epidemic protocol
   * Idea: when a node receives a message for the **first time**, forward it to 3 other nodes, chosen randomly.
   * A message reaches all nodes (with very high probability -- there is a chance that a message may not reach some nodes, but can be minimized by tuning the parameters of algorithm like sending to say 5 nodes)
+  * Note: gossip protocol is also used in Cassandra and Riak to track partition assignment
  
 Now, we will implement ordering on top of reliable broadcast
 1. FIFO broadcast
