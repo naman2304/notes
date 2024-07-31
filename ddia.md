@@ -2348,8 +2348,6 @@ Three types of systems
     * The key-value pair must be sorted, but the dataset is likely too large to be sorted with a conventional sorting algorithm on a single machine. Sorting is performed in stages. First, each map task partitions its output by reducer, based on hash of the key. Each of these partitions is written to a sorted file on mapper's local disk (like LSM). Whenever a mapper finishes reading its input file and writing its sorted output files, the MapReduce scheduler notifies the reducers that they can start fetching the output files from that mapper. The reducers connect to each of the mappers and download the files of sorted key-value pairs for their partition. Process of partitioning by reducer, sorting and copying data partitions from mappers to reducers is called **_shuffle_**. The reduce task takes the files from the mappers and merges them together, preserving the sort order.
   * **Advantages**
     * The MapReduce scheduler tries to run each mapper on one of the machines that stores a replica of the input file, _putting the computation near the data_ -- saves copying the input file over the network, reducing network load and increasing locality.
-  * MapReduce jobs can be chained together into _workflows_, the output of one job becomes the input to the next job. In Hadoop this chaining is done implicitly by directory name: the first job writes its output to a designated directory in HDFS, the second job reads that same directory name as its input. A batch job's output is only considered valid when the job has completed successfully (MapReduce discards the partial output of a failed job). Thus, one job in a workflow can only start when the prior jobs have completed successfully.
-  * Workflow schedulers for Hadoop: Oozie, Luigi
 
 #### Joins
 * It is common in datasets for one record to have an association with another record: a _foreign key_ in a relational model, a _document reference_ in a document model, or an _edge_ in graph model. If the query involves joins, it may require multiple index lookups. MapReduce has no concept of indexes.
@@ -2386,32 +2384,22 @@ If you _can_ make certain assumptions about your input data, it is possible to m
 
 Output of reduce-side join is partitioned and sorted by the join key, whereas the output of a map-side join (broadcast or partition hash join) is partitioned and sorted in the same way as large input.
 
----
-
-The output of a batch process is often not a report, but some other kind of structure.
-
-Google's original use of MapReduce was to build indexes for its search engine. Hadoop MapReduce remains a good way of building indexes for Lucene/Solr.
-
-If you need to perform a full-text search, a batch process is very effective way of building indexes: the mappers partition the set of documents as needed, each reducer builds the index for its partition, and the index files are written to the distributed filesystem. It pararellises very well.
-
-Machine learning systems such as clasifiers and recommendation systems are a common use for batch processing.
-
-#### Key-value stores as batch process output
-
-The output of those batch jobs is often some kind of database.
-
-So, how does the output from the batch process get back into a database?
-
-Writing from the batch job directly to the database server is a bad idea:
-* Making a network request for every single record is magnitude slower than the normal throughput of a batch task.
-* Mappers or reducers concurrently write to the same output database an it can be easily overwhelmed.
-* You have to worry about the results from partially completed jobs being visible to other systems.
-
-A much better solution is to build a brand-new database _inside_ the batch job an write it as files to the job's output directory, so it can be loaded in bulk into servers that handle read-only queries. Various key-value stores support building database files in MapReduce including Voldemort, Terrapin, ElephanDB and HBase bulk loading.
+#### Batch Workflows
+* MapReduce jobs can be chained together into _workflows_, the output of one job becomes the input to the next job. In Hadoop this chaining is done implicitly by directory name: the first job writes its output to a designated directory in HDFS, the second job reads that same directory name as its input. A batch job's output is only considered valid when the job has completed successfully (MapReduce discards the partial output of a failed job). Thus, one job in a workflow can only start when the prior jobs have completed successfully.
+* Workflow schedulers for Hadoop: Oozie, Luigi
+* Batch process is closer to analytics (OLAP) rather than transaction processing (OLTP).
+* Google's original use of MapReduce was to build indexes for its search engine. Hadoop MapReduce remains a good way of building indexes for Lucene/Solr. If you need to perform a full-text search, a batch process is very effective way of building indexes: the mappers partition the set of documents as needed, each reducer builds the index for its partition, and the index files are written to the distributed filesystem. It pararellises very well.
+* Machine learning systems such as classifiers (spam filters, anamoly detection) and recommendation systems are a common use for batch processing.
+* The output of a batch process is often not a report, but some other kind of structure i.e. database. So, how does the output from the batch process get back into a database?
+  * Writing from the batch job directly to the database server is a bad idea:
+    * Making a network request for every single record is magnitude slower than the normal throughput of a batch task.
+    * Mappers or reducers concurrently write to the same output database which can overwhelm the database.
+    * You have to worry about the results from partially completed jobs being visible to database.
+  * A much better solution is to build a brand-new database _inside_ the batch job and write it as files to the job's output directory, so it can be loaded in bulk into servers that handle read-only queries. Various key-value stores support building database files in MapReduce including Voldemort, Terrapin, ElephanDB and HBase bulk loading.
 
 ---
 
-By treating inputs as immutable and avoiding side effects (such as writing to external databases), batch jobs not only achieve good performance but also become much easier to maintain.
+* By treating inputs as immutable and avoiding side effects (such as writing to external databases), batch jobs not only achieve good performance but also become much easier to maintain.
 
 Design principles that worked well for Unix also seem to be working well for Hadoop.
 
