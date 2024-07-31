@@ -43,7 +43,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Distributed transactions and consensus](#distributed-transactions-and-consensus)
 - [Batch processing](#batch-processing)
   - [Batch processing with Unix tools](#batch-processing-with-unix-tools)
-  - [Map reduce and distributed filesystems](#map-reduce-and-distributed-filesystems)
+  - [MapReduce](#mapreduce)
   - [Beyond MapReduce](#beyond-mapreduce)
 - [Stream processing](#stream-processing)
   - [Transmitting event streams](#transmitting-event-streams)
@@ -2287,99 +2287,105 @@ ZooKeeper and friends can be seen as part of a long history of research into _me
 
 ## Batch processing
 
-* Service (online): waits for a request, sends a response back
-* Batch processing system (offline): takes a large amount of input data, runs a _job_ to process it, and produces some output.
-* Stream processing systems (near-real-time): a stream processor consumes input and produces outputs. A stream job operates on events shortly after they happen.
+Three types of systems
+* Service (online): waits for a request, sends a response back. Response time is usually the primary performance metric.
+* Batch processing system (offline): takes a large amount of input data, runs a _job_ to process it, and produces some output. Throughput (time taken to crunch data of certain size) is usually the primary performance metric.
+* Stream processing systems (near-real-time): somewhere b/w online and offline systems. A stream processor consumes input and produces outputs (rather than responding to requests). A stream job operates on events shortly after they happen, as compared to batch job which operates on a fixed set of input data.
 
 ### Batch processing with Unix tools
 
-We can build a simple log analysis job to get the five most popular pages on your site
+* We can build a simple log analysis job to get the five most popular pages on your site
 
-```
-cat /var/log/nginx/access.log |
-  awk '{print $7}' |
-  sort             |
-  uniq -c          |
-  sort -r -n       |
-  head -n 5        |
-```
+  ```
+  cat /var/log/nginx/access.log |      # read log file
+    awk '{print $7}' |                 # give 7th element on the file (which is the page actually in this example.
+    sort             |                 # sort the list
+    uniq -c          |                 # group same elements and count them
+    sort -r -n       |                 # sort by count (in reverse order)
+    head -n 5        |                 # pick top 5
+  ```
 
-You could write the same thing with a simpel program.
+* You could write the same thing with a simple python program.
 
-The difference is that with Unix commands automatically handle larger-than-memory datasets and automatically paralelizes sorting across multiple CPU cores.
+  ```
+  for line in lines:
+    page = line.split(7)
+    count[page]++;
+  ```
 
-Programs must have the same data format to pass information to one another. In Unix, that interface is a file (file descriptor), an ordered sequence of bytes.
+* The difference is that with Unix commands automatically handle larger-than-memory datasets (say `sort` spills dataset to disk) and automatically parallelizes sorting across multiple CPU cores. In the simple python program, `count` has to be kept in memory, and single threaded, and would have to manage everything ourselvse if have to do multithreaded.
+* UNIX philosophy
+  * Programs must have the same data format to pass information to one another. In Unix, that interface is a file (file descriptor), an ordered sequence of bytes.
+  * By convention Unix programs treat this sequence of bytes as ASCII text.
+  * Input file immutable.
+  * For debugging
+    * you can put `less` and look at it to see if it has the expected formk OR
+    * write intermediate result to a file, and inspect that, if ok, pipe it to next stage.
+* The UNIX approach works best if a program simply uses `stdin` and `stdout`. This allows a shell user to wire up the input and output in whatever way they want; the program doesn't know or care where the input is coming from and where the output is going to. Pipes let you attach the stdout of one process to the stdin of another process (with a small in-memory buffer, and without writing the entire intermediate data stream to disk).
 
-By convention Unix programs treat this sequence of bytes as ASCII text.
+### MapReduce
 
-The unix approach works best if a program simply uses `stdin` and `stdout`. This allows a shell user to wire up the input and output in whatever way they want; the program doesn't know or care where the input is coming from and where the output is going to.
+* MapReduce is a bit like UNIX tools, but distributed across potentially thousands of machines (single MapReduce job is comparable to a single Unix process).
+* Running a MapReduce job normally does not modify the input and does not have any side effects other than producing the output.
+* While Unix tools use `stdin` and `stdout` as input and output, MapReduce jobs read and write files on a distributed filesystem. In Hadoop, that filesystem is called HDFS (Hadoop Distributed File System), an open source reimplementation of Google File System (GFS). Other distributed filesystems are GlusterFS, and other object storage services are Amazon S3 and Microsoft Azure Blob Storage. Hadoop consists of 2 components: HDFS (storage) and MapReduce (processing)
+* HDFS
+  * is based on the _shared-nothing_ principle, requiring no special hardware, only computers connected by a conventional datacenter network.
+  * consists of a daemon process running on each machine, exposing a network service that allows other nodes to access files stored on that machine. A central server called the _NameNode_ keeps track of which file blocks are stored on which machine. Thus, HDFS creates one big filesystem that can use the space on the disks of all machines running the daemon.
+  * In ordre to tolerate machine and disk failures, file blocks are replicated on multiple machines. Replication may mean simply several copies of the same data on multiple machines, or an _erasure coding_ scheme such as Reed-Solomon codes, which allow lost data to be recovered with low storage overhead than full replication.
+* MapReduce
+  * is a programming framework with which you can write code to process large datasets in a distributed filesystem like HDFS.
+    1. Read a set of input files, and break it up into _records_. This is handled by input parser.
+    2. Call the mapper function to extract a key and value from each input record.
+    3. Sort all of the key-value pairs by key. This is implicit in MapReduce -- output of mapper is always sorted before it is given to reducer.
+    4. Call the reducer function to iterate over the sorted key-value pairs.
+  * MapReduce programming model has separated the physical network communication aspects of the computation (getting the data to the right machine) from the application logic (processing the data once you have it).
+  * **Mapper**: Called once for every input record, and its job is to extract the key and value from the input record. For each record, can generate any number of k-v pairs (including none). Does not keep any state from one input to other -- all records treated independently.
+  * **Reducer**: Takes the key-value pairs produced by the mappers, collects all the values belonging to the same key, and calls the reducer with an interator over that collection of values. Can generate any number of records. Output records are written to a file on distributed filesystem
+  * MapReduce can parallelise a computation across many machines, without you having to write code to explicitly handle the parallelism. The mapper and reducer only operate on one record at a time; they don't need to know where their input is coming from or their output is going to.
+  * In Hadoop MapReduce, the mapper and reducer are each a Java class that implements a particular interface. In MongoDB and CouchDB, they are JavaScript functions.
+  * Advantages
+    * The MapReduce scheduler tries to run each mapper on one of the machines that stores a replica of the input file, _putting the computation near the data_ -- saves copying the input file over the network, reducing network load and increasing locality.
+  * The reduce side of the computation is also partitioned. While the number of map tasks is determined by the number of input file blocks, the number of reduce tasks is configured by the job author. To ensure that all key-value pairs with the same key end up in the same reducer, the framework uses a hash of the key to determine which reduc task should receive a particular key-value pair.
+  * The key-value pair must be sorted, but the dataset is likely too large to be sorted with a conventional sorting algorithm on a single machine. Sorting is performed in stages. First, each map task partitions its output by reducer, based on hash of the key. Each of these partitions is written to a sorted file on mapper's local disk (like LSM). Whenever a mapper finishes reading its input file and writing its sorted output files, the MapReduce scheduler notifies the reducers that they can start fetching the output files from that mapper. The reducers connect to each of the mappers and download the files of sorted key-value pairs for their partition. Process of partitioning by reducer, sorting and copying data partitions from mappers to reducers is called _shuffle_.The reduce task takes the files from the mappers and merges them together, preserving the sort order.
+  * MapReduce jobs can be chained together into _workflows_, the output of one job becomes the input to the next job. In Hadoop this chaining is done implicitly by directory name: the first job writes its output to a designated directory in HDFS, the second job reads that same directory name as its input. A batch job's output is only considered valid when the job has completed successfully (MapReduce discards the partial output of a failed job). Thus, one job in a workflow can only start when the prior jobs have completed successfully.
+  * Workflow schedulers for Hadoop: Oozie, Luigi
 
-Part of what makes Unix tools so successful is that they make it quite easy to see what is going on.
+#### Joins
+* It is common in datasets for one record to have an association with another record: a _foreign key_ in a relational model, a _document reference_ in a document model, or an _edge_ in graph model. If the query involves joins, it may require multiple index lookups. MapReduce has no concept of indexes.
+* When a MapReduce job is given a set of files as input, it reads the entire content of all of those files, like a _full table scan_. In analytics it is common to want to calculate aggregates over a large number of records. Scanning the entire input might be quite reasonable.
+* In order to achieve good throughput in a batch process, the computation must be local to one machine. Requests over the network are too slow. Queries to other database for example would be prohibitive. A better approach is to take a copy of the data (eg: the database) and put it in the same distributed filesystem. So, say we have 2 tables, and want to join on a common column -- put both the databases on HDFS.
+* GROUP BY is achieved similarly. One common case of grouping is collating all the activity events for a particular user session, this is called sessionization.
 
-### Map reduce and distributed filesystems
+##### Sort-merge join
+* reducer-side join
+* one set of mappers go over one DB (set of files), another set of mappers go over another DB (another set of files). Reducer takes data from both sets of mappers, merges them and do cross join.
+* ![Sort merge join](/metadata/sort_merge_join.png)
+* Advantages: can always be done
+* Disadvantages
+  * SLOW (data over the network + sorting and merging)
+  * Skew:
+    * "Breaking all records with same key to **same place**" is the problem.
+    * For example, in a batch process wanting to assess users, we record activity events of user and do join across multiple DBs (a fact table and multiple dimension tables) to get the data. For celebrities, their reducers will be hotspots and can lead to significant _skew_ i.e. they must process significantly more records than the others.
+    * Solution
+      * The _skewed join_ method in Pig first runs a sampling job to determine which keys are hot and then mapper sends them to not just one reducer, but to several reducers (choosen randomly). Other DB records (dimension tables) related to the hot key need to be replicated to _all_ reducers handling that key. Allows celebrities to be handled parallely across several reducers. In Crunch, hot keys have to be specified explicitly rather than sampling job. For aggegation (like GROUP) here we want to have one value per key, so we can do the total work in two stages, first like explained here so that multiple reducer performs the grouping on a subset of records for the hot key, second,  we can create another MapReduce job which takes data for a celebrity from multiple reducers from above method, and combine them to one value per key. 
+      * Hive's skewed join optimisation requries hot keys to be specified explicitly and then it stores hot keys data in separate files, and for them uses **uses map-side join**.
 
-A single MapReduce job is comparable to a single Unix process.
+If you _can_ make certain assumptions about your input data, it is possible to make joins faster. A MapReducer job with no reducers and no sorting, each mapper simply reads one input file and writes one output file. This is done using mapper-side joins
 
-Running a MapReduce job normally does not modify the input and does not have any side effects other than producing the output.
+##### Broadcast hash join
+* mapper-side join
+* large dataset joined with small dataset (small enough to be loaded entirely in memory of each mapper). Small input is effectively "broadcast" to all partitions
+* Each mapper has partitioned fact table records. Dimension table records are small enough to be put on every mapper.
 
-While Unix tools use `stdin` and `stdout` as input and output, MapReduce jobs read and write files on a distributed filesystem. In Hadoop, that filesystem is called HDFS (Haddoop Distributed File System).
 
-HDFS is based on the _shared-nothing_ principe. Implemented by centralised storage appliance, often using custom hardware and special network infrastructure.
+##### Partition hash join
+* mapper-side join
+* inputs on map-side join are partitioned in the same way, then the hash join approach can be applied to each partition independently.
+* only workds if both of join's inputs have the same number of partitions, with records assigned to partitions based on the same key and the same hash function
 
-HDFS consists of a daemon process running on each machine, exposing a network service that allows other nodes to access files stored on that machine. A central server called the _NameNode_ keeps track of which file blocks are stored on which machine.
+Output of reduce-side join is partitioned and sorted by the join key, whereas the output of a map-side join (broadcast or partition hash join) is partitioned and sorted in the same way as large input.
 
-File blocks are replciated on multiple machines. Reaplication may mean simply several copies of the same data on multiple machines, or an _erasure coding_ scheme such as Reed-Solomon codes, which allow lost data to be recovered.
-
-MapReduce is a programming framework with which you can write code to process large datasets in a distributed filesystem like HDFS.
-1. Read a set of input files, and break it up into _records_.
-2. Call the mapper function to extract a key and value from each input record.
-3. Sort all of the key-value pairs by key.
-4. Call the reducer function to iterate over the sorted key-value pairs.
-
-* Mapper: Called once for every input record, and its job is to extract the key and value from the input record.
-* Reducer: Takes the key-value pairs produced by the mappers, collects all the values belonging to the same key, and calls the reducer with an interator over that collection of vaues.
-
-MapReduce can parallelise a computation across many machines, without you having ot write code to explicitly handle the parallelism. THe mapper and reducer only operate on one record at a time; they don't need to know where their input is coming from or their output is going to.
-
-In Hadoop MapReduce, the mapper and reducer are each a Java class that implements a particular interface.
-
-The MapReduce scheduler tries to run each mapper on one of the machines that stores a replica of the input file, _putting the computation near the data_.
-
-The reduce side of the computation is also partitioned. While the number of map tasks is determined by the number of input file blocks, the number of reduce tasks is configured by the job author. To ensure that all key-value pairs with the same key end up in the same reducer, the framework uses a hash of the key.
-
-The dataset is likely too large to be sorted with a conventional sorting algorithm on a single machine. Sorting is performed in stages.
-
-Whenever a mapper finishes reading its input file and writing its sorted output files, the MapReduce scheduler notifies the reducers that they can start fetching the output files from that mapper. The reducers connect to each of the mappers and download the files of sorted key-value pairs for their partition. Partitioning by reducer, sorting and copying data partitions from mappers to reducers is called _shuffle_.
-
-The reduce task takes the files from the mappers and merges them together, preserving the sort order.
-
-MapReduce jobs can be chained together into _workflows_, the output of one job becomes the input to the next job. In Hadoop this chaining is done implicitly by directory name: the first job writes its output to a designated directory in HDFS, the second job reads that same directory name as its input.
-
-Compared with the Unix example, it could be seen as in each sequence of commands each command output is written to a temporary file, and the next command reads from the temporary file.
-
-It is common in datasets for one record to have an association with another record: a _foreign key_ in a relational model, a _document reference_ in a document model, or an _edge_ in graph model.
-
-If the query involves joins, it may require multiple index lookpus. MapReduce has no concept of indexes.
-
-When a MapReduce job is given a set of files as input, it reads the entire content of all of those files, like a _full table scan_.
-
-In analytics it is common to want to calculate aggregates over a large number of records. Scanning the entire input might be quite reasonable.
-
-In order to achieve good throughput in a batch process, the computation must be local to one machine. Requests over the network are too slow and nondeterministic. Queries to other database for example would be prohibitive.
-
-A better approach is to take a copy of the data (peg: the database) and put it in the same distributed filesystem.
-
-MapReduce programming model has separated the physical network communication aspects of the computation (getting the data to the right machine) from the application logic (processing the data once you have it).
-
-In an example of a social network, small number of celebrities may have many millions of followers. Such disproportionately active database records are known as _linchpin objects_ or _hot keys_.
-
-A single reducer can lead to significant _skew_ that is, one reducer that must process significantly more records than the others.
-
-The _skewed join_ method in Pig first runs a sampling job to determine which keys are hot and then records related to the hot key need to be replicated to _all_ reducers handling that key.
-
-Handling the hot key over several reducers is called _shared join_ method. In Crunch is similar but requires the hot keys to be specified explicitly.
-
-Hive's skewed join optimisation requries hot keys to be specified explicitly and it uses map-side join. If you _can_ make certain assumptions about your input data, it is possible to make joins faster. A MapReducer job with no reducers and no sorting, each mapper simply reads one input file and writes one output file.
+---
 
 The output of a batch process is often not a report, but some other kind of structure.
 
