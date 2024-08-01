@@ -491,6 +491,16 @@ How do we get the data sorted in the first place? With red-black trees or AVL tr
         * Key present? Yes &#8594; May or may not present
 * From time to time, run merging and compaction in the background to discard overwritten and deleted values.
 
+##### Bloom filter algorithm
+* start with array of m bits initialized to 0s
+* put key to bloom filter
+  * for a key, hash it using k different hash functions (all spitting results from 0 to m-1)
+  * change all the bits corresponding to the results of previous equation to 1 in the bloom filter. Example: if we used 3 hash functions and they spit values 11, 23 and 28, then we will switch on these 3 bits in our m sized array.
+* check if key is present in bloom filter
+  * compute k hashes for key using k hash functions
+  * if any of k positions in the m bit array is 0 --> return false (definitely not present)
+  * if all k positions in the m bit array are 1 --> return true (may or may not be present)
+
 Other points
 * If the database crashes, the most recent writes are lost. We can keep a separate log on disk to which every write is immediately appended. That log is not in sorted order, but that doesn't matter, because its only purpose is to restore the memtable after crash. Every time the memtable is written out to an SSTable, the log can be discarded.
 * Storage engines that are based on this principle of merging and compacting sorted files are often called LSM structure engines (Log Structure Merge-Tree).
@@ -632,10 +642,11 @@ Programming languages come with built-in support for encoding in-memory objects 
 Standardised encodings can be written and read by many programming languages.
 
 JSON, XML, and CSV are human-readable (**textual**) and popular specially as data interchange formats, but they have some subtle problems:
-* Ambiguity around the encoding of numbers (numbers and strings are indistinguishable in XML and CSV), dealing with large numbers and precision problems with floating numbers.
+* Ambiguity around the encoding of numbers (numbers and strings are indistinguishable in XML and CSV), dealing with large numbers and precision problems with floating numbers (in JSON)
 * Support of Unicode character strings, but no support for binary strings. People get around this by encoding binary data as Base64, which increases the data size by 33%.
 * There is "optional" schema support for both JSON and XML
 * CSV does not have any schema, and is quite a vague format (what happens if a value contains a comma or a newline character?)
+* Not compact!
 
 #### Binary encoding
 
@@ -689,12 +700,13 @@ record Person {
 * Forward compatibility means you can have a new version of the schema as writer and an old version of the schema as reader. Conversely, backward compatibility means that you can have a new version of the schema as reader and an old version as writer.
 * To maintain compatibility, you may only add or remove a field that has a default value.
 * If you were to add a field that has no default value, new readers wouldn't be able to read data written by old writers.
-* Changing the datatype of a field is possible, provided that Avro can convert the type. Changing the name of a filed is tricky (backward compatible but not forward compatible).
+* Changing the datatype of a field is possible, provided that Avro can convert the type. Changing the name of a field is tricky (backward compatible but not forward compatible).
 * The schema is identified encoded in the data.
-     * In a large file with lots of records, the writer of the file can just include the schema at the beginning of the file.
+     * In a large file with lots of records, the writer of the file can just include the schema (full schema and not just version number) at the beginning of the file (like sending a whole bunch of records in Hadoop)
      * On a database with individually written records, you cannot assume all the records will have the same schema, so you have to include a version number at the beginning of every encoded record.
      * While sending records over the network, you can negotiate the schema version on connection setup.
-* Avro is friendlier to _dynamically generated schemas_ (dumping into a file the database). You can fairly easily generate an Avro schema in JSON. If the database schema changes, you can just generate a new Avro schema for the updated database schema and export data in the new Avro schema. By contrast with Thrift and Protocol Buffers, every time the database schema changes, you would have to manually update the mappings from database column names to field tags.
+* Avro is friendlier to _dynamically generated schemas_ (dumping into a file the database). You can fairly easily generate an Avro schema in JSON. If the database schema changes, you can just generate a new Avro schema for the updated database schema and export data in the new Avro schema. By contrast with Thrift and Protocol Buffers, every time the database schema changes, you would have to manually update the mappings from database column names to field tags
+  * Very useful for ETL processes. If we want to export all rows from a database to HDFS, we want to fully automate this process. With Thrift / Protocol Buffers, we would have somebody manually convert database schema to a serialization schema to follow rules of only increasing tag numbers (database is not aware of this). 
 
 ---
 
@@ -1086,7 +1098,19 @@ Eventually, all the data is copied to every replica. After a unavailable node co
 * **Read repair.** When a client detect any stale responses, write the newer value back to that replica.
 * **Anti-entropy process.** There is a background process that constantly looks for differences in data between replicas and copies any missing data from one replica to he other. **It does not copy writes in any particular order**. Voldemort does not have anti entropy process. Without it, values that are rarely read may be missing from some replicas and thus have reduced durability.
 
-![Merkle Tree](/metadata/merkle_tree.jpeg)
+##### Merkle Tree
+* Useful for efficiently calculating the difference between two sets of data or files, and determine the difference in logarithmic time
+* Algorithm
+  * we have n values in set, calculate hashes of them, take pairs of them and calculate the sum, take hash and repeat
+  * to find difference b/w two merkle trees, start from the root and traverse depth first finding differences in hashes
+* the single unit (leaf value) is usually the whole file (say a.txt), for which we find the hash (hashing all the contents of the file)
+* use case
+  * git revision system
+    * when there is a change to say file foo.cc, then we compute the hash, we get a different valye, create another leaf node in the existing tree, keep creating nodes till the root in the same tree. So similar to copy-on-write we can do in BTree to implement snapshot isolation. This way we keep history of changes. Note: here we are only tracking if a file has been changed, and not the diff in contents of the changed file
+  * anti entropy process in leaderless databases
+    * single unit of comparison is the whole SSTable segment in case of Cassandra.
+  * blockchain
+* ![Merkle Tree](/metadata/merkle_tree.jpeg)
 
 #### Quorums for reading and writing
 
@@ -2323,31 +2347,36 @@ Three types of systems
     * write intermediate result to a file, and inspect that, if ok, pipe it to next stage.
 * The UNIX approach works best if a program simply uses `stdin` and `stdout`. This allows a shell user to wire up the input and output in whatever way they want; the program doesn't know or care where the input is coming from and where the output is going to. Pipes let you attach the stdout of one process to the stdin of another process (with a small in-memory buffer, and without writing the entire intermediate data stream to disk).
 
+Hadoop consists of 2 components: HDFS (storage) and MapReduce (processing)
+
+### HDFS
+* is based on the _shared-nothing_ principle, requiring no special hardware, only computers connected by a conventional datacenter network.
+* consists of a daemon process running on each machine, exposing a network service that allows other nodes to access files stored on that machine. A central server called the _NameNode_ keeps track of which file blocks are stored on which machine (_DataNode_). Thus, HDFS creates one big filesystem that can use the space on the disks of all machines running the daemon.
+* **Fault Tolerance**: In order to tolerate machine and disk failures, file blocks are replicated on multiple machines. Replication may mean simply several copies of the same data on multiple machines, or an _erasure coding_ scheme such as Reed-Solomon codes, which allow lost data to be recovered with low storage overhead than full replication.
+* **Extensibility**: building block for MapReduce, and data flow engines (Spark, Tez, Flink), and other databases (OLTP like HBase, OLAP like Impala)
+
 ### MapReduce
 
 * MapReduce is a bit like UNIX tools, but distributed across potentially thousands of machines (single MapReduce job is comparable to a single Unix process).
 * Running a MapReduce job normally does not modify the input and does not have any side effects other than producing the output.
-* While Unix tools use `stdin` and `stdout` as input and output, MapReduce jobs read and write files on a distributed filesystem. In Hadoop, that filesystem is called HDFS (Hadoop Distributed File System), an open source reimplementation of Google File System (GFS). Other distributed filesystems are GlusterFS, and other object storage services are Amazon S3 and Microsoft Azure Blob Storage. Hadoop consists of 2 components: HDFS (storage) and MapReduce (processing)
-* HDFS
-  * is based on the _shared-nothing_ principle, requiring no special hardware, only computers connected by a conventional datacenter network.
-  * consists of a daemon process running on each machine, exposing a network service that allows other nodes to access files stored on that machine. A central server called the _NameNode_ keeps track of which file blocks are stored on which machine. Thus, HDFS creates one big filesystem that can use the space on the disks of all machines running the daemon.
-  * In ordre to tolerate machine and disk failures, file blocks are replicated on multiple machines. Replication may mean simply several copies of the same data on multiple machines, or an _erasure coding_ scheme such as Reed-Solomon codes, which allow lost data to be recovered with low storage overhead than full replication.
-* MapReduce
-  * is a programming framework with which you can write code to process large datasets in a distributed filesystem like HDFS.
-    1. Read a set of input files, and break it up into _records_. This is handled by input parser.
-    2. Call the mapper function to extract a key and value from each input record.
-    3. Sort all of the key-value pairs by key. This is implicit in MapReduce -- output of mapper is always sorted before it is given to reducer.
-    4. Call the reducer function to iterate over the sorted key-value pairs.
-  * **Mapper**: Called once for every input record, and its job is to extract the key and value from the input record. For each record, can generate any number of k-v pairs (including none). Does not keep any state from one input to other -- all records treated independently.
-  * **Reducer**: Takes the key-value pairs produced by the mappers, collects all the values belonging to the same key, and calls the reducer with an interator over that collection of values. Can generate any number of records. Output records are written to a file on distributed filesystem
-  * **Properties**
-    * MapReduce programming model has separated the physical network communication aspects of the computation (getting the data to the right machine) from the application logic (processing the data once you have it).
-    * MapReduce can parallelise a computation across many machines, without you having to write code to explicitly handle the parallelism. The mapper and reducer only operate on one record at a time; they don't need to know where their input is coming from or their output is going to.
-    * In Hadoop MapReduce, the mapper and reducer are each a Java class that implements a particular interface. In MongoDB and CouchDB, they are JavaScript functions.
-    * The reduce side of the computation is also partitioned. While the number of map tasks is determined by the number of input file blocks, the number of reduce tasks is configured by the job author. To ensure that all key-value pairs with the same key end up in the same reducer, the framework uses a hash of the key to determine which reducer task should receive a particular key-value pair.
-    * The key-value pair must be sorted, but the dataset is likely too large to be sorted with a conventional sorting algorithm on a single machine. Sorting is performed in stages. First, each map task partitions its output by reducer, based on hash of the key. Each of these partitions is written to a sorted file on mapper's local disk (like LSM). Whenever a mapper finishes reading its input file and writing its sorted output files, the MapReduce scheduler notifies the reducers that they can start fetching the output files from that mapper. The reducers connect to each of the mappers and download the files of sorted key-value pairs for their partition. Process of partitioning by reducer, sorting and copying data partitions from mappers to reducers is called **_shuffle_**. The reduce task takes the files from the mappers and merges them together, preserving the sort order.
-  * **Advantages**
-    * The MapReduce scheduler tries to run each mapper on one of the machines that stores a replica of the input file, _putting the computation near the data_ -- saves copying the input file over the network, reducing network load and increasing locality.
+* While Unix tools use `stdin` and `stdout` as input and output, MapReduce jobs read and write files on a distributed filesystem. In Hadoop, that filesystem is called HDFS (Hadoop Distributed File System), an open source reimplementation of Google File System (GFS). Other distributed filesystems are GlusterFS, and other object storage services are Amazon S3 and Microsoft Azure Blob Storage.
+* is a programming framework with which you can write code to process large datasets in a distributed filesystem like HDFS.
+  1. Read a set of input files, and break it up into _records_. This is handled by input parser.
+  2. Call the mapper function to extract a key and value from each input record.
+  3. Sort all of the key-value pairs by key. This is implicit in MapReduce -- output of mapper is always sorted before it is given to reducer.
+  4. Call the reducer function to iterate over the sorted key-value pairs.
+* **Mapper**: Called once for every input record, and its job is to extract the key and value from the input record. For each record, can generate any number of k-v pairs (including none). Does not keep any state from one input to other -- all records treated independently.
+* **Reducer**: Takes the key-value pairs produced by the mappers, collects all the values belonging to the same key, and calls the reducer with an interator over that collection of values. Can generate any number of records. Output records are written to a file on distributed filesystem
+* **Properties**
+  * MapReduce programming model has separated the physical network communication aspects of the computation (getting the data to the right machine) from the application logic (processing the data once you have it).
+  * MapReduce can parallelise a computation across many machines, without you having to write code to explicitly handle the parallelism. The mapper and reducer only operate on one record at a time; they don't need to know where their input is coming from or their output is going to.
+  * In Hadoop MapReduce, the mapper and reducer are each a Java class that implements a particular interface. In MongoDB and CouchDB, they are JavaScript functions.
+  * The reduce side of the computation is also partitioned. While the number of map tasks is determined by the number of input file blocks, the number of reduce tasks is configured by the job author. To ensure that all key-value pairs with the same key end up in the same reducer, the framework uses a hash of the key to determine which reducer task should receive a particular key-value pair.
+  * The key-value pair must be sorted, but the dataset is likely too large to be sorted with a conventional sorting algorithm on a single machine. Sorting is performed in stages. First, each map task partitions its output by reducer, based on hash of the key. Each of these partitions is written to a sorted file on mapper's local disk (like LSM). Whenever a mapper finishes reading its input file and writing its sorted output files, the MapReduce scheduler notifies the reducers that they can start fetching the output files from that mapper. The reducers connect to each of the mappers and download the files of sorted key-value pairs for their partition. Process of partitioning by reducer, sorting and copying data partitions from mappers to reducers is called **_shuffle_**. The reduce task takes the files from the mappers and merges them together, preserving the sort order.
+* **Advantages**
+  * The MapReduce scheduler tries to run each mapper on one of the machines that stores a replica of the input file, _putting the computation near the data_ -- saves copying the input file over the network, reducing network load and increasing locality.
+  * Can run arbitrary code
+  * Designed for fault tolerance
 
 #### Joins
 * It is common in datasets for one record to have an association with another record: a _foreign key_ in a relational model, a _document reference_ in a document model, or an _edge_ in graph model. If the query involves joins, it may require multiple index lookups. MapReduce has no concept of indexes.
@@ -2361,7 +2390,7 @@ Three types of systems
 * ![Sort merge join](/metadata/sort_merge_join.png)
 * Advantages: can always be done
 * Disadvantages
-  * SLOW (data over the network + sorting and merging)
+  * SLOW (data over the network + shuffle (repartition, sorting and merging))
   * Skew:
     * "Breaking all records with same key to **same place**" is the problem.
     * For example, in a batch process wanting to assess users, we record activity events of user and do join across multiple DBs (a fact table and multiple dimension tables) to get the data. For celebrities, their reducers will be hotspots and can lead to significant _skew_ i.e. they must process significantly more records than the others.
@@ -2374,8 +2403,7 @@ If you _can_ make certain assumptions about your input data, it is possible to m
 ##### Broadcast hash join
 * mapper-side join
 * large dataset joined with small dataset (small enough to be loaded entirely in memory of each mapper). Small input is effectively "broadcast" to all partitions
-* Each mapper has partitioned fact table records. Dimension table records are small enough to be put on every mapper.
-
+* Mappers have partitioned fact table records. Dimension table records are small enough to be put on every mapper.
 
 ##### Partition hash join
 * mapper-side join
@@ -2398,8 +2426,6 @@ Output of reduce-side join is partitioned and sorted by the join key, whereas th
   * A much better solution is to build a brand-new database _inside_ the batch job and write it as files to the job's output directory, so it can be loaded in bulk into servers that handle read-only queries. Various key-value stores support building database files in MapReduce including Voldemort, Terrapin, ElephanDB and HBase bulk loading.
 * By treating inputs as immutable and avoiding side effects (such as writing to external databases), batch jobs not only achieve good performance but also become much easier to maintain.
 
----
-
 ### Comparing Hadoop to Distributed Databases
 * Design principles that worked well for Unix also seem to be working well for Hadoop.
 * The MapReduce paper was not at all new. Things we discussed till now had been already implemented in so-called _massively parallel processing_ (MPP) databases.
@@ -2413,7 +2439,7 @@ Output of reduce-side join is partitioned and sorted by the join key, whereas th
     * With time, even both Hadooop and SQL were insufficient, so other models were required.
     * With openness of Hadoop platform, it was possible to build other models on top of it.
       * SQL query execution engine build on top of it, and indeed this is what the Hive project did.
-      * OLTP database HBase and OLAP database Impala both use HDFS as storage, but not MapReduce.
+      * OLTP database HBase and OLAP database Impala both use HDFS as storage, but do not use MapReduce.
   * **Designing of frequent faults**
     * handling of faults + memory/disk usage
     * If a node crashes while a query is executing, most MPP databases abort the entire query. MPP databases also prefer to keep as much data as possible in memory.
@@ -2431,28 +2457,41 @@ Output of reduce-side join is partitioned and sorted by the join key, whereas th
   * Crunch uses Java library.
 
 #### Data flow engines
-* In complex tasks like recommendation engine, there are many independent MapReduce jobs taking output of one as input of another and so on. These **intermediate files** are still put on HDFS which requires replication and all. The process of writing out the intermediate state to files is called **_materialisation_**. In contrast, UNIX connects two programs by pipes which do not fully materialize the intermediate results, but streams the output to the input incrementally using in-memory buffer. MapReduce's approach of fully materialising state has some downsides compared to Unix pipes:
-  * A MapReduce job can only start when all tasks in the preceding jobs have completed, whereas processes connected by a Unix pipe are started at the same time.
-  * Mappers are often redundant: they just read back the same file that was just written by a reducer; mapper code could easily be part of previous reducer
-  * Files are replicated across several nodes, which is often overkill for such temporary data.
-* To fix these problems with MapReduce, new execution engines for distributed batch computations were developed: **Spark, Tez and Flink**. 
-  * They can handle an entire workflow as one job, rather than breaking it up into independent subjobs. These are called _dataflow engines_.
-  * Dataflow engines look much more like UNIX pipes, rather than MapReduce which writes outpout of each command to temporary file.
-  * They parallelize work by partitioning inputs, and they copy the output of one function over the network to become input to another function. These functions need not to take the strict roles of alternating map and reduce, they are assembled in flexible ways, in functions called **_operators_**.
-    * One option is to repartition and sort records by key, like in the shuffle stage of MapReduce. This feature enables sort-merge joins and grouping in the same way as in MapReduce.
-    * Another possibility is to take several inputs and to partition them in the same way, but skip the sorting. This saves effort on partitioned hash joins, where the partitioning of records is important but the order is irrelevant because building the hash table randomizes the order anyway.
-    * For broadcast hash joins, the same output from one operator can be sent to all partitions of the join operator.
-  * **Optimizations**
-    * Expensive operation like sorting can only be performed in places where it is actually required, rather than default between every map and reduce stage
-    * No unncessary map tasks
-    * Because all joins and dependencies are explicitly declared, can do locality optimisations.
-    * can keep intermediate results in memory
-    * operators can start executing as soon as their input is ready; there is no need to wait for the entire preceding stage to finish before the next one starts.
-  * **Interoperability**: Since operators are a generalization of map and reduce, the same processing code can run on either execution engine: workflows implemented in Pig, Hive, or Cascading can be switched from MapReduce to Tez or Spark with a simple configuration change, without modifying code
-  * **Fault tolerance**:
-    * Spark, Flink, and Tez avoid writing intermediate state to HDFS, so they take a different approach to tolerating faults: if a machine fails and the intermediate state on that machine is lost, it is recomputed from other data that is still available (prior intermediary stage if possible, or otherwise the original input data).
-    * Better to make operators deterministic because if it is nondeterministic (O1), and it's output is say consumed by two other operators (O2 and O3), and O2 failed, and we have to recompute O1, then we would have to fail O3 too, because O1 is nondeterministic.
-    * If intermediate data is small than original data, or was very CPU intensive to generate, it is better to actually materialize the intermediate result.
+Pitfalls of MapReduce
+* A MapReduce job can only start when all tasks in the preceding jobs have completed, whereas processes connected by a Unix pipe are started at the same time. Lots of waiting
+* In complex tasks like recommendation engine, there are many independent MapReduce jobs taking output of one as input of another and so on. These **intermediate files** are still put on HDFS which requires replication and all. The process of writing out the intermediate state to files is called **_materialisation_**. In contrast, UNIX connects two programs by pipes which do not fully materialize the intermediate results, but streams the output to the input incrementally using in-memory buffer. MapReduce hence uses a ton of disk (store intermediate results + do replication)
+* Expensive sorting operation between every mapper and reducer.
+* Mappers are often redundant: they just read back the same file that was just written by a reducer; and do expensive partition and sorting thingy. Mapper code could easily be part of previous reducer
+
+To fix these problems with MapReduce, new execution engines for distributed batch computations were developed: **Spark, Tez and Flink**. 
+* They can handle an entire workflow as one job, rather than breaking it up into independent subjobs. These are called _dataflow engines_.
+* Dataflow engines look much more like UNIX pipes, rather than MapReduce which writes outpout of each command to temporary file.
+* They parallelize work by partitioning inputs, and they copy the output of one function over the network to become input to another function. These functions need not to take the strict roles of alternating map and reduce, they are assembled in flexible ways, in functions called **_operators_**.
+  * One option is to repartition and sort records by key, like in the shuffle stage of MapReduce. This feature enables sort-merge joins and grouping in the same way as in MapReduce.
+  * Another possibility is to take several inputs and to partition them in the same way, but skip the sorting. This saves effort on partitioned hash joins, where the partitioning of records is important but the order is irrelevant because building the hash table randomizes the order anyway.
+  * For broadcast hash joins, the same output from one operator can be sent to all partitions of the join operator.
+* **Optimizations**
+  * operators can start executing as soon as their input is ready; there is no need to wait for the entire preceding stage to finish before the next one starts.
+  * can keep intermediate results in memory
+  * Expensive operation like sorting can only be performed in places where it is actually required, rather than default between every map and reduce stage
+  * No unncessary map tasks
+  * Because all joins and dependencies are explicitly declared, can do locality optimisations.
+* **Interoperability**: Since operators are a generalization of map and reduce, the same processing code can run on either execution engine: workflows implemented in Pig, Hive, or Cascading can be switched from MapReduce to Tez or Spark with a simple configuration change, without modifying code
+* **Fault tolerance**:
+  * Spark uses the resilient distributed dataset (RDD)(these are in memory) abstraction for tracking the ancestry of data, while Flink checkpoints operator state, allowing it to resume running an operator that ran into a fault during its execution
+  * Spark, Flink, and Tez avoid writing intermediate state to HDFS, so they take a different approach to tolerating faults: if a machine fails and the intermediate state on that machine is lost, it is recomputed from other data that is still available (prior intermediary stage if possible, or otherwise the original input data).
+  * Better to make operators deterministic because if it is nondeterministic (O1), and it's output is say consumed by two other operators (O2 and O3), and O2 failed, and we have to recompute O1, then we would have to fail O3 too, because O1 is nondeterministic.
+  * If intermediate data is small than original data, or was very CPU intensive to generate, it is better to actually materialize the intermediate result.
+
+##### Apache Spark
+Instead of materializing intermediate state, Spark uses RDD (Resilient Distributed Dataset):
+* in memory data structure representing the contents of variable in Spark program (in reality the data is probably held across multiple nodes in a cluster
+* can create RDDs from data on disk or by performing an operation on another RDD
+* tracks lineage of each RDD
+* Fault tolerance
+  * Narrow dependency: each partition of the child RDD depends on a small number of partitions from the parent RDD. Typically, each partition in the child RDD can be computed using only one partition of the parent RDD. No shuffling of data is required across the network. If a task fails, only the partitions directly linked to that task need to be recomputed.
+  * Wide dependency: each partition of the child RDD depends on multiple partitions of the parent RDD. This typically requires data from multiple partitions to be shuffled across the network to create the child RDD. Shuffling or movement of data b/w different nodes is required which is expensive. If a task fails, Spark may need to recompute multiple partitions from the parent RDD, involving a more complex and time-consuming process. Solution: output of such operators which involve inputs from multiple partition to produce result are written to disk, so that if the node fails, this expensive computation is there and we don't have to recompute.
+ 
 
 #### Graphs and iterative processing
 * Dataflow engines like Spark, Flink, and Tez typically arrange the operators in a job as a directed acyclic graph (DAG). This is not the same as graph databases: in dataflow engines, the flow of data from one operator to another is structured as a graph, while the data itself typically consists of relational-style tuples. In graph processing, the data itself has the form of a graph. We are talking here about putting graph data in distributed filesystem.
