@@ -758,6 +758,21 @@ Here are some other differences between gRPC and REST:
 * API design: gRPC is based on the RPC (Remote Procedure Call) paradigm, while REST follows the architectural constraints of the Representational State Transfer model.
 * Streaming: gRPC supports bidirectional streaming, whereas REST is limited to request-response communication patterns.
 
+##### Microservices essentials
+
+Docker (quick detour)
+* many things to deploy, each having unique requirements (one in Java, another in Python, etc)
+* containers allow us to package our dev environments into an easy to run package
+* applications are packaged into containers (each container has all the dependencies of application, versions, environment, etc)
+* when deploying to cloud, you typically preconfigure the capacity of virtual machine
+  * if we want microservice running on each virtual machine, we would have to figure out capacity of each microservice needed in advanced -- would likely result in a lot of bad utilization
+  * Docker allows running multiple containers on just one virtual machine, giving each container the ability to take resources as they need (one service can be heavily used, while other has little traffic)
+ 
+Kubernetes
+* like sigma in Google
+* manages various applications on diff hosts (orchestrator)
+ 
+
 **Remote procedure calls (RPC)**
 
 RPC tries to make a request to a remote network service look the same as calling a function or method in your programming language, it seems convenient at first but the approach is flawed:
@@ -1769,6 +1784,45 @@ We need to accept the possibility of partial failure and build fault-tolerant me
 * IP (Layer 3, Network Layer) is unreliable: delay, drop, duplicate and reorder packets.
 * TCP (Layer 4, Transport Layer) which is built on top of IP, ensures missing packets are transmitted (not drop), duplicates are eliminated, and packets are reassembled into the order in which they are sent (TCP can't do anything about "delay" though).
 
+**TCP** (Transmission Control Protocol)
+* retransmission of packets, deduplication, ordered (via sequence numbers)
+* flow control and congestion control
+* error checked (via checksums)
+* Properties
+  * **3-way handshake**: used to create a connection b/w two nodes over TCP
+    * process
+      * client sends SYN to server with some random sequence number x
+      * server responds with SYN-ACK with sequence number y and acknowledgement value x+1
+      * client sends ACK with acknowledgement value y+1
+    * sequence number is for ordering of message at server's end
+    * acknowledgement value is for telling the client that they have received message and now expect this ack value to be sent as sequence number by client
+  * **reliable transmission**
+    * after the handshake, we can start sending packets
+    * duplicate ack retransmission (getting ack value, but not what we intended)
+      * sender sends packet with sequence number 99, gets ack value 100 from receiver
+      * sender sends packet with sequence number 100, gets ack value 100 from receiver.
+      * Trouble: should have received 101 but got 100 as ack value. Thus we know that sequence number 100 has to be resend
+    * timeout based estimates (**exponential backoff**) (not getting ack value back)
+      * sender will resend packet if it doesn't receive SYN-ACK within some timeout
+      * timeout is based on estimate of round trip time
+      * on expiration double the round trip time
+      * helps protect against DDOS attacks
+  * **flow control**
+    * it is possible to overwhelm the "receiver node"
+    * receiving device specifies how much space it has in bytes to buffer new messages, and sending device can only send that much more until new acknowledgement comes in
+    * if receiving device has no room left, sender waits for some time and then sends a small packet to see how much space is left now
+  * **congestion control**
+    * it is possible to overwhelm "network links"
+    * mitigation:
+      * congestion window keeps track of
+        * max number of packets that can be sent over the network without being acked.
+        * number of packets currently being sent over the network (ones that have not been acknowledged) and limits them.
+      * size of window builds up over time using additive increase multiplicative decrease (AIMD) strategy (window increase in size linearly with successful acks, decrease in size exponentially if network overloaded)
+  * **connection termination**
+    * four way handshake: really just each half of the connection termination independently. Cannot terminate both connections at the same time, due to two generals problem. FIN from client to sender. ACK from sender to client. FIN from sender to client. ACK from client to sender.
+
+UDP (User Datagram Protocol) does not perform reliable transmission or flow control or congestion control or retransmission of packets. Only does checksum. Good for video calls, video games, stock prices. Also we can do multicast (send to bunch of nodes using UDP)
+
 ### Unreliable networks
 
 Focusing on _shared-nothing systems_ the network is the only way machines communicate.
@@ -1801,7 +1855,6 @@ The internet and most internal networks are _asynchronous packet networks_. A me
       * If CPU cores are busy, the request is queued by the operative system, until applications are ready to handle it.
       * TCP performs _flow control_ (also known as congestion avoidance or backpressure), in which a node limits its own rate of sending in order to avoid overloading a network link or the receiving node. This means additional queuing at the sender.
    * You can choose timeouts experimentally by measuring the distribution of network round-trip times over an extended period. TCP considers packet to be lost if it is not acknowledged within some timeout, and hence lost packets are automatically retransmitted. Systems can continually measure response times and their variability (_jitter_), and automatically adjust timeouts according to the observed response time distribution.
-   * **TCP vs UDP**: UDP does not perform _flow control_ and retransmission of packets.
 * **Synchronous vs asynchronous networks**
    * A telephone network estabilishes a _circuit_, a fixed guaranteed amount of bandwidth is allocated for the call, we say is _synchronous_ even as the data passes through several routers as it does not suffer from queuing. The maximum end-to-end latency of the network is fixed (_bounded delay_).
    * A circuit is a fixed amount of reserved bandwidth which nobody else can use while the circuit is established, whereas packets of a TCP connection opportunistically use whatever network bandwidth is available. While TCP connection is idle, it doesn't use any bandwidth.
