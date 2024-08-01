@@ -2396,78 +2396,87 @@ Output of reduce-side join is partitioned and sorted by the join key, whereas th
     * Mappers or reducers concurrently write to the same output database which can overwhelm the database.
     * You have to worry about the results from partially completed jobs being visible to database.
   * A much better solution is to build a brand-new database _inside_ the batch job and write it as files to the job's output directory, so it can be loaded in bulk into servers that handle read-only queries. Various key-value stores support building database files in MapReduce including Voldemort, Terrapin, ElephanDB and HBase bulk loading.
+* By treating inputs as immutable and avoiding side effects (such as writing to external databases), batch jobs not only achieve good performance but also become much easier to maintain.
 
 ---
 
-* By treating inputs as immutable and avoiding side effects (such as writing to external databases), batch jobs not only achieve good performance but also become much easier to maintain.
-
-Design principles that worked well for Unix also seem to be working well for Hadoop.
-
-The MapReduce paper was not at all new. The sections we've seen had been already implemented in so-called _massively parallel processing_ (MPP) databases.
-
-The biggest difference is that MPP databases focus on parallel execution of analytic SQL queries on a cluster of machines, while the combination of MapReduce and a distributed filesystem provides something much more like a general-purpose operating system that can run arbitraty programs.
-
-Hadoop opened up the possibility of indiscriminately dumpint data into HDFS. MPP databases typically require careful upfront modeling of the data and query patterns before importing data into the database's proprietary storage format.
-
-In MapReduce instead of forcing the producer of a dataset to bring it into a standarised format, the interpretation of the data becomes the consumer's problem.
-
-If you have HDFS and MapReduce, you _can_ build a SQL query execution engine on top of it, and indeed this is what the Hive project did.
-
-If a node crashes while a query is executing, most MPP databases abort the entire query. MPP databases also prefer to keep as much data as possible in memory.
-
-MapReduce can tolerate the failure of a map or reduce task without it affecting the job. It is also very eager to write data to disk, partly for fault tolerance, and partly because the dataset might not fit in memory anyway.
-
-MapReduce is more appropriate for larger jobs.
-
-At Google, a MapReduce task that runs for an hour has an approximately 5% risk of being terminated to make space for higher-priority process.
-
-Ths is why MapReduce is designed to tolerate frequent unexpected task termination.
+### Comparing Hadoop to Distributed Databases
+* Design principles that worked well for Unix also seem to be working well for Hadoop.
+* The MapReduce paper was not at all new. Things we discussed till now had been already implemented in so-called _massively parallel processing_ (MPP) databases.
+* Difference
+  * **Diversity of storage**
+    * Databases require to structure data according to particular model, whereas files in distributed filesystem are just byte sequences, which can be written using any data model and encoding (text, images, videos, genome sequence, any data)
+    * Shifts the burden of interpreting the data: instead of forcing the produce of a dataset to bring it into a standardized format, the interpretation of data becomes consumer's problem (schema on read approach)
+    * Thus, Hadoop has often been used for implementing ETL processes: data from transaction processing is dumped into distributed filesystem in raw form, MapReduce jobs cleans up the data, transform into relational form, and import it into MPP databases for analytic purposes
+  * **Diversity of processing models**
+    * Not all processing makes sense with SQL (recommendation systems, ranking models, etc)
+    * With time, even both Hadooop and SQL were insufficient, so other models were required.
+    * With openness of Hadoop platform, it was possible to build other models on top of it.
+      * SQL query execution engine build on top of it, and indeed this is what the Hive project did.
+      * OLTP database HBase and OLAP database Impala both use HDFS as storage, but not MapReduce.
+  * **Designing of frequent faults**
+    * handling of faults + memory/disk usage
+    * If a node crashes while a query is executing, most MPP databases abort the entire query. MPP databases also prefer to keep as much data as possible in memory.
+    * MapReduce can tolerate the failure of a map or reduce task without it affecting the job. It is also very eager to write data to disk, partly for fault tolerance, and partly because the dataset might not fit in memory anyway. Thus, MapReduce is more appropriate for larger jobs.
+    * At Google, they use mixed datacenters, online production services and offline batch jobs run on same machines for better resource usage. Online services were high priority and offline batch jobs are low priority. If there is spike in resource consumption in online, offline job can easily be dropped. MapReduce task that runs for an hour has an approximately 5% risk of being terminated to make space for higher-priority process. This is why MapReduce is designed to tolerate frequent unexpected task termination.
 
 ### Beyond MapReduce
+* Depending on volume of data, structure of data, and type of processing done, other tools are developed.
 
-In response to the difficulty of using MapReduce directly, various higher-level programming models emerged on top of it: Pig, Hive, Cascading, Crunch.
+#### Higher level programming models
+* In response to the difficulty of using MapReduce directly, various higher-level programming models emerged on top of it: **Pig, Hive, Cascading, Crunch**. Essentially all abstracts out different components of MapReduce
+  * Pig has Pig Latin scripting language to create complex programs easily
+  * Hive uses HiveQL (similar semantics to SQL)
+  * Cascading uses Java application framework
+  * Crunch uses Java library.
 
-MapReduce has poor performance for some kinds of processing. It's very robust, you can use it to process almost arbitrarily large quantities of data on an unreliable multi-tenant system with frequent task terminations, and it will still get the job done.
-
-The files on the distributed filesystem are simply _intermediate state_: a means of passing data from one job to the next.
-
-The process of writing out the intermediate state to files is called _materialisation_.
-
-MapReduce's approach of fully materialising state has some downsides compared to Unix pipes:
-
-* A MapReduce job can only start when all tasks in the preceding jobs have completed, whereas rocesses connected by a Unix pipe are started at the same time.
-* Mappers are often redundant: they just read back the same file that was just written by a reducer.
-* Files are replicated across several nodes, which is often overkill for such temporary data.
-
-To fix these problems with MapReduce, new execution engines for distributed batch computations were developed, Spark, Tez and Flink. These new ones can handle an entire workflow as one job, rather than breaking it up into independent subjobs (_dataflow engines_).
-
-These functions need not to take the strict roles of alternating map and reduce, they are assembled in flexible ways, in functions called _operators_.
-
-Spark, Flink, and Tex avoid writing intermediate state to HDFS, so they take a different approach to tolerating faults: if a machine fails and the intermediate state on that machine is lost, it is recomputed from other data that is still available.
-
-The framework must keep track of how a given piece of data was computed. Spark uses the resilient distributed dataset (RDD) to track ancestry data, while Flink checkpoints operator state, allowing it to resume running an operator that ran into a fault during its execution.
+#### Data flow engines
+* In complex tasks like recommendation engine, there are many independent MapReduce jobs taking output of one as input of another and so on. These **intermediate files** are still put on HDFS which requires replication and all. The process of writing out the intermediate state to files is called **_materialisation_**. In contrast, UNIX connects two programs by pipes which do not fully materialize the intermediate results, but streams the output to the input incrementally using in-memory buffer. MapReduce's approach of fully materialising state has some downsides compared to Unix pipes:
+  * A MapReduce job can only start when all tasks in the preceding jobs have completed, whereas processes connected by a Unix pipe are started at the same time.
+  * Mappers are often redundant: they just read back the same file that was just written by a reducer; mapper code could easily be part of previous reducer
+  * Files are replicated across several nodes, which is often overkill for such temporary data.
+* To fix these problems with MapReduce, new execution engines for distributed batch computations were developed: **Spark, Tez and Flink**. 
+  * They can handle an entire workflow as one job, rather than breaking it up into independent subjobs. These are called _dataflow engines_.
+  * Dataflow engines look much more like UNIX pipes, rather than MapReduce which writes outpout of each command to temporary file.
+  * They parallelize work by partitioning inputs, and they copy the output of one function over the network to become input to another function. These functions need not to take the strict roles of alternating map and reduce, they are assembled in flexible ways, in functions called **_operators_**.
+    * One option is to repartition and sort records by key, like in the shuffle stage of MapReduce. This feature enables sort-merge joins and grouping in the same way as in MapReduce.
+    * Another possibility is to take several inputs and to partition them in the same way, but skip the sorting. This saves effort on partitioned hash joins, where the partitioning of records is important but the order is irrelevant because building the hash table randomizes the order anyway.
+    * For broadcast hash joins, the same output from one operator can be sent to all partitions of the join operator.
+  * **Optimizations**
+    * Expensive operation like sorting can only be performed in places where it is actually required, rather than default between every map and reduce stage
+    * No unncessary map tasks
+    * Because all joins and dependencies are explicitly declared, can do locality optimisations.
+    * can keep intermediate results in memory
+    * operators can start executing as soon as their input is ready; there is no need to wait for the entire preceding stage to finish before the next one starts.
+  * **Interoperability**: Since operators are a generalization of map and reduce, the same processing code can run on either execution engine: workflows implemented in Pig, Hive, or Cascading can be switched from MapReduce to Tez or Spark with a simple configuration change, without modifying code
+  * **Fault tolerance**:
+    * Spark, Flink, and Tez avoid writing intermediate state to HDFS, so they take a different approach to tolerating faults: if a machine fails and the intermediate state on that machine is lost, it is recomputed from other data that is still available (prior intermediary stage if possible, or otherwise the original input data).
+    * Better to make operators deterministic because if it is nondeterministic (O1), and it's output is say consumed by two other operators (O2 and O3), and O2 failed, and we have to recompute O1, then we would have to fail O3 too, because O1 is nondeterministic.
+    * If intermediate data is small than original data, or was very CPU intensive to generate, it is better to actually materialize the intermediate result.
 
 #### Graphs and iterative processing
+* Dataflow engines like Spark, Flink, and Tez typically arrange the operators in a job as a directed acyclic graph (DAG). This is not the same as graph databases: in dataflow engines, the flow of data from one operator to another is structured as a graph, while the data itself typically consists of relational-style tuples. In graph processing, the data itself has the form of a graph. We are talking here about putting graph data in distributed filesystem.
+* It's interesting to look at graphs in batch processing context, where the goal is to perform some kind of offline processing or analysis on an entire graph. This need often arises in machine learning applications such as recommendation engines, or in ranking systems.
+* "repeating until done" cannot be expressed in plain MapReduce as it runs in a single pass over the data and some extra trickery is necessary.
+* MapReduce does not account for the iterative nature of the algorithm: it will always read the entire input dataset and produce a completely new output dataset, even if only a small part of the graph has changed compared to the last iteration
+* An optimisation for batch processing graphs, the _bulk synchronous parallel_ (BSP) has become popular. It is implemented by Apache Giraph, Spark's GraphX API, and Flink's Gelly API. This is also called Pregel model, as Google Pregel paper popularised it.
+* One vertex can "send a message" to another vertex, and typically those messages are sent along the edges in a graph. In each iteration, a function is called for each vertex, passing it all the messages that were sent to it—much like a call to the reducer. The difference from MapReduce is that in the Pregel model, a vertex remembers its state in memory from one iteration to the next, so the function only needs to process new incoming messages. If no messages are being sent in some part of the graph, no work needs to be done.
+* The fact that vertices can only communicate by message passing helps improve the performance of Pregel jobs, since messages can be batched.
+* Fault tolerance is achieved by periodically checkpointing the state of all vertices at the end of an interation.
+* The framework may partition the graph in arbitrary ways.
+* Graph algorithms often have a lot of cross-machine communication overhead, and the intermediate state is often bigger than the original graph.
+* If your graph can fit into memory on a single computer, it's quite likely that a single-machine algorithm will outperform a distributed batch process. If the graph is too big to fit on a single machine, a distributed approach such as Pregel is unavoidable.
 
-It's interesting to look at graphs in batch processing context, where the goal is to perform some kind of offline processing or analysis on an entire graph. This need often arises in machine learning applications such as recommednation engines, or in ranking systems.
-
-"repeating until done" cannot be expressed in plain MapReduce as it runs in a single pass over the data and some extra trickery is necessary.
-
-An optimisation for batch processing graphs, the _bulk synchronous parallel_ (BSP) has become popular. It is implemented by Apache Giraph, Spark's GraphX API, and Flink's Gelly API (_Pregel model, as Google Pregel paper popularised it).
-
-One vertex can "send a message" to another vertex, and typically those messages are sent along the edges in a graph.
-
-The difference from MapReduce is that a vertex remembers its state in memory from one iteration to the next.
-
-The fact that vertices can only communicate by message passing helps improve the performance of Pregel jobs, since messages can be batched.
-
-Fault tolerance is achieved by periodically checkpointing the state of all vertices at the end of an interation.
-
-The framework may partition the graph in arbitrary ways.
-
-Graph algorithms often have a lot of cross-machine communication overhead, and the intermediate state is often bigger than the original graph.
-
-If your graph can fit into memory on a single computer, it's quite likely that a single-machine algorithm will outperform a distributed batch process. If the graph is too big to fit on a single machine, a distributed approach such as Pregel is unavoidable.
+In summary, think of batch processing with 2 requirements
+1. Partitioning
+   * In MapReduce, mappers are partitioned according to input file blocks. The output of mappers is repartitioned, sorted, and merged into a configurable number of reducer partitions. The purpose of this process is to bring all the related data e.g., all the records with the same key—together in the same place.
+   * Dataflow engines try to avoid sorting unless it is required, but they otherwise take a broadly similar approach to partitioning.
+2. Fault Tolerance
+   * MapReduce frequently writes to disk, which makes it easy to recover from an individual failed task without restarting the entire job but slows down execution in the failure-free case.
+   * Dataflow engines perform less materialization of intermediate state and keep more in memory, which means that they need to recompute more data if a node fails. Deterministic operators reduce the amount of data that needs to be recomputed.
+  
+---
+---
 
 ## Stream processing
 
