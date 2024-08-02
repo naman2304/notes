@@ -62,8 +62,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
 | VoltDB          | Relational           | Hash (in memory database - but maintains durability by WAL)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
-| Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
-| Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) | | | | | Consistent Hashing
+| Redis           | Key-Value            | Hash (in memory one; disk one is custom format)  | | | | | Fixed number of partitions via gossip protocol | | serializable (actual serial execution as its single threaded)
+| Memcached       | Key-Value            | Hash (in memory one; no data is flushed to disk) | | | | | Consistent Hashing
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
 | RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
