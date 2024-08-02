@@ -1262,6 +1262,7 @@ Algorithm
 
 ## Partitioning
 
+* In horizontal scaling, if we want to scale reads we do replication, if we want to scale writes we do partitioning.
 * Replication, for very large datasets or very high query throughput is not sufficient, we need to break the data up into _partitions_ (_sharding_).
 * Two types of partitioning
   * Horizontal - by rows (relational and non-relational DBs)
