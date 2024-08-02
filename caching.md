@@ -1,8 +1,4 @@
 ## Caching
-
-### Distributed Caching
-
-Caching
 * Pros
   * faster reads (and writes?)
   * reduced load on database
@@ -10,31 +6,31 @@ Caching
   * cache misses are expensive -- say our cache server is diff, and our application server makes a network call to just find out that our value is not there in cache. Then have to make disk seek.
   * data consistency is complex, depends on how much you care
 
-What do we cache
+#### What do we cache
 * database results
 * computation done by application servers
 * popular static content (CDN)
 
-Server-local cache (seeing at low level)
+#### Server-local cache (seeing at low level)
 * L1 is smallest (fastest) cache. Different for different CPU core
 * L2 is bigger (slower than L1) cache. Can be shared or different for different CPU core
 * L3 is biggest (slowest than L2) cache. Shared across different CPU core.
 * First we check L1, if not found, L2, if not found L3, if not found RAM, if not found disk seek.
 * ![Single computer cache](/metadata/single_computer_cache.png)
 
-Server-local cache (seeing at high level) 
+#### Server-local cache (seeing at high level) 
 * cache on application server, database, message broker
 * say if we want to see number of likes on our post, application server can cache that result. If we make call again, first we need to reach the same application server (consistent hashing on load balancer), and then we can fetch the result from cache on application server and not make network call to database.
 * Pros: fewer network calls, very fast
 * Cons: cache size is proportional to number of servers
 
-Global caching layer
+#### Global caching layer
 * dedicated cache server(s)
 * hit application server, which makes network call to caching server, if not present, make network call to database server
 * Pros: scale independently (replication + partitioning) from application server
 * Cons: extra network call
 
-Writing to database strategies
+#### Writing to database strategies
 1. Write Around Cache
    * We just write to database
    * What about cache consistency? Two ways:
@@ -51,7 +47,7 @@ Writing to database strategies
      * Don't do anything -- durability
      * Distributed locking + replication
 
-Cache Eviction Policies
+#### Cache Eviction Policies
 1. FIFO
    * implemented using queue
    * easy to understand, but has huge downside
@@ -59,7 +55,7 @@ Cache Eviction Policies
    * implemented using hashmap + doubly linked list
 3. Least Frequently Used (LFU)
 
-Redis vs Memcached
+#### Redis vs Memcached
 | Memcached | Redis |
 | --------- | ----- |
 | Bare bones in memory | Feature rich: hashmaps, sorted sets, geo indexes, etc |
@@ -68,3 +64,12 @@ Redis vs Memcached
 | Multithreaded | Singlethreaded (allows transaction; actual serial execution) |
 | LRU eviction (single policy) | | LRU, LFU, TTL, etc |
 | Natively don't support replication | Single leader replication |
+
+#### Content Delivery Network (CDN)
+* a lot of applications need to serve static content (music, video, image, scripts, etc), and these files are BIG.
+* CDN are geographically distributed caches for static content, hence reduces latency
+* Domain Name System (DNS) directs the request to the nearest CDN server based on the user’s location
+* Two types
+  * Pull CDN: Content is fetched from the origin server on-demand and cached on the CDN's edge servers when requested by a user. Higher latency on first request, possible cache misses.
+  * Push CDN: Content is manually uploaded to the CDN's edge servers ahead of time. Immediate availability, lower latency.
+* Example: Akamai, Cloudfare
