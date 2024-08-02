@@ -63,7 +63,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | SQL Server      | Relational           | BTree                                              |                     | Single + Multi   |
 | VoltDB          | Relational           | Hash (in memory database - but maintains durability by WAL)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
 | Redis           | Key-Value            | Hash (in memory one -- disk one is custom format)  |
-| Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) |
+| Memcached       | Key-Value            | Hash (in memory one -- no data is flushed to disk) | | | Consistent Hashing
 | Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
 | RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
