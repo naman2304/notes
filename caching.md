@@ -66,5 +66,5 @@ Redis vs Memcached
 | Volatile; do not write to disk | Durable; writes to disk using WAL |
 | Partioned using consistent hashing | Paritioned using fixed number of partitions via gossip protocol |
 | Multithreaded | Singlethreaded (allows transaction; actual serial execution) |
-| LRU eviction | |
-| | Single leader replication |
+| LRU eviction (single policy) | | LRU, LFU, TTL, etc |
+| Natively don't support replication | Single leader replication |
