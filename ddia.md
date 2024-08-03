@@ -3249,4 +3249,57 @@ We should not retain data forever, but purge it as soon as it is no longer neede
   * cheaper to run than a Hadoop cluster (1/10th of the price)
 * Data Lake Paradigm -- bunch of different kinds of data (logs, metrics, images, etc) -- schemaless -- put in Object Stores
 * Batch jobs on Object Stores? Object Stores lack the requisite compute power, need to transport the data from storage node to compute node! Expensive
+
 ### Search Indexes
+* search for a value
+* databases are not optimized for this, because optimizations in database is due to index, and index are complete string, not substring or regex or fuzzy matching
+* search indexes solve our problem by creating inverted index
+* Prefix and suffix searching
+
+```sql
+# Documents
+1: {"apple mang"}
+2: {"apples orang"}
+3: {"mang orang"}
+
+# both have to be sorted by key to efficiently do search query by binary search
+# Prefix Inverted Index             # Suffix Inverted Index
+"apple" : {1}                       "elppa" : {1}
+"apples": {2}                       "gnam"  : {1, 3}
+"mang"  : {1, 3}                    "gnaro" : {2, 3}
+"orang" : {2, 3}                    "selppa": {2}
+
+# Prefix query (works on Prefix Inverted Index)
+GET("app") --> returns {1, 2}
+
+# Suffix query (works on Suffix Inverted Index)
+GET("ng") --> returns {1, 2, 3} [invert the query i.e make it "gn", and then search in Suffix Inverted Index]
+```
+
+##### Apache Lucene
+* most popular open source search index started in 1999
+* supports many different complicated searches
+  * text
+    * Levenshtein distance aka edit distance
+    * prefix searching
+    * suffix searching
+  * numbers
+  * coordinates (geolocation)
+* uses an LSM tree
+  * writes are first sent to memory buffer -- contrary to normal LSM tree, this write cannot be read; can only be read when dumped as immutable SSTable to disk. Dump in disk is NOT of raw document, but of inverted index (sorted by token)
+  * reads are sent to multiple SSTable files, and results are eventually merged
+* it's not a fully managed service with replication and partitioning
+
+##### ElasticSearch / Solr
+* convenience wrapper around Lucene to allow for fast searching in a "distributed way"
+* Many more things
+  * Rest API
+  * It's own query language
+  * Replication + partitioning
+  * Visualization
+  * Monitoring and Logging
+* In various partitions of documents, ElasticSearch maintains a **local index**, rather a global index (writes are fast, reads have to fan out i.e. scatter and gather)
+* Hence, try to partition data such that queries are limited to one partition only. In a chat application with various messages, partition by chatId, so that all messages of a chat are in one partition and search for a keyword in a chat thread hits only one partition
+* If we have bunch of data, and we can't store all of that in search index, then we can put recent data in search index, and this can be treated as sort of **cache**
+
+### Time series database
