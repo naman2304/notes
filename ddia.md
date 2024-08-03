@@ -3233,10 +3233,11 @@ We should not retain data forever, but purge it as soon as it is no longer neede
 #### Content Delivery Network (CDN)
 * a lot of applications need to serve static content (music, video, image, scripts, etc), and these files are BIG.
 * CDN are geographically distributed caches for static content, hence reduces latency
+* partition the data such that data for specific geographic regions goes to particular CDN you want
 * Domain Name System (DNS) directs the request to the nearest CDN server based on the user’s location
 * Two types
-  * Pull CDN / Lazy Propagation: Content is fetched from the origin server on-demand and cached on the CDN's edge servers when requested by a user. Higher latency on first request, possible cache misses.
-  * Push CDN / Eager Propagation: Content is manually uploaded to the CDN's edge servers ahead of time. Immediate availability, lower latency.
+  * Pull CDN / Lazy Propagation: Content is fetched from the **origin server** on-demand and cached on the CDN's edge servers when requested by a user. Higher latency on first request, possible cache misses. Good for social media sites
+  * Push CDN / Eager Propagation: Content is manually uploaded to the CDN's edge servers ahead of time. Immediate availability, lower latency. Good for news sites, HTML home pages.
 * Example: Akamai, Cloudfare
 
 #### Object Stores
@@ -3245,7 +3246,7 @@ We should not retain data forever, but purge it as soon as it is no longer neede
   * Hadoop clusters nodes have both compute and storage. Expensive! We just want more space and not compute.
 * Object Stores
   * service offered by large cloud providers to store static content
-  * Amazon S3, Azure Cloud Storage, Google Cloud Storage
+  * Amazon S3, Azure Blob Storage, Google Cloud Storage
   * handles scaling for you
   * handles replication for you
   * cheaper to run than a Hadoop cluster (1/10th of the price)
