@@ -59,6 +59,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Search Indexes](#search-indexes)
   - [Time series database](#time-series-database)
   - [Geospatial Index](#geospatial-index)
+  - [Load Balancer](#load-balancer)
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- |
@@ -3373,3 +3374,5 @@ WHERE
 * This is implemented in **Redis** (Redis geospatial index)
 
 If we want to index polygons and want to find overlapping polygons for a polygon, it is done using R-Trees (technique called HyperDex)
+
+### Load Balancer
