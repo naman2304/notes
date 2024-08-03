@@ -57,6 +57,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 - [Essential Technologies](#essential-technologies)
   - [Caching](#caching)
   - [Search Indexes](#search-indexes)
+  - [Time series database](#time-series-database)
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- |
@@ -3303,3 +3304,34 @@ GET("ng") --> returns {1, 2, 3} [invert the query i.e make it "gn", and then sea
 * If we have bunch of data, and we can't store all of that in search index, then we can put recent data in search index, and this can be treated as sort of **cache**
 
 ### Time series database
+* Each data point is recorded with a precise time stamp
+* great for handling time series database
+* Applications
+  * Monitoring: logs, metrics
+  * IoT: sensor readings
+  * Finance: stock market tickers
+* Example: TimeScale DB, InfluxDB, Druid, Prometheus
+* Access Pattern Requirement
+  * Reads
+    * for one data source for small time interval
+    * for all data source for small time interval
+  * Writes
+    * primarily inserts to a recent time interval, adjacent values likely similar
+    * generally uses a compound index like (data source ID, timestamp)
+  * Deletes
+    * delete data older than some prior date
+* Implementation
+  * column oriented storage (implemented using LSM trees) 
+    * since we mostly only care about a couple of metrics at a time
+    * advantages: optimize reads, less data to fetch (only relevant cols), compression, better disk locality, range queries
+  * hypertable
+    * Within one node, we can divide table (hypertable) into child tables called chunks
+    * Each chunk is assigned a range of time, and only contains data from that range. If the hypertable is also partitioned by data sources, each chunk is then (data source, range of time) like (sensor1, 20240801)
+    * ![Hypertables](/metadata/hypertables.png)
+    * Optimize Reads
+      * don't create index over whole hypertable, but on chunks -- so (sensor1, 20240801) have it's index, if some row is getting accessed for sensor1 with timestamp in 20240801 date, put the whole chunk in which this row is present to cache, because most likely values above or below will be fetched.
+      * place things in cache at chunk level (so either whole chunk is in cache or not)
+    * Optimize Deletes
+      * in usual LSM, delete is a write with tombstone + compaction. Here, we want a bunch of old data to be deleted, so can actually just hard delete old chunk
+    * Optimizes Writes
+      * when a sensor generates data, we can transfer it to it's corresponding separate LSM tree and store in chunks (say 1 chunk = 1 SSTable segment)
