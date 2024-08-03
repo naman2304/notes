@@ -54,7 +54,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Unbundling databases](#unbundling-databases)
   - [Aiming for correctness](#aiming-for-correctness)
   - [Doing the right thing](#doing-the-right-thing)
-- [Essential Technologies]
+- [Essential Technologies](#essential-technologies)
   - [Caching](#caching)
   - [Search Indexes](#search-indexes)
 
