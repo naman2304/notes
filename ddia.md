@@ -3354,11 +3354,13 @@ Geohashing
 * map areas of 2d plane to a single string value so that similar values are close to each other
 * go in say clockwise manner (a, b, c, d). Divide square again and append (a, b, c, d) to the parent. Note actually it's (00, 01, 10, 11) and hence shown as hexadecimal, but for sake of clarity using alphabets to show binary
 * as length of geohash increases, size of our box decreases. At 10 length geohash, we are talking about 1.2m * 1.1m box
+* ![Geohash Length](/metadata/geohash_length.png)
 * So when we get (query_x, query_y, query_r) as our input
   1. Convert (query_x, query_y) to geohash. We do this by starting at (a, b, c, d). Checking in which quadrant will our point be. Then let's say it's in b. Then check for (ba, bb, bc, bd), which quadrant our point will be
-  2. Repeat until we reach to smallest box whose length is >= radius required (say our radius in query is 1m, so we know that at 10 length geohash we need to stop because it's 1.2 m * 1.1 m and not go further like 11 which will be of size 0.4m * 0.35m)
-  3. For this bounding box + 8 adjacent boxes get all the points in them. Say if we are searching for all points in box "adabc", we just search for all points starting "adabc", so "adabc"<= x <"adabd"
-  4. We may get extra results, so check which ones are actually within the proper radius of 1m from our original point using Pythagorean theorem. 
+  2. Repeat until we reach to smallest box whose min(box.width, box.length) is >= radius required (say our radius in query is 1m, so we know that at 10 length geohash we need to stop because it's 1.2 m * 0.8 m and not go further like 11 which will be of size 0.4m * 0.35m)
+  3.  >= r
+  4. For this bounding box + 8 adjacent boxes get all the points in them. Say if we are searching for all points in box "adabc", we just search for all points starting "adabc", so "adabc"<= x <"adabd"
+  5. We may get extra results, so check which ones are actually within the proper radius of 1m from our original point using Pythagorean theorem. 
 * ![Geohash example](/metadata/geohash_example.png)
 * both LSM or BTree can be used because both allows fast range queries on an index
 * Geosharding
