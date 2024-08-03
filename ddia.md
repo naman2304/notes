@@ -288,6 +288,7 @@ _Not Only SQL_ has a few driving forces:
 * **Schema Flexibility** - schema-on-read, like dynamic (runtime) type checking (Python) where schema is handled at application layer while reading (client have no guarantees what data they will get; called schemaless but that's misleading).
 * **Locality** - JSON representation has better _locality_ than the multi-table SQL schema. All the relevant information is in one place, and one query is sufficient. The database typically needs to load the entire document, even if you access only a small portion of it. On updates, the entire document usually needs to be rewritten, it is recommended that you keep documents fairly small.
 * **Example** - MongoDB, CouchDB, RethinkDB, Espresso
+* Supports complex queries like aggregation (MapReduce implementation in MongoDB and CouchDB)
 
 **PostgreSQL does support storing JSON documents in a single cell. RethinkDB supports relational-like joins in its query language. Relational and document databases are becoming more similar over time**
 
@@ -506,6 +507,9 @@ How do we get the data sorted in the first place? With red-black trees or AVL tr
   * compute k hashes for key using k hash functions
   * if any of k positions in the m bit array is 0 --> return false (definitely not present)
   * if all k positions in the m bit array are 1 --> return true (may or may not be present)
+* Example: we want to recommend users reels which they have not watched. For each user maintain a bloom filter of reels they have watched, picked some video, check in bloom filter, if it says NO, then user has definitey not watched that, so can recommend that.
+* Use Bloom Filter when you want to get NO with 100% uncertainity, YES with some certainity is okay, and we only add things to it and not remove it.
+* Real life: Redis Bloom Filter
 
 Other points
 * If the database crashes, the most recent writes are lost. We can keep a separate log on disk to which every write is immediately appended. That log is not in sorted order, but that doesn't matter, because its only purpose is to restore the memtable after crash. Every time the memtable is written out to an SSTable, the log can be discarded.
@@ -1362,11 +1366,14 @@ Strategies for rebalancing:
   * When a new node joins the cluster, it randomly chooses a fixed number of existing partitions to split, and then takes ownership of one half of each of those split partitions while leaving the other half of each partition in place.
   * This approach also keeps the size of each partition fairly stable.
 * **Consistent Hashing**
+  * only problem it solves is data ownership (who owns this data)
   * distributes keys evenly, minimal data sent over networks on rebalance
   * ring is the range of hash function (say 0 to 2^32 - 1), and then we put nodes randomly on the ring (can put a node at **multiples places** (this number is same for all nodes say K) on the ring at the same time) -- we can think each node having fixed number of partitions (K)
-  * when we want to remove or add a node, just put it randomly on the ring
+  * when we want to remove or add a node, just add or remove it randomly on the ring
   * this is equivalent to **partition proportionally to nodes**
-  * apart from rebalancing partitions, consistent hashing is also used in load balancers (to create requests sticky such that request from user goes to one application server only, say to leverage caching benefits etc) (ring is hash of user IDs, and then application server is put on the ring) 
+  * Use cases
+    * Rebalancing partitions of databases
+    * Load balancers (to create requests sticky such that request from a user goes to one application server only, say to leverage caching benefits etc) (ring is hash of user IDs, and then application server is put on the ring) 
 
 #### Automatic versus manual rebalancing
 
@@ -1410,6 +1417,7 @@ Implementing fault-tolerant mechanisms is a lot of work. So, we have transaction
 * The application is free to ignore certain potential error scenarios and concurrency issues, because DB takes care of them (_safety guarantees_). For example, if a transaction fails, the application can safely retry and don't have to worry about partial failures
 * Not all applications actually need transaction, because it comes at a cost.
 * Wrong belief: transactions means reduced scalability, so any large application has to abandon transaction to achieve performance and high availability. Not entirely true!
+* Non relational DBs scale because records are independent, so they can scale horizontaly. If in relational DBs we can prevent distributed transactions and joins across partitions by sharding data smartly, then relational DBs are scalable too.
 
 #### ACID
 
@@ -3243,16 +3251,30 @@ We should not retain data forever, but purge it as soon as it is no longer neede
 
 #### Object Stores
 * Where do we store static content when we don't cache it?
-* Can't use Hadoop
-  * Hadoop clusters nodes have both compute and storage. Expensive! We just want more space and not compute.
-* Object Stores
-  * service offered by large cloud providers to store static content
-  * Amazon S3, Azure Blob Storage, Google Cloud Storage
-  * handles scaling for you
-  * handles replication for you
-  * cheaper to run than a Hadoop cluster (1/10th of the price)
+* Can't use Hadoop -- Hadoop clusters nodes have both compute and storage. Expensive! We just want more space and not compute.
+* Object Stores -- service offered by large cloud providers to store static content
 * Data Lake Paradigm -- bunch of different kinds of data (logs, metrics, images, etc) -- schemaless -- put in Object Stores
 * Batch jobs on Object Stores? Object Stores lack the requisite compute power, need to transport the data from storage node to compute node! Expensive
+* Example: Amazon S3, Azure Blob Storage, Google Cloud Storage
+* Advantages
+  * cheaper to run than a Hadoop cluster (1/10th of the price)
+  * durable
+  * stores literally any file
+  * handles scalability for you
+  * handles replication for you (99.99% availability for S3)
+  * handles security
+* Disadvantages
+  * Not fully fledged filesystem
+  * slow reads
+* Use cases:
+  * DB backups + logs archival + infrequently accessed data
+  * CDN
+* S3
+  * You have two things to identify a blob file in S3:
+    * buckets: like namespaces; globally unique
+    * keys: name of the file. S3 is not a filesystem, so there is no concept of directories or path.
+  * So if the file is identified by "S3://heynaman_bucket/images/sunset/wow.png", then "heynaman_bucket" identifies my bucket and name of the file is "images/sunset/wow.png", there is no directory.
+  * has integration with a lot of AWS and Big Data services (Apache Spark, Kafka)
 
 ### Search Indexes
 * search for a value
