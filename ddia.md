@@ -75,8 +75,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | CouchDB         | Document             |                                                    |                     | Multi            | Key Range            |
 | RethinkDB       | Document             |                                                    |                     |                  |                      |              | Dynamic partitioning |
 | Espresso        | Document             |
-| ElasticSearch   | Document             |                                                    |                     |                  |                      | Local Index  | Fixed number of partitions |
-| Solr            | Document             |                                                    |                     |                  |                      | Local Index  |
+| ElasticSearch   | Document             |                                                    |                     | Single                |                      | Local Index  | Fixed number of partitions |
+| Solr            | Document             |                                                    |                     | Single                 |                      | Local Index  |
 | Neo4J           | Graph (property)     |
 | Titan           | Graph (property)     |
 | InfiniteGraph   | Graph (property)     |
