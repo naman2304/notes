@@ -58,6 +58,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Caching](#caching)
   - [Search Indexes](#search-indexes)
   - [Time series database](#time-series-database)
+  - [Geospatial Index](#geospatial-index)
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- |
@@ -3335,3 +3336,31 @@ GET("ng") --> returns {1, 2, 3} [invert the query i.e make it "gn", and then sea
       * in usual LSM, delete is a write with tombstone + compaction. Here, we want a bunch of old data to be deleted, so can actually just hard delete old chunk
     * Optimizes Writes
       * when a sensor generates data, we can transfer it to it's corresponding separate LSM tree and store in chunks (say 1 chunk = 1 SSTable segment)
+
+### Geospatial Index
+* query: find all objects within a certain distance (radius) of the original point
+* bad solution: because we have 2 diff indexes (one on x and one on y), get all objects with x coordinates in range, get all objects with y coordinates in range, find intersection of both.
+
+```sql
+SELECT id
+FROM tbl
+WHERE
+  query_x - query_radius <= x <= query_x + query_radius AND
+  query_y - query_radius <= y <= query_y + query_radius
+```
+
+Geohashing
+* ![Geohash](/metadata/geohash.png)
+* map areas of 2d plane to a single string value so that similar values are close to each other
+* go in say clockwise manner (a, b, c, d). Divide square again and append (a, b, c, d) to the parent. Note actually it's (00, 01, 10, 11) and hence shown as hexadecimal, but for sake of clarity using alphabets to show binary
+* as length of geohash increases, size of our box decreases. At 10 length geohash, we are talking about 1.2m * 1.1m box
+* So when we get (query_x, query_y, query_r) as our input
+  1. Convert (query_x, query_y) to geohash. We do this by starting at (a, b, c, d). Checking in which quadrant will our point be. Then let's say it's in b. Then check for (ba, bb, bc, bd), which quadrant our point will be
+  2. Repeat until we reach to smallest box whose length is >= radius required (say our radius in query is 1m, so we know that at 10 length geohash we need to stop because it's 1.2 m * 1.1 m and not go further like 11 which will be of size 0.4m * 0.35m)
+  3. For this bounding box + 8 adjacent boxes get all the points in them. Say if we are searching for all points in box "adabc", we just search for all points starting "adabc", so "adabc"<= x <"adabd"
+  4. We may get extra results, so check which ones are actually within the proper radius of 1m from our original point using Pythagorean theorem. 
+* ![Geohash example](/metadata/geohash_example.png)
+* both LSM or BTree can be used because both allows fast range queries on an index
+* Geosharding
+  * this whole data point might not fight in one DB, so have to shard it
+  * even though one area might be bigger, but may have lesser data points in it. Say whole of North East vs Delhi. We don't need to do anything extra to take care of this, we can just partition data normally (**on geohashes**)
