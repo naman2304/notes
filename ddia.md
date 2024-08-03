@@ -3370,3 +3370,5 @@ WHERE
 * this whole data point might not fight in one DB, so have to shard it
 * even though one area might be bigger, but may have lesser data points in it. Say whole of North East vs Delhi. We don't need to do anything extra to take care of this, we can just partition data normally (**sorted on geohashes**)
 * This is implemented in **Redis** (Redis geospatial index)
+
+If we want to index polygons and want to find overlapping polygons for a polygon, it is done using R-Trees (technique called HyperDex)
