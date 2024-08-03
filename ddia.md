@@ -3353,16 +3353,18 @@ Geohashing
 * ![Geohash](/metadata/geohash.png)
 * map areas of 2d plane to a single string value so that similar values are close to each other
 * go in say clockwise manner (a, b, c, d). Divide square again and append (a, b, c, d) to the parent. Note actually it's (00, 01, 10, 11) and hence shown as hexadecimal, but for sake of clarity using alphabets to show binary
-* as length of geohash increases, size of our box decreases. At 10 length geohash, we are talking about 1.2m * 1.1m box
+* as depth of geohash increases, area of our box decreases. At 10 depth geohash, we are talking about 1.19m * 0.596m box
 * ![Geohash Length](/metadata/geohash_length.png)
 * So when we get (query_x, query_y, query_r) as our input
-  1. Convert (query_x, query_y) to geohash. We do this by starting at (a, b, c, d). Checking in which quadrant will our point be. Then let's say it's in b. Then check for (ba, bb, bc, bd), which quadrant our point will be
-  2. Repeat until we reach to smallest box whose min(box.width, box.length) is >= radius required (say our radius in query is 1m, so we know that at 10 length geohash we need to stop because it's 1.2 m * 0.8 m and not go further like 11 which will be of size 0.4m * 0.35m)
-  3.  >= r
-  4. For this bounding box + 8 adjacent boxes get all the points in them. Say if we are searching for all points in box "adabc", we just search for all points starting "adabc", so "adabc"<= x <"adabd"
-  5. We may get extra results, so check which ones are actually within the proper radius of 1m from our original point using Pythagorean theorem. 
+  1. Get the appropriate bounding box and it's geohash using our coordinates and radius
+     * Start at (a, b, c, d). Check in which quadrant will our point be. Then let's say it's in b. Then check for (ba, bb, bc, bd), which quadrant our point will be
+     * Repeat until we reach to the last box whose min(box.width, box.length) is >= radius required. Say our radius in query is 1m, so we know that 9 geohash depth box is 4.77m * 4.77m and at 10 length box is 1.19m * 0.596m. So we stop at 9 length because min(1.19, 0.596) is not >= 1m
+  2. Get 8 adjacent bounding box
+  3. For this bounding box + 8 adjacent boxes get all the points in them. Say if we are searching for all points in box "adabc", we just search for all points starting "adabc", so "adabc"<= x <"adabd"
+  4. We may get extra results, so check which ones are actually within the proper radius of 1m from our original point using Pythagorean theorem. 
 * ![Geohash example](/metadata/geohash_example.png)
 * both LSM or BTree can be used because both allows fast range queries on an index
 * Geosharding
   * this whole data point might not fight in one DB, so have to shard it
-  * even though one area might be bigger, but may have lesser data points in it. Say whole of North East vs Delhi. We don't need to do anything extra to take care of this, we can just partition data normally (**on geohashes**)
+  * even though one area might be bigger, but may have lesser data points in it. Say whole of North East vs Delhi. We don't need to do anything extra to take care of this, we can just partition data normally (**sorted on geohashes**)
+* This is implemented in **Redis** (Redis geospatial index)
