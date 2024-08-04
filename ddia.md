@@ -1801,45 +1801,6 @@ We need to accept the possibility of partial failure and build fault-tolerant me
 * IP (Layer 3, Network Layer) is unreliable: delay, drop, duplicate and reorder packets.
 * TCP (Layer 4, Transport Layer) which is built on top of IP, ensures missing packets are transmitted (not drop), duplicates are eliminated, and packets are reassembled into the order in which they are sent (TCP can't do anything about "delay" though).
 
-**TCP** (Transmission Control Protocol)
-* retransmission of packets, deduplication, ordered (via sequence numbers)
-* flow control and congestion control
-* error checked (via checksums)
-* Properties
-  * **3-way handshake**: used to create a connection b/w two nodes over TCP
-    * process
-      * client sends SYN to server with some random sequence number x
-      * server responds with SYN-ACK with sequence number y and acknowledgement value x+1
-      * client sends ACK with acknowledgement value y+1
-    * sequence number is for ordering of message at server's end
-    * acknowledgement value is for telling the client that they have received message and now expect this ack value to be sent as sequence number by client
-  * **reliable transmission**
-    * after the handshake, we can start sending packets
-    * duplicate ack retransmission (getting ack value, but not what we intended)
-      * sender sends packet with sequence number 99, gets ack value 100 from receiver
-      * sender sends packet with sequence number 100, gets ack value 100 from receiver.
-      * Trouble: should have received 101 but got 100 as ack value. Thus we know that sequence number 100 has to be resend
-    * timeout based estimates (**exponential backoff**) (not getting ack value back)
-      * sender will resend packet if it doesn't receive SYN-ACK within some timeout
-      * timeout is based on estimate of round trip time
-      * on expiration double the round trip time
-      * helps protect against DDOS attacks
-  * **flow control**
-    * it is possible to overwhelm the "receiver node"
-    * receiving device specifies how much space it has in bytes to buffer new messages, and sending device can only send that much more until new acknowledgement comes in
-    * if receiving device has no room left, sender waits for some time and then sends a small packet to see how much space is left now
-  * **congestion control**
-    * it is possible to overwhelm "network links"
-    * mitigation:
-      * congestion window keeps track of
-        * max number of packets that can be sent over the network without being acked.
-        * number of packets currently being sent over the network (ones that have not been acknowledged) and limits them.
-      * size of window builds up over time using additive increase multiplicative decrease (AIMD) strategy (window increase in size linearly with successful acks, decrease in size exponentially if network overloaded)
-  * **connection termination**
-    * four way handshake: really just each half of the connection termination independently. Cannot terminate both connections at the same time, due to two generals problem. FIN from client to sender. ACK from sender to client. FIN from sender to client. ACK from client to sender.
-
-UDP (User Datagram Protocol) does not perform reliable transmission or flow control or congestion control or retransmission of packets. Only does checksum. Good for video calls, video games, stock prices. Also we can do multicast (send to bunch of nodes using UDP)
-
 ### Unreliable networks
 
 Focusing on _shared-nothing systems_ the network is the only way machines communicate.
@@ -3422,4 +3383,111 @@ If we want to index polygons and want to find overlapping polygons for a polygon
     * Active-Passive: One load balancer is active, and another is in standby, taking over if the active one fails
     * Active-Active: Multiple load balancers work in parallel, sharing the load and providing fault tolerance.
 
+## Communication
+* determine how different components of system will communicate with each other
+* Usually client requests data, and server responds to it
+* But what if we want real time or near real time updates from server to client? Polling and Websockets.
 
+#### Short Polling
+* client repeatedly makes requests to the server at regular intervals (e.g., every few seconds) to check for new data.
+* Each request is independent
+* Algorithm: for each new request
+  * first establishes connection using TCP 3-way handshake
+  * request from client to server
+  * response from server to client (NULL or some data)
+  * close TCP using two 2-way handshake
+* Pros
+  * simple to implement
+  * based on standard HTTP
+  * least expensive resource wise
+* Cons
+  * inefficient due to frequent requests and redundant traffic
+  * not real time
+* Suitable for scenarios where updates are not frequent or where real-time communication is not critical. For example, checking for new emails or notifications.
+
+#### Long Polling
+* the client makes a request to the server, but the server holds the request open until new data is available or a timeout occurs. Once the server has new data or the connection times out, it responds to the client, and the client immediately sends another request. In case of timeout, a completely independent thing happens (establish connection, send request, etc). Only when we receive data, we don't need to re-establish connection
+* Algorithm
+  * 3 way TCP handshake to establish connection
+  * request from client to server
+  * server holds onto request, until new data is available or timeout occurs
+  * new data available on server, sends response to client
+  * client immediately sends another request to server (on existing established connection only, so no new 3 way handshake is required)
+* Pros
+  * Reduces the number of requests compared to short polling, making it more efficient for some use cases.
+  * Provides a more responsive experience by reducing latency.
+* Cons
+  * complex to implement than short polling
+  * more expensive than short polling resource wise -- can put additional load on the server (as a port is occupied and may require proper management of connections
+* Useful for applications where updates are relatively frequent but not constant, such as chat applications or live notifications.
+
+#### Websockets
+* establish a full-duplex communication channel over a single, long-lived connection. Once the connection is established, data can be sent and received simultaneously in real-time without the overhead of opening and closing connections for each message.
+* Algorithm
+  * connection establishment via handshake: initial request from client is HTTP only with special "Upgrade" header indicating desire to establish Websocket. If server supports Websocket, it responds with "101 Switching Protocols" indicating protocol is switching from HTTP to Websocket
+  * connection remains open until either client or server decides to close it
+  * both client and server can send messages to each other at any time w/o needing for requesting.
+* Pros
+  * Provides the lowest latency and the most efficient communication method for real-time applications.
+  * Reduces the overhead of establishing new connections for each message.
+* Cons
+  * More complex to implement and maintain compared to polling methods.
+  * most expensive resource wise
+* Ideal for applications requiring continuous, real-time interaction, such as online gaming, live financial trading platforms, or collaborative tools.
+
+### OSI stack
+| Layer number | Layer name         | Examples |
+| ------------ | ------------------ | -------- |
+| L7           | Application Layer  | HTTP, Websocket, RPC, FTP, SMTP
+| L6           | Presentation Layer | SSL/TLS, ASCII, JPEG
+| L5           | Session Layer      | NetBIOS
+| L4           | Transport Layer    | TCP, UDP
+| L3           | Network Layer      | IP
+| L2           | Datalink Layer     | MAC address, ethernet switches, WiFi access points
+| L1           | Physical Layer     | ethernet cables, fiber optic cables
+
+* A connection is defined by (client IP, client port, server IP, server port)
+* Usually there are 65k ports on a machine. Some ports are dedicated
+  * Port 80: HTTP
+  * Port 443: HTTPS
+* So if a client wants to make connection to a server, it can make max 65k connections, because server's port (80) is same in all the connection and client can use any of it's port
+
+### TCP (Transmission Control Protocol) vs UDP (User Datagram Protocol)
+* retransmission of packets, deduplication, ordered (via sequence numbers)
+* flow control and congestion control
+* error checked (via checksums)
+* Properties
+  * **3-way handshake**: used to create a connection b/w two nodes over TCP
+    * process
+      * client sends SYN to server with some random sequence number x
+      * server responds with SYN-ACK with sequence number y and acknowledgement value x+1
+      * client sends ACK with acknowledgement value y+1
+    * sequence number is for ordering of message at server's end
+    * acknowledgement value is for telling the client that they have received message and now expect this ack value to be sent as sequence number by client
+  * **reliable transmission**
+    * after the handshake, we can start sending packets
+    * duplicate ack retransmission (getting ack value, but not what we intended)
+      * sender sends packet with sequence number 99, gets ack value 100 from receiver
+      * sender sends packet with sequence number 100, gets ack value 100 from receiver.
+      * Trouble: should have received 101 but got 100 as ack value. Thus we know that sequence number 100 has to be resend
+    * timeout based estimates (**exponential backoff**) (not getting ack value back)
+      * sender will resend packet if it doesn't receive SYN-ACK within some timeout
+      * timeout is based on estimate of round trip time
+      * on expiration double the round trip time
+      * helps protect against DDOS attacks
+  * **flow control**
+    * it is possible to overwhelm the "receiver node"
+    * receiving device specifies how much space it has in bytes to buffer new messages, and sending device can only send that much more until new acknowledgement comes in
+    * if receiving device has no room left, sender waits for some time and then sends a small packet to see how much space is left now
+  * **congestion control**
+    * it is possible to overwhelm "network links"
+    * mitigation:
+      * congestion window keeps track of
+        * max number of packets that can be sent over the network without being acked.
+        * number of packets currently being sent over the network (ones that have not been acknowledged) and limits them.
+      * size of window builds up over time using additive increase multiplicative decrease (AIMD) strategy (window increase in size linearly with successful acks, decrease in size exponentially if network overloaded)
+  * **connection termination**
+    * four way handshake: really just each half of the connection termination independently. Cannot terminate both connections at the same time, due to two generals problem. FIN from client to sender. ACK from sender to client. FIN from sender to client. ACK from client to sender.
+* TCP does not dictate what data can be sent over it. Common fortmat agreed upon by client and server is called protcol. Example is HTTP (but we can use other formats other. So TCP ensures reliable, ordered and error checked delivery, while HTTP specifies the format of messages to be exchanged 
+
+UDP (User Datagram Protocol) does not perform reliable transmission or flow control or congestion control or retransmission of packets. Only does checksum. Good for video calls, video games, stock prices. Also we can do multicast (send to bunch of nodes using UDP)
