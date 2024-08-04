@@ -3397,4 +3397,27 @@ WHERE
 
 If we want to index polygons and want to find overlapping polygons for a polygon, it is done using R-Trees (technique called HyperDex)
 
+
 ### Load Balancer
+* prevents SPOF and overclocked/overloaded systems. Improves scalability and availability
+* where are they placed? any place that abstracts identical systems
+* so, can be put before API servers or databases or caches
+* Types
+  * Deployment type
+    * Software: Runs on standard servers or virtual machines. Cost effective. Example: Nginx, HAProxy
+    * Hardware: Physical appliances specifically designed for load balancing. More expensive. Example: Cisco ACE
+  * Layer of operation
+    * L4: Transport Layer. Distribute based on IP address and port w/o inspecting content of the message. Faster. Example: TCP/UDP load balancing.
+    * L7: Application Layer. Make routing decisions based on application-level data like HTTP headers, URL paths, or cookies. Slower as have to see payload, but is more flexible. Example: HTTP/HTTPS load balancing. Commonly used
+  * Routing algorithms
+    * Round Robin: Distributes requests sequentially across a pool of servers
+    * Weighted Round Robin: Similar to Round Robin, but assigns a weight to each server based on its capacity. Servers with higher weights receive more requests.
+    * Least Connections: Useful in scenarios where the load on each server can vary significantly. May not always account for the varying nature of connection types (some connections may be lightweight, others resource-intensive).
+    * Least Response Time: Traffic routed to server with lowest average response time
+    * IP Hash: Stickiness; this ensures that a specific client always connects to the same server. But if server goes done, session persistence ends as clients may be redirected to a new server. Implemented using consistent hashing. L4 layer usually because seeing IP.
+    * URL Hash: URL determines which server handles the request. Implemented using consistent hashing. L7 layer usually because we are seeing actually payload
+  * Fault Tolerance
+    * Active-Passive: One load balancer is active, and another is in standby, taking over if the active one fails
+    * Active-Active: Multiple load balancers work in parallel, sharing the load and providing fault tolerance.
+
+
