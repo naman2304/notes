@@ -60,6 +60,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Time series database](#time-series-database)
   - [Geospatial Index](#geospatial-index)
   - [Load Balancer](#load-balancer)
+  - [Communication](#communication)
 
 | Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation | Comment |
 | -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- | ------- |
