@@ -61,8 +61,8 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
   - [Geospatial Index](#geospatial-index)
   - [Load Balancer](#load-balancer)
 
-| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation |
-| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- |
+| Database        | Database Model       | Storage Engine                                     | Replication log     | Replication type | Partitioning Strategy | Secondary index partition | Rebalancing strategy | ACID isolation | Comment |
+| -------------   | -------------------- | -------------------------------------------------- | ------------------- | ---------------- | --------------------- | ------------------------- | ------- | ------- | ------- |
 | MySQL           | Relational           | BTree (InnoDB)                                     | Logical (row-based). Was statement based before version 5.1 | Single + Multi (Tungsten Replicator)   | | | | serializable (2PL)
 | PostgreSQL      | Relational           | BTree                                              | WAL based           | Single + Multi (BDR - Bi Directional Replication) | | | | serializable (SSI)
 | Oracle          | Relational           | BTree                                              | WAL based           | Single + Multi (GoldenGate)  |
@@ -70,7 +70,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | VoltDB          | Relational           | Hash (in memory database - but maintains durability by WAL)                          | Statement based     |                  |                      | Local Index  | | serializable (actual serial execution)
 | Redis           | Key-Value            | Hash (in memory one; disk one is custom format)  | | | | | Fixed number of partitions via gossip protocol | serializable (actual serial execution as its single threaded)
 | Memcached       | Key-Value            | Hash (in memory one; no data is flushed to disk) | | | | | Consistent Hashing
-| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless       | Hash                 | Local Index  | Fixed number of partitions |
+| Riak            | Key-Value            | Hash (Bitcask), LSM (LevelDB)                      |                     | Leaderless; conflicts resolved using version vectors       | Hash                 | Local Index  | Fixed number of partitions |
 | RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
 | Amazon DynamoDB | Key-Value            |                                                    |                     | Single           | Hash+Key combo       | Global Index |
@@ -85,7 +85,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | InfiniteGraph   | Graph (property)     |
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
-| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       | Hash+Key combo       | Local Index  | | Consistent Hashing
+| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless; conflicts resolved via LWW       | Hash+Key combo (aka compound index)       | Local Index  | Consistent Hashing | | Extremely fast for write heavy applications due to LSM + leaderless
 | HBase           | Wide Column          | LSM                                                |                     |                  | Key Range            |              | Dynamic partitioning |
 | BigTable        | Wide Column          | LSM                                                |                     |                  | Key Range
 | Amazon Redshift | Wide Column          | BTree
