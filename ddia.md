@@ -990,7 +990,7 @@ MySQL, PostgreSQL, Oracle Data Guard, SQL Server's AlwaysOn Availability Groups,
 
 #### Synchronous vs asynchronous
 
-* **The advantage of synchronous replication is that the follower is guaranteed to have an up-to-date copy of the data that is consistent with the leader. The disadvantage is that it the synchronous follower doesn't respond, the write cannot be processed.**. Synchronous replication => Strong Consistency.
+* **The advantage of synchronous replication is that the follower is guaranteed to have an up-to-date copy of the data that is consistent with the leader. The disadvantage is that it the synchronous follower doesn't respond, the write cannot be processed.**. Synchronous replication => Strong Consistency. Not the other way around because strong conistency can be achieved via other methods too, like raft consensus which is not synchronous to all nodes but just quorum of nodes agreeing to something
     * _Chain replication_ is a variant of synchronous replication that has been successfully implemented in a few systems such as Microsoft Azure Storage.
     * There is a strong connection between consistency of replication and consensus (getting several nodes to agree on a value).
 * It's impractical for all followers to be synchronous. If you enable synchronous replication on a database, it usually means that _one_ of the followers is synchronous, and the others are asynchronous. This guarantees up-to-date copy of the data on at least two nodes (this is sometimes called _semi-synchronous_).
