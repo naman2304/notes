@@ -3453,7 +3453,7 @@ If we want to index polygons and want to find overlapping polygons for a polygon
   * Port 443: HTTPS
 * So if a client wants to make connection to a server, it can make max 65k connections, because server's port (80) is same in all the connection and client can use any of it's port
 
-### TCP (Transmission Control Protocol) vs UDP (User Datagram Protocol)
+### TCP (Transmission Control Protocol)
 * retransmission of packets, deduplication, ordered (via sequence numbers)
 * flow control and congestion control
 * error checked (via checksums)
@@ -3491,4 +3491,5 @@ If we want to index polygons and want to find overlapping polygons for a polygon
     * four way handshake: really just each half of the connection termination independently. Cannot terminate both connections at the same time, due to two generals problem. FIN from client to sender. ACK from sender to client. FIN from sender to client. ACK from client to sender.
 * TCP does not dictate what data can be sent over it. Common fortmat agreed upon by client and server is called protcol. Example is HTTP (but we can use other formats other. So TCP ensures reliable, ordered and error checked delivery, while HTTP specifies the format of messages to be exchanged 
 
+### UDP (User Datagram Protocol)
 UDP (User Datagram Protocol) does not perform reliable transmission or flow control or congestion control or retransmission of packets. Only does checksum. Good for video calls, video games, stock prices. Also we can do multicast (send to bunch of nodes using UDP)
