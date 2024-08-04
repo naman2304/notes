@@ -3384,12 +3384,12 @@ If we want to index polygons and want to find overlapping polygons for a polygon
     * Active-Passive: One load balancer is active, and another is in standby, taking over if the active one fails
     * Active-Active: Multiple load balancers work in parallel, sharing the load and providing fault tolerance.
 
-## Communication
+### Communication
 * determine how different components of system will communicate with each other
 * Usually client requests data, and server responds to it
 * But what if we want real time or near real time updates from server to client? Polling and Websockets.
 
-#### Short Polling
+##### Short Polling
 * client repeatedly makes requests to the server at regular intervals (e.g., every few seconds) to check for new data.
 * Each request is independent
 * Algorithm: for each new request
@@ -3406,7 +3406,7 @@ If we want to index polygons and want to find overlapping polygons for a polygon
   * not real time
 * Suitable for scenarios where updates are not frequent or where real-time communication is not critical. For example, checking for new emails or notifications.
 
-#### Long Polling
+##### Long Polling
 * the client makes a request to the server, but the server holds the request open until new data is available or a timeout occurs. Once the server has new data or the connection times out, it responds to the client, and the client immediately sends another request. In case of timeout, a completely independent thing happens (establish connection, send request, etc). Only when we receive data, we don't need to re-establish connection
 * Algorithm
   * 3 way TCP handshake to establish connection
@@ -3422,7 +3422,7 @@ If we want to index polygons and want to find overlapping polygons for a polygon
   * more expensive than short polling resource wise -- can put additional load on the server (as a port is occupied and may require proper management of connections
 * Useful for applications where updates are relatively frequent but not constant, such as chat applications or live notifications.
 
-#### Websockets
+##### Websockets
 * establish a full-duplex communication channel over a single, long-lived connection. Once the connection is established, data can be sent and received simultaneously in real-time without the overhead of opening and closing connections for each message.
 * Algorithm
   * connection establishment via handshake: initial request from client is HTTP only with special "Upgrade" header indicating desire to establish Websocket. If server supports Websocket, it responds with "101 Switching Protocols" indicating protocol is switching from HTTP to Websocket
@@ -3436,7 +3436,7 @@ If we want to index polygons and want to find overlapping polygons for a polygon
   * most expensive resource wise
 * Ideal for applications requiring continuous, real-time interaction, such as online gaming, live financial trading platforms, or collaborative tools.
 
-### OSI stack
+#### OSI stack
 | Layer number | Layer name         | Examples |
 | ------------ | ------------------ | -------- |
 | L7           | Application Layer  | HTTP, Websocket, RPC, FTP, SMTP
@@ -3453,7 +3453,7 @@ If we want to index polygons and want to find overlapping polygons for a polygon
   * Port 443: HTTPS
 * So if a client wants to make connection to a server, it can make max 65k connections, because server's port (80) is same in all the connection and client can use any of it's port
 
-### TCP (Transmission Control Protocol)
+#### TCP (Transmission Control Protocol)
 * retransmission of packets, deduplication, ordered (via sequence numbers)
 * flow control and congestion control
 * error checked (via checksums)
@@ -3491,5 +3491,5 @@ If we want to index polygons and want to find overlapping polygons for a polygon
     * four way handshake: really just each half of the connection termination independently. Cannot terminate both connections at the same time, due to two generals problem. FIN from client to sender. ACK from sender to client. FIN from sender to client. ACK from client to sender.
 * TCP does not dictate what data can be sent over it. Common fortmat agreed upon by client and server is called protcol. Example is HTTP (but we can use other formats other. So TCP ensures reliable, ordered and error checked delivery, while HTTP specifies the format of messages to be exchanged 
 
-### UDP (User Datagram Protocol)
+#### UDP (User Datagram Protocol)
 UDP (User Datagram Protocol) does not perform reliable transmission or flow control or congestion control or retransmission of packets. Only does checksum. Good for video calls, video games, stock prices. Also we can do multicast (send to bunch of nodes using UDP)
