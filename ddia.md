@@ -74,7 +74,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | RocksDB         | Key-Value            | LSM                                                |
 | Voldemort       | Key-Value            |                                                    |                     | Leaderless       | Hash                 |              | Fixed number of partitions |
 | Amazon DynamoDB | Key-Value            |                                                    |                     | Single           | Hash+Key combo       | Global Index |
-| MongoDB         | Document             |                                                    |                     |                  | Key Range (<2.4)     | Local Index  |
+| MongoDB         | Document             | BTree                                              |                     |                  | Key Range (<2.4)     | Local Index  |
 | CouchDB         | Document             |                                                    |                     | Multi            | Key Range            |
 | RethinkDB       | Document             |                                                    |                     |                  |                      |              | Dynamic partitioning |
 | Espresso        | Document             |
