@@ -3385,9 +3385,10 @@ If we want to index polygons and want to find overlapping polygons for a polygon
     * Active-Active: Multiple load balancers work in parallel, sharing the load and providing fault tolerance.
 
 ### Communication
-* determine how different components of system will communicate with each other
+
+#### Realtime communication
 * Usually client requests data, and server responds to it
-* But what if we want real time or near real time updates from server to client? Polling and Websockets.
+* But what if we want real time or near real time updates from server to client? Polling, websockets and SSE.
 
 ##### Short Polling
 * client repeatedly makes requests to the server at regular intervals (e.g., every few seconds) to check for new data.
@@ -3423,18 +3424,30 @@ If we want to index polygons and want to find overlapping polygons for a polygon
 * Useful for applications where updates are relatively frequent but not constant, such as chat applications or live notifications.
 
 ##### Websockets
-* establish a full-duplex communication channel over a single, long-lived connection. Once the connection is established, data can be sent and received simultaneously in real-time without the overhead of opening and closing connections for each message.
+* these are not webhooks which are callback to HTTP request
+* establish a full-duplex (**bidirectional**) communication channel over a single, long-lived connection. Once the connection is established, data can be sent and received simultaneously in real-time without the overhead of opening and closing connections for each message.
 * Algorithm
   * connection establishment via handshake: initial request from client is HTTP only with special "Upgrade" header indicating desire to establish Websocket. If server supports Websocket, it responds with "101 Switching Protocols" indicating protocol is switching from HTTP to Websocket
+  * both client and server can send messages to each other at any time w/o needing for sending a request.
   * connection remains open until either client or server decides to close it
-  * both client and server can send messages to each other at any time w/o needing for requesting.
 * Pros
   * Provides the lowest latency and the most efficient communication method for real-time applications.
   * Reduces the overhead of establishing new connections for each message.
 * Cons
   * More complex to implement and maintain compared to polling methods.
-  * most expensive resource wise
+  * most expensive resource wise, so use wisely
+  * if the connection breaks, need extra client side logic to create another websocket connection -- not handled by websockets
 * Ideal for applications requiring continuous, real-time interaction, such as online gaming, live financial trading platforms, or collaborative tools.
+
+#### Server Sent Events (SSE)
+*  Ideal for scenarios where the server needs to push updates to the client, but the client doesn't need to send updates back frequently.
+* Algorithm
+  * client initiates the connection by sending an HTTP request to the server
+  * server keeps this connection open and uses it to send updates to the client whenever new data is available
+* Pro
+  * If the connection breaks, client automatically reconnects
+* Cons
+  * Thundering Herd Problem: Let's say a bunch of clients are connected to a single server using SSE. And suddenly server crashes or gives impression to all clients that connection is broken. Then ALL clients will try to reestablish the connection; huge load on server. Fix: try to add random jitter while reconnecting
 
 #### OSI stack
 | Layer number | Layer name         | Examples |
