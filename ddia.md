@@ -85,7 +85,7 @@ This is copied, modified and appended from [here](https://github.com/keyvanakbar
 | InfiniteGraph   | Graph (property)     |
 | Datomic         | Graph (triple store) |
 | AllegroGraph    | Graph (triple store) |
-| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       | Hash+Key combo       | Local Index  |
+| Cassandra       | Wide Column          | LSM                                                |                     | Leaderless       | Hash+Key combo       | Local Index  | | Consistent Hashing
 | HBase           | Wide Column          | LSM                                                |                     |                  | Key Range            |              | Dynamic partitioning |
 | BigTable        | Wide Column          | LSM                                                |                     |                  | Key Range
 | Amazon Redshift | Wide Column          | BTree
@@ -1359,21 +1359,23 @@ Strategies for rebalancing:
 * **Dynamic partitioning.**
   * The number of partitions adapts to the total data volume.
   * An empty database starts with an empty partition. While the dataset is small, all writes have to processed by a single node while the others nodes sit idle. HBase and MongoDB allow an initial set of partitions to be configured (_pre-splitting_).
-* **Partitioning proportionally to nodes.**
+* **Partitioning proportionally to nodes.** (Consistent Hashing)
   * Fixed number of partitions: size of dataset increases => size of partition increases. # of partitions is independent of # of nodes.
   * Dynamic partition: size of dataset increases => # of partition increases. # of partitions is independent of # of nodes.
   * Cassandra and Ketama make the number of partitions proportional to the number of nodes. Have a fixed number of partitions _per node_.
   * When a new node joins the cluster, it randomly chooses a fixed number of existing partitions to split, and then takes ownership of one half of each of those split partitions while leaving the other half of each partition in place.
   * This approach also keeps the size of each partition fairly stable.
-* **Consistent Hashing**
-  * only problem it solves is data ownership (who owns this data)
-  * distributes keys evenly, minimal data sent over networks on rebalance
-  * ring is the range of hash function (say 0 to 2^32 - 1), and then we put nodes randomly on the ring (can put a node at **multiples places** (this number is same for all nodes say K) on the ring at the same time) -- we can think each node having fixed number of partitions (K)
-  * when we want to remove or add a node, just add or remove it randomly on the ring
-  * this is equivalent to **partition proportionally to nodes**
-  * Use cases
-    * Rebalancing partitions of databases
-    * Load balancers (to create requests sticky such that request from a user goes to one application server only, say to leverage caching benefits etc) (ring is hash of user IDs, and then application server is put on the ring) 
+  * Implemented using consistent hashing
+
+**Consistent Hashing**
+* only problem it solves is data ownership (who owns this data)
+* distributes keys evenly, minimal data sent over networks on rebalance
+* ring is the range of hash function (say 0 to 2^32 - 1), and then we put nodes randomly on the ring (can put a node at **multiples places** (this number is same for all nodes say K) on the ring at the same time) -- we can think each node having fixed number of partitions (K)
+* when we want to remove or add a node, just add or remove it randomly on the ring
+* this is equivalent to **partition proportionally to nodes**
+* Use cases
+  * Rebalancing partitions of databases
+  * Load balancers (to create requests sticky such that request from a user goes to one application server only, say to leverage caching benefits etc) (ring is hash of user IDs, and then application server is put on the ring) 
 
 #### Automatic versus manual rebalancing
 
