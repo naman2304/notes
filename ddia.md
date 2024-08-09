@@ -2802,7 +2802,7 @@ User                           ---> | DB2 copy stored here           | --> event
 
 ##### Microbatching and checkpointing
 * One solution is to break the stream into small blocks, and treat each block like a miniature batch process (_micro-batching_). This technique is used in Spark Streaming, and the batch size is typically around one second.
-* An alternative approach, used in Apache Flint, is to periodically generate rolling checkpoints of state and write them to durable storage. If a stream operator crashes, it can restart from its most recent checkpoint.
+* An alternative approach, used in Apache Flink, is to periodically generate rolling checkpoints of state and write them to durable storage. If a stream operator crashes, it can restart from its most recent checkpoint.
 * Microbatching and checkpointing approaches provide the same exactly-once semantics as batch processing. However, as soon as output leaves the stream processor, the framework is no longer able to discard the output of a failed batch.
 
 ##### Atomic Commit
@@ -2826,7 +2826,7 @@ User                           ---> | DB2 copy stored here           | --> event
 * example: Flink (real time i.e. per event), Spark Streaming (microbatching). Note that stream processing frameworks are not message brokers, they are specifically consumers. Many many consumers chained to produce events and then consumers consumes these events, spits events, which are further consumed and so on.
 * Features
   * in joins, the DB in stream processor may not fit on single node. Then we would have to create partitions of events incoming to the stream processor, and also have corresponding nodes in stream processor
-  * ensures fault tolerance and no reprocessing of a message -- every consumer flushes to disk periodically i.e checkpointing (to say S3 or HDFS) using barrier messages (put state to S3 when barrier message received) -- exactly once semantic!
+  * ensures fault tolerance and no reprocessing of a message by periodically generating rolling checkpoints of state and writing them to durable storage (S3 or HDFS). If a stream operator crashes, it can restart from its most recent checkpoint and discard any output generated between the last checkpoint and the crash. The checkpoints are triggered by barriers in the message stream, similar to the boundaries between microbatches, but without forcing a particular window size.
   * requires partitioned logs and not message brokers as we need to replay messages till last barrier message in HDFS for this consumer if prev consumer went down
 
 ```sql
