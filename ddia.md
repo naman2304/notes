@@ -2805,17 +2805,17 @@ User                           ---> | DB2 copy stored here           | --> event
 * An alternative approach, used in Apache Flint, is to periodically generate rolling checkpoints of state and write them to durable storage. If a stream operator crashes, it can restart from its most recent checkpoint.
 * Microbatching and checkpointing approaches provide the same exactly-once semantics as batch processing. However, as soon as output leaves the stream processor, the framework is no longer able to discard the output of a failed batch.
 
-#### Atomic Commit
+##### Atomic Commit
 * In order to give appearance of exactly-once processing, things either need to happen atomically or none of must happen. Things should not go out of sync of each other. Distributed transactions and two-phase commit can be used (sloww and should be avoided)
 * This approach is used in Google Cloud Dataflow and VoltDB, and there are plans to add similar features to Apache Kafka.
 
-#### Idempotence
+##### Idempotence
 * Our goal is to discard the partial output of failed tasks so that they can be safely retired without taking effect twice. Another way is to rely on _idempotence_.
 * An idempotent operation is one that you can perform multiple times, and it has the same effect as if you performed it only once.
 * Even if an operation is not naturally idempotent, it can often be made idempotent with a bit of extra metadata. You can tell whether an update has already been applied (say we also send monotonic offset from broker to consumer, and if consumer has already seen it then it won't reprocess it)
 * Idempotent operations can be an effective way of achieving exactly-once semantics with only a small overhead.
 
-#### Replication
+##### Replication
 * This is for making message brokers / partitioned logs fault tolerant
 * Any stream process that requires state must ensure that this state can be recovered after a failure.
 * One option is to keep the state in a remote datastore and replicate it, but it is slow.
