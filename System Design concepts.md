@@ -3133,8 +3133,8 @@ Some hash functions are cryptographic and some are not. Cryptographic hash funct
 | --------- | -------------- | -------------------- | ------------------------ |
 | MD5 (Message Digest 5) | 128 bit | Cryptographic | Not secure |
 | SHA1 (Secure Hash Algorithm 1) | 160 bit | Cryptographic | Not secure |
-| MD5 (Secure Hash Algorithm 256) | 256 bit | Cryptographic | Secure (as of now) |
-| Murmur Hash | 128 bit | Non-cryptographic | N/A (not intended for security) |
+| SHA256 (Secure Hash Algorithm 256) | 256 bit | Cryptographic | Secure (as of now) |
+| Murmur Hash | 32/64 bit | Non-cryptographic | N/A (not intended for security) |
 
 ### Caching
 * Pros
