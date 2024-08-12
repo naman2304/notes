@@ -2632,15 +2632,14 @@ Log deletion
 * Typical large hard drive has a capacity of 6 TB and a sequential write throughput of 150 MB/s. If you are writing messages at the fastest possible rate, it takes about 11 hours to fill the drive. Thus, the disk can buffer 11 hours’ worth of messages, after which it will start overwriting old messages.
 * The throughput of a log remains more or less constant, since every message is written to disk anyway. This is in contrast to messaging systems that keep messages in memory by default and only write them to disk if the queue grows too large: systems are fast when queues are short and become much slower when they start writing to disk, throughput depends on the amount of history retained.
 
-| JMS/AMQP | Partitoned logs |
+| JMS/AMQP aka message broker | Partitoned logs |
 | -------- | --------------- |
-| Message is delivered from broker to consumer(s) | Message is consumed by consumer(s) from broker |
-| Two ways: Queues (each message delivered to one consumer) and topics (publish/subscribe model -- each message delivered to multiple subscribers) |  Append-only log with partitioning |
+| Two ways:<li>Queues (each message consumed by one consumer -- PULL i.e. not realtime)</li><li>Topics (publish/subscribe model -- each message delivered to multiple subscribers -- PUSH i.e. realtime)</li> |  Append-only log with partitioning (PULL i.e. not realtime) |
 | After message delivery, message is deleted on the broker | Consuming messages is more like reading from a file, so message is not deleted |
 | Due to deletion of message, replay not possible | Replay possible, offset is under the consumer's control, so you can easily be manipulated if necessary |
 | Preferred when messages may be expensive to process and want to parallelize processing on a message-by-message basis | Preferred for high message throughput, where each message is fast to process |
 | Preferred when no order is required because usually for a queue there are multiple consumers and we just load balance messages to them.| Preferred when order is required because usually there are multiple partitions and from a consumer group only one consumer is there on a partition |
-| ActiveMQ, RabbitMQ, Amazon SQS, IBM MQ | Apache Kafka, Amazon Kinesis |
+| <li>Queue model: ActiveMQ, RabbitMQ, Amazon SQS</li><li>Topic model: ActiveMQ, RabbitMQ, Amazon SNS (Amazon SQS does not support Topic Model), Redis Pubsub (does not support queue model)</li> | Apache Kafka, Amazon Kinesis |
 
 ### Use cases of stream processing
 
