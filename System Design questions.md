@@ -16,7 +16,7 @@ Way to approach a system design question
    * replication
    * partitioning
 
-Disk: 10TB per machine
+Disk: 10TB per machine 
 RAM: 128GB per machine
 
 ## TinyURL/PasteBin
