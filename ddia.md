@@ -1,6 +1,10 @@
-This is copied, modified and appended from [here](https://github.com/keyvanakbary/learning-notes/blob/master/books/designing-data-intensive-applications.md)
-
-# [Designing Data-Intensive Applications](https://www.goodreads.com/book/show/23463279-designing-data-intensive-applications)
+Appendix
+* [DDIA](https://www.goodreads.com/book/show/23463279-designing-data-intensive-applications) (and notes from [here](https://github.com/keyvanakbary/learning-notes/blob/master/books/designing-data-intensive-applications.md))
+* Jordan Epstein — [System Design Concepts 1](https://www.youtube.com/watch?v=ugVwhsWslAc&list=PLjTveVh7FakKjb4UYzUazqBNNF-WGurXp)
+* Jordan Epstein — [System Design Concepts 2](https://www.youtube.com/watch?v=bwt09KXDH94&list=PLjTveVh7FakLdTmm42TMxbN8PvVn5g4KJ)
+* Martin Klepmann — [Distributed Systems](https://www.youtube.com/watch?v=UEAMfLPZZhE&list=PLeKd45zvjcDFUEv_ohr_HdUFe97RItdiB)
+* Arpit Bhayani — [System Design for Beginners](https://arpitbhayani.me/system-design-for-beginners/)
+* Arpit Bhayani — [System Design Masterclass](https://arpitbhayani.me/masterclass/) 
 
 - [Reliable, scalable, and maintainable applications](#reliable-scalable-and-maintainable-applications)
   - [Reliability](#reliability)
