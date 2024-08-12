@@ -59,6 +59,7 @@ Appendix
   - [Aiming for correctness](#aiming-for-correctness)
   - [Doing the right thing](#doing-the-right-thing)
 - [Essential Technologies](#essential-technologies)
+  - [Hash algorithms](#hash-algorithms)
   - [Caching](#caching)
   - [Search Indexes](#search-indexes)
   - [Time series database](#time-series-database)
@@ -3121,6 +3122,19 @@ We should allow each individual to maintain their privacy, their control over th
 We should not retain data forever, but purge it as soon as it is no longer needed.
 
 ## Essential Technologies
+
+### Hash Algorithms
+Some hash functions are cryptographic and some are not. Cryptographic hash functions provide security properties, and should hold following 3 criterias 
+1. Collision resistance. Finding 2 distinct x, y such that H(x) = H(y) is extremely difficult.
+2. Preimage resistance. Given hash value h, should be extremely difficult to find x such that H(x) = h
+3. Second preimage resistance. Given x, should be extremely difficult to find y such that H(x) = H(y)
+
+| Algorithm | Number of bits | Cryptographic or not | Considered secure or not |
+| --------- | -------------- | -------------------- | ------------------------ |
+| MD5 (Message Digest 5) | 128 bit | Cryptographic | Not secure |
+| SHA1 (Secure Hash Algorithm 1) | 160 bit | Cryptographic | Not secure |
+| MD5 (Secure Hash Algorithm 256) | 256 bit | Cryptographic | Secure (as of now) |
+| Murmur Hash | 128 bit | Non-cryptographic | N/A (not intended for security) |
 
 ### Caching
 * Pros
