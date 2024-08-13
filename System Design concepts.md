@@ -86,11 +86,8 @@ Appendix
 | Espresso        | Document             |
 | ElasticSearch   | Document             |                                                    |                     | Single                |                      | Local Index  | Fixed number of partitions |
 | Solr            | Document             |                                                    |                     | Single                 |                      | Local Index  |
-| Neo4J           | Graph (property)     |
-| Titan           | Graph (property)     |
-| InfiniteGraph   | Graph (property)     |
-| Datomic         | Graph (triple store) |
-| AllegroGraph    | Graph (triple store) |
+| Neo4J / Titan / InfiniteGraph          | Graph (property)     |
+| Datomic / AllegroGraph         | Graph (triple store) |
 | Cassandra       | Wide Column          | LSM                                                |                     | Leaderless; conflicts resolved via LWW       | Hash+Key combo (aka compound index)       | Local Index  | Consistent Hashing | | Extremely fast for write heavy applications due to LSM + leaderless
 | HBase           | Wide Column          | LSM                                                |                     |                  | Key Range            |              | Dynamic partitioning |
 | BigTable        | Wide Column          | LSM                                                |                     |                  | Key Range
