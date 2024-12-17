@@ -9,8 +9,8 @@
 __Item 1 : Static factory methods__
 
 Pros
- - They have a name
- - You can use them to control the number of instance (Example : Boolean.valueOf)
+ - They have a name. So for instantiating classes with complex arguments to constructor, rather use a static method factory with good naming.
+ - You can use them to control the number of instance (example : `Boolean.valueOf`). We can cache / precompute them to avoid creating instance of the class when asked one.
  - You can return a subtype of the return class 
 
 Cons
