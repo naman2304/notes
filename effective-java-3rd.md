@@ -64,7 +64,7 @@ public class NutritionFacts {
 Second Way: **JavaBean Pattern** (unsafe, but readable)
  - Provide setter for all
  - But here, object is in inconsistent state during the various statements when client is trying to setup the object correctly. No atomocity while creation of object -- thread unsafe.
- - Also, it precludes the possibility of making a class immutable.
+ - Also, it prevents the possibility of making a class immutable.
 
 Example :
 ```java
@@ -94,14 +94,12 @@ cocaCola.setSodium(35);
 
 Third Way: **Builder Pattern** (safe and readable)
  - It's easier to read and write
- - You can prevent inconsistent state of you object as instance creation of main outer class is atomic.
- - Your class can be immutable (Instead of using a java bean)
- - client calls a constructor (or static factory) with all of the required parameters and
-gets a builder object. Then the client calls setter-like methods on the builder object
-to set each optional parameter of interest. Finally, the client calls a parameterless
-build method to generate the object, which is typically immutable
+ - Client calls a constructor (or static factory) with all of the **required** parameters and gets a builder object. Then the client calls setter-like methods on the builder object to set each optional parameter of interest. Finally, the client calls a parameterless build method to generate the object, which is typically immutable
+ - You can prevent inconsistent state of your object as instance creation of main outer class is atomic.
+ - Your class can be immutable (instead of using a java bean)
+ - Builder is usually static member class of the class it builds (so that client can access Builder directly without having to instantiate outer class)
  - Checks for validity for individual parameters go in Builder's constructor and methods.
- - Checks for multiple parameter's invariants goes to outer class's private constructor *after copying parameters from the builder* (Item 50)
+ - Checks for multiple parameter's invariants goes to outer class's **private** constructor *after copying parameters from the builder* (Item 50). If a check fails, throw an IllegalArgumentException (Item 72) whose detail message indicates which parameters are invalid (Item 75).
 
 Example :
 ```java
@@ -155,16 +153,19 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8).calories(100).sodiu
 
 Builder pattern is good for class heirarchies too.
  - Use a parallel hierarchy of builders, each nested in the corresponding class. Abstract classes have abstract builders; concrete classes have concrete builder.
- - This technique, wherein a subclass method is declared to return a subtype of the return type declared in the superclass, is known as *covariant return typing*. It allows clients to use these builders
-without the need for casting.
+ - This technique, wherein a subclass method (build function) is declared to return a subtype of the return type declared in the superclass, is known as *covariant return typing*. It allows clients to use these builders without the need for casting (fluent API).
 
 ```java
 public abstract class Pizza {
 	public enum Topping { HAM, MUSHROOM, ONION, PEPPER, SAUSAGE };
  	final Set<Topping> toppings;
 
-  	abstract static class Builder<T extends Builder<T>> {
+	// This is generic type with recursive type parameter (Item 30)
+	// This, along with the abstract self method, allows method chaining to work properly in subclasses, without the need for casts.
+  	public abstract static class Builder<T extends Builder<T>> {
 		EnumSet<Topping> toppings = EnumSet.noneOf(Topping.class);
+
+		// Return subclass type T so that chaining happens smoothly
 		public T addTopping(Topping topping) {
 			toppings.add(Objects.requireNonNull(topping));
 			return self();			
@@ -173,6 +174,7 @@ public abstract class Pizza {
 		abstract Pizza build();
 
 		// Subclasses must override this method to return "this"
+		// Made protected so that only subclass can access / override it, and client code can't call this function.
 		protected abstract T self();
 	}
 
@@ -197,6 +199,7 @@ public class NYPizza extends Pizza {
 		@Override protected Builder self() { return this; }
 	}
 
+	// Constructor is private.
 	private NYPizza(Builder builder) {
 		super(builder);
 		size = builder.size;
@@ -222,6 +225,7 @@ public class Calzone extends Pizza {
 		@Override protected Builder self() { return this; }
 	}
 
+	// Constructor is private.
 	private Calzone(Builder builder) {
 		super(builder);
 		sauceInside = builder.sauceInside;
