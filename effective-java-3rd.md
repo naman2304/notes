@@ -179,6 +179,9 @@ public abstract class Pizza {
 	}
 
 	Pizza(Builder<?> builder) {
+		// We should always clone the Builder variable to outer class
+		// As one Builder can be used to create object, and then changes happen to same Builder to create another object.
+		// Hence to keep memory different for variables in these 2 objects, use clone.
 		toppings = builder.toppings.clone();
 	}
 }
