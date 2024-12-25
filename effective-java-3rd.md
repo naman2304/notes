@@ -421,12 +421,30 @@ Make accessibility as low as possible. Work on a public API that you want to exp
    - package-private: member is accessible from any class in the package where it is declared (if we don't specify accessor, this is what we get -- except for interface members, which are public by default)
    - protected: member is accessible from subclasses of the class where it is declared + from any class in the package where it is declared
    - public: member is accessible from anywhere.
- - If a method overrides a superclass method, it cannot have a more restrictive access level in the subclass than in the superclass (Liskov substitution principle can be applied then)
+ - Both private and package-private members are part of class's implementation and do not normally impact its exported API. However, can leak into exported API if class implements `Serializable` interface (Item 86 and 87).
+ - A `protected` member (like `public` member) is part of the class’s exported API and must be supported forever
+ - If a method overrides a superclass method, it cannot have a more restrictive access level in the subclass than in the superclass (Liskov substitution principle. Item 15)
  - Instance fields of public classes should not be public
- - can make `static final` fields public only if it is either primitive or reference to immutable object, in which case these are effectively constants (CAPITAL_DECLARED)
- - It is wrong for a class to have a public static final array field, as nonzero length arrays are mutable
- - Implementation (fields) can leak into exported API if class implements `Serializable` class
- - A `protected` member is part of the class’s exported API and must be supported forever
+   - except: can make `static final` fields public only if it is either primitive or reference to immutable object, in which case these are effectively constants (CAPITAL_DECLARED). DO NOT make reference to mutable objects public, even if the field is final (in which case the reference cannot be modified, but the referenced object can be modified).
+   - It is wrong for a class to have a public static final array field, as nonzero length arrays are mutable
+
+```java
+// SECURITY HOLE!
+public static final Thing[] VALUES = { ... };
+
+// Way 1 to fix: can make the public array private and add a public immutable list
+private static final Thing[] PRIVATE_VALUES = { ... };
+public static final List<Thing> VALUES =
+ Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));
+
+// Way 2 to fix: can make the array private and add a public method that returns a copy of a private array
+private static final Thing[] PRIVATE_VALUES = { ... };
+public static final Thing[] values() {
+	return PRIVATE_VALUES.clone();
+}
+```
+
+ - It is acceptable to make private member of public class package-private for testing, but it is not acceptable to raise accessibility any higher. 
  - Use package-private visibility with `@VisibleForTesting` annotation to indicate that this is package-private just because we need to test it (rare cases, this annotation is used with `public` accessor too).
 
 
