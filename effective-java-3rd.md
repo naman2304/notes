@@ -140,6 +140,7 @@ public class NutritionFacts {
 		}
 	}
 	private NutritionFacts(Builder builder) {
+		// Nested classes (inner or static) have full access to the private fields and methods of the enclosing class and vice versa.
 		servingSize		= builder.servingSize;
 		servings 		= builder.servings;
 		calories		= builder.calories;
@@ -214,8 +215,6 @@ public class Calzone extends Pizza {
 
 	public static class Builder extends Pizza.Builder<Builder> {
 		private final boolean sauceInside = false;
-
-		public Builder() {}
 
 		public Builder sauceInside() {
 			sauceInside = true;
