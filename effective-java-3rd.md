@@ -375,8 +375,9 @@ public class UtilityClass {
 
 __Item 5 : Prefer Dependency Injection to hardwiring resources__
 
-A common mistake is the use of a singleton or a static utility class for a class that depends on underlying resources.
-The use of dependency injection gives us more flexibility, testability and reusability
+* A common mistake is the use of a singleton or a static utility class for a class that depends on underlying resources.
+* The use of dependency injection gives us more flexibility, testability and reusability
+* Pass the resources, or factories to create them, into the constructor or static factory or builder
 
 Example : 
 ```java
@@ -387,6 +388,10 @@ public class SpellChecker {
 	}
 	...
 }
+```
+Example of providing a factory (which will create the resource i.e. type or subtypes of tile)
+```java
+Mosaic create(Supplier<? extends Tile> tileFactory) { ... }
 ```
 
 __Item 6 : Avoid creating unnecessary objects__
