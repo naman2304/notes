@@ -102,7 +102,16 @@ public class Main {
 # Effective Java 3rd Edition Summary
 
 * [Creating and destroying objects](#creating-and-destroying-objects)
+* [Methods common to all objects](#methods-common-to-all-objects)
 * [Classes and Interfaces](#classes-and-interfaces)
+* [Generics](#generics)
+* [Enums and annotations](#enums-and-annotations)
+* [Lambdas and streams](#lambdas-and-streams)
+* [Methods](#methods)
+* [General Progamming](#general-programming)
+* [Exceptions](#exceptions)
+* [Concurrency](#concurrency)
+* [Serialization](#serialization)
 
 
 ## Creating and destroying objects
