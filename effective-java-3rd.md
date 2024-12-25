@@ -450,7 +450,7 @@ public static final Thing[] values() {
 
 __Item 16 : In public classes, use accessor methods, not public fields__
 
- - Public classes should never expose its fields. Doing this will prevent you to change its representation in the future.
+ - Public classes should never expose its fields. Doing this will prevent you to change its representation in the future. Except static final primitives or references to immutable objects (effectively constants in CAPITAL_WORDS).
  - Package private classes or private nested classes, can, on the contrary, expose their fields since it won't be part of the API.
    - For package private classes (as this is implementation detail), it can be changed or modified in code later as clients are within package only.
    - For private nested class, it doesn't really matter what the fields inside it are marked with access modifier as only outer class can read it no matter what the accessor is.
