@@ -423,7 +423,7 @@ Make accessibility as low as possible. Work on a public API that you want to exp
    - public: member is accessible from anywhere.
  - Both private and package-private members are part of class's implementation and do not normally impact its exported API. However, can leak into exported API if class implements `Serializable` interface (Item 86 and 87).
  - A `protected` member (like `public` member) is part of the class’s exported API and must be supported forever
- - If a method overrides a superclass method, it cannot have a more restrictive access level in the subclass than in the superclass (Liskov substitution principle. Item 15)
+ - If a method overrides a superclass method, it cannot have a more restrictive access level in the subclass than in the superclass (Liskov substitution principle. Item 10)
  - Instance fields of public classes should not be public
    - except: can make `static final` fields public only if it is either primitive or reference to immutable object, in which case these are effectively constants (CAPITAL_DECLARED). DO NOT make reference to mutable objects public, even if the field is final (in which case the reference cannot be modified, but the referenced object can be modified).
    - It is wrong for a class to have a public static final array field, as nonzero length arrays are mutable
