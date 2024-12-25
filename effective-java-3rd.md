@@ -1,104 +1,3 @@
-# Overview of few concepts
-
-### Generics
-
-## Generic classes
-```java
-public class Printer<T> {
-	T thingToPrint;
-
-	public Printer(T thingToPrint) {
-		this.thingToPrint = thingToPrint;
-	}
-
-	public void print() {
-		System.out.println(thingToPrint);
-	}
-}
-
-Printer<Integer> printer = new Printer<>(23);
-printer.print();
-
-Printer<Double> printer2 = new Printer<>(33.5);
-printer2.print();
-
-// Do note that generics don't work with primitives
-Printer<int> printer3 = new Printer<>>(11); // Compiler error.
-```
-Bounded Generic
-```java
-// 1. We use `extends` with interfaces too in generics <T extends Serializable>
-// 2. For multiple upper bounds use <T extends Animal & Serializable> [obviously we can extend only 1 class, but multiple interfaces]
-public class Printer<T extends Animal> {
-	T thingToPrint;
-
-	public Printer(T thingToPrint) {
-		this.thingToPrint = thingToPrint;
-	}
-
-	public void print() {
-		System.out.println(thingToPrint);
-	}
-}
-
-// Compilation error.
-Printer<Integer> printer = new Printer<>(23);
-printer.print();
-
-// Works fine.
-Printer<Cat> printer = new Printer<>(new Cat());
-printer.print();
-```
-
-## Generic Methods
-```java
-public class Main {
-	public static void main(String[] args) {
-		shout("hello", 74);
-		shout(new Cat(), "yo");
-	}
-
-	
-	public static <T, V> void shout(T thingToShout, V otherThingToShout) {
-		System.out.println(thingToShout + "!!");
-		System.out.println(otherThingToShout + "!!");
-	}
-}
-```
-Bounded Generic
-```java
-public class Main {
-	public static void main(String[] args) {
-		shout("hello"); // Error.
-		shout(new Cat());
-	}
-	
-	public static <T extends Animal> void shout(T thingToShout) {
-		System.out.println(thingToShout + "!!");
-	}
-}
-```
-
-Wildcard, used when type T is actually a parameter in a generic class. Because say Integer is a subclass of Object, but List<Integer> is not a subclass of List<Object>
-```java
-public class Main {
-	public static void main(String[] args) {
-		List<Cat> catList = new ArrayList<>();
-		catList.add(new Cat());
-		printList(catList);
-	}
-
-	// Unbounded: List<?>
-	// Upper Bounded: List<? extends Animal>
-	// Lower Bounded: List<? super Integer>
-	public static void printList(List<? extends Animal> mylist) {
-		for (Animal n : mylist) {
-			System.out.println(n);
-		}
-	}
-}
-```
-
 # Effective Java 3rd Edition Summary
 
 * [Creating and destroying objects](#creating-and-destroying-objects)
@@ -691,6 +590,103 @@ Even though it's possible to write multiple top level classes in a single file, 
 Doing so can result in multiple definition for a single class at compile time.
 
 ## Generics
+
+## Generic classes
+```java
+public class Printer<T> {
+	T thingToPrint;
+
+	public Printer(T thingToPrint) {
+		this.thingToPrint = thingToPrint;
+	}
+
+	public void print() {
+		System.out.println(thingToPrint);
+	}
+}
+
+Printer<Integer> printer = new Printer<>(23);
+printer.print();
+
+Printer<Double> printer2 = new Printer<>(33.5);
+printer2.print();
+
+// Do note that generics don't work with primitives
+Printer<int> printer3 = new Printer<>>(11); // Compiler error.
+```
+Bounded Generic
+```java
+// 1. We use `extends` with interfaces too in generics <T extends Serializable>
+// 2. For multiple upper bounds use <T extends Animal & Serializable> [obviously we can extend only 1 class, but multiple interfaces]
+public class Printer<T extends Animal> {
+	T thingToPrint;
+
+	public Printer(T thingToPrint) {
+		this.thingToPrint = thingToPrint;
+	}
+
+	public void print() {
+		System.out.println(thingToPrint);
+	}
+}
+
+// Compilation error.
+Printer<Integer> printer = new Printer<>(23);
+printer.print();
+
+// Works fine.
+Printer<Cat> printer = new Printer<>(new Cat());
+printer.print();
+```
+
+## Generic Methods
+```java
+public class Main {
+	public static void main(String[] args) {
+		shout("hello", 74);
+		shout(new Cat(), "yo");
+	}
+
+	
+	public static <T, V> void shout(T thingToShout, V otherThingToShout) {
+		System.out.println(thingToShout + "!!");
+		System.out.println(otherThingToShout + "!!");
+	}
+}
+```
+Bounded Generic
+```java
+public class Main {
+	public static void main(String[] args) {
+		shout("hello"); // Error.
+		shout(new Cat());
+	}
+	
+	public static <T extends Animal> void shout(T thingToShout) {
+		System.out.println(thingToShout + "!!");
+	}
+}
+```
+
+Wildcard, used when type T is actually a parameter in a generic class. Because say Integer is a subclass of Object, but List<Integer> is not a subclass of List<Object>
+```java
+public class Main {
+	public static void main(String[] args) {
+		List<Cat> catList = new ArrayList<>();
+		catList.add(new Cat());
+		printList(catList);
+	}
+
+	// Unbounded: List<?>
+	// Upper Bounded: List<? extends Animal>
+	// Lower Bounded: List<? super Integer>
+	public static void printList(List<? extends Animal> mylist) {
+		for (Animal n : mylist) {
+			System.out.println(n);
+		}
+	}
+}
+```
 
 Generics means type safety. Rather than finding type inconsistencies during runtime, find it at compile time.
 
