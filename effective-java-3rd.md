@@ -455,7 +455,7 @@ static void copy(String src, String dst) throws IOException {
 }
 ```
 
-## Methods of the Object class
+## Methods common to all objects
 
 __Item 10 : equals__
 
