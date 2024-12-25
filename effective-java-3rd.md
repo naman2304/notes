@@ -255,15 +255,17 @@ public enum Elvis() {
 __Item 4 : Enforce noninstantiability with a private constructor__
 
 A utility class with only static fields and static methods should never be instantiated.
- - Attempting to enforce noninstantiability by making a class abstract does not work. The class can be subclassed and the subclass instantiated.
+ - Attempting to enforce noninstantiability by making a class abstract does not work. The class can be subclassed and the subclass instantiated. Furthermore, it misleads the user into thinking the class was designed for inheritance
+ - Also, an abstract class can NEVER be `final`, so you can't prevent instantiation. 
  - Hence, create a private constructor to prevent the construction of a useless object.
- - As a side effect, this idiom also prevents the class from being subclassed as all constructors must invoke a superclass constructor, explicitly or implicitly.
+ - As a side effect, this idiom also prevents the class from being subclassed as all constructors must invoke a superclass constructor, explicitly or implicitly, and here the subclass would have no accessible superclass constructor to invoke.
 
 Example :
 ```java
 public class UtilityClass {
 	// Suppress default constructor for non-instantiability
 	private UtilityClass(){
+		// Not required, but it provides insurance in case the constructor is accidentally invoked from within the class.
 		throw new AssertionError();
 	}
 	...
