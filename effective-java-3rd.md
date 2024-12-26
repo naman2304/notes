@@ -819,8 +819,8 @@ We want to discover mistakes as soon as possible (compile time) and using raw ty
 ```java
 //Use of raw type : don't !
 private final Collection stamps = ...
-stamps.add(new Coin(...)); //Erroneous insertion. Does not throw any error
-Stamp s = (Stamp) stamps.get(i); // Throws ClassCastException when getting the Coin
+stamps.add(new Coin(...)); // Erroneous insertion. Does not throw any error (but gives "unchecked call" warning)
+Stamp s = (Stamp) stamps.get(i); // Throws runtime ClassCastException when getting the Coin
 ```
  - `List<Object>` is better than `List` because if there is a `List<String>`, then it can be passed to a method which accepts `List`, but it cannot be passed to a method that accepts `List<Object>`.
  - If we don't care about type parameter in a method, then we should use unbounded wildcard types, rather than raw types. **You can't put any element (other than null) into a Collection<?>**
@@ -842,14 +842,14 @@ static int numElementsInCommon(Set<?> s1, Set<?> s2) {
 }
 ``` 
 We still need to use raw types in two cases : 
- - Usage of class literals (`List.class`) (there is no such thing as `List<String>.class` or `List<?>.class`
- - Usage of `instanceof`. `instanceof` does not recognize type parameters as type parameter is erased on runtime. After verifying that something is an `instanceof` `Set`, it must be casted into `Set<?>` though
+ - Usage of class literals (`List.class` or `String[].class`) (there is no such thing as `List<String>.class` or `List<?>.class`)
+ - Usage of `instanceof`. `instanceof` does not recognize type parameters as type parameter is erased on runtime. After verifying that something is an `instanceof` `Set`, it must be casted into `Set<?>` (and not `Set`)
 
 
 ```java
 // Common usage of instance of
-if (o instanceof Set) {
-	Set<?> = (Set<?>) o;
+if (o instanceof Set) {		// Raw type
+	Set<?> = (Set<?>) o;	// Wildcard type
 }
 ```
 
