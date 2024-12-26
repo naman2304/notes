@@ -686,7 +686,7 @@ public class Main {
 }
 ```
 
-Wildcard, used when type T is actually a parameter in a generic class. Because say Integer is a subclass of Object, but List<Integer> is not a subclass of List<Object>
+Wildcard, used when we don't know or don't care about type. Because say Integer is a subclass of Object, but `List<Integer>` is not a subclass of `List<Object>`
 ```java
 public class Main {
 	public static void main(String[] args) {
