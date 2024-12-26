@@ -855,10 +855,42 @@ if (o instanceof Set) {		// Raw type
 
 __Item 27 : Unchecked warnings__
 
-Working with generics can often create warnings about them. Not having those warnings assure you that your code is typesafe.
-Try as hard as possible to eliminate them. Those warnings represent a potential ClassCastException at runtime.
-When you prove your code is safe but you can't remove this warning use the annotation @SuppressWarnings("unchecked") as close as possible to the declaration.
-Also, comment on why it is safe.
+* Working with generics can often create warnings about them. Not having those warnings assure you that your code is typesafe.
+* Try as hard as possible to eliminate them. Those warnings represent a potential ClassCastException at runtime.
+* When you prove your code is safe but you can't remove this warning use the annotation @SuppressWarnings("unchecked") as close as possible to the declaration. The SuppressWarnings annotation can be used on any declaration, from an individual local variable declaration to an entire class. Always use the SuppressWarnings annotation on the smallest scope possible. Typically this will be a variable declaration or a very short method or constructor. Never use SuppressWarnings on an entire class
+* Also, comment on why it is safe.
+
+```java
+public <T> T[] toArray(T[] a) {
+	if (a.length < size)
+		return (T[]) Arrays.copyOf(elements, size, a.getClass());
+	System.arraycopy(elements, 0, a, 0, size);
+	if (a.length > size)
+		a[size] = null;
+	return a;
+}
+
+ArrayList.java:305: warning: [unchecked] unchecked cast
+		return (T[]) Arrays.copyOf(elements, size, a.getClass());
+		^
+ required: T[]
+ found: Object[]
+
+// Adding local variable to reduce scope of @SuppressWarnings
+public <T> T[] toArray(T[] a) {
+	if (a.length < size) {
+		// This cast is correct because the array we're creating
+		// is of the same type as the one passed in, which is T[].
+		@SuppressWarnings("unchecked")
+		T[] result = (T[]) Arrays.copyOf(elements, size, a.getClass());
+		return result;
+	}
+	System.arraycopy(elements, 0, a, 0, size);
+	if (a.length > size)
+		a[size] = null;
+	return a;
+}
+```
 
 __Item 28 : List and arrays__
 
