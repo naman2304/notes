@@ -609,7 +609,7 @@ Doing so can result in multiple definition for a single class at compile time.
 
 ## Generics
 
-## Generic classes
+### Generic classes
 ```java
 public class Printer<T> {
 	T thingToPrint;
@@ -657,7 +657,7 @@ Printer<Cat> printer = new Printer<>(new Cat());
 printer.print();
 ```
 
-## Generic Methods
+### Generic Methods
 ```java
 public class Main {
 	public static void main(String[] args) {
