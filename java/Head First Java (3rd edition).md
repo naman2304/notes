@@ -88,6 +88,12 @@ String phrase = wordList[(int)(Math.random() * wordList.length)];
 *   A method is declared within the curly braces of a class.
 *   You can send things to a method (parameters), and get things back from a method (return types).
 
+#### Naming
+*  You can name a class, method, or variable according to the following rules:
+  *  It must start with a letter, underscore (_), or dollar sign ($). You can’t start a name with a number.
+  *  After the first character, you can use numbers as well. Just don’t start it with a number.
+  *  It can be anything you like, subject to those two rules, just so long as it isn’t one of Java’s reserved words.
+
 #### Creating Objects
 *   Objects are created using the `new` keyword followed by the class name and parentheses. For example: `Dog d = new Dog();` creates a new `Dog` object.
 *   The `new` keyword allocates memory for the new object and calls the constructor.
@@ -115,38 +121,29 @@ String phrase = wordList[(int)(Math.random() * wordList.length)];
 
 # Know Your Variables
 
-#### Core Concepts
-*   Chapter 3 focuses on the concept of **variables** in Java, and specifically what you can declare as a variable, what can be put inside a variable, and what you can do with a variable.
-*   The chapter introduces the crucial distinction between **primitive** types and **reference** types.
-
 #### Declaring Variables
-*   All variables must be declared with a **type** and a **name**.
-    *   The **type** of a variable determines the kind of value it can hold (for example, an integer, a character, or a reference to an object).
+*  All variables must be declared with a **type** and a **name**.
+    *  The **type** of a variable determines the kind of value it can hold (for example, an integer, a character, or a reference to an object).
     *  The **name** of a variable is used in code to access its value.
-*   Java **cares about the type** of variables. You cannot put a value of one type into a variable of another, incompatible type. For example, you cannot put a `Giraffe` reference in a `Rabbit` variable.
+*  Java **cares about the type** of variables. You cannot put a value of one type into a variable of another, incompatible type. For example, you cannot put a `Giraffe` reference in a `Rabbit` variable.
 
 #### Primitive Types
-*   Java has **eight primitive types**: `boolean`, `char`, `byte`, `short`, `int`, `long`, `float`, and `double`.
-*   These primitive types are used for storing simple values, not objects.
+*  Java has **eight primitive types**: `boolean`, `char`, `byte`, `short`, `int`, `long`, `float`, and `double`.
+*  These primitive types are used for storing simple values, not objects.
 *  Each primitive type has a specific size and range of values it can represent.
-* The mnemonic "Be Careful! Bears Shouldn't Ingest Large Donuts" can help you remember the order of these types.
 
-#### Primitive Type Examples
-*   `int` is used for integers, `double` is used for double-precision floating-point numbers, `boolean` is used for true/false values, etc.
-*   Examples of declaring primitive variables:
-    ```java
-    int count;
-    boolean isFinished;
-    double price;
-    char initial;
-    ```
+```java
+long big = 3456789L;  // notice L here for long
+float f = 32.5f;      // notice f here for float
+```
 
 #### Reference Variables
+*   There is actually no such thing as an object variable. There’s only an object reference variable.
 *   A reference variable holds a **reference** (or "remote control") to an **object**, not the object itself.
 *   Think of a reference variable as a remote control to an object, not the object itself.
-*   The reference variable can be programmed to refer to different objects of the same type during runtime unless declared as final.
+*   The reference variable can be programmed to refer to different objects of the same type during runtime unless declared as final. If a reference variable is marked `final`, it can only ever refer to the same object.
 *   Multiple references can refer to the same object.
-*  If a reference variable is marked `final`, it can only ever refer to the same object.
+*   How big is reference variable? Don't know. Dependent on JVM implementation. All references for a given JVM will be the same size regardless of the objects they reference, but each JVM might have a different way of representing references, so references on one JVM may be smaller or larger than references on another JVM.
 
 #### Object References
 *   When you declare a reference variable, you must specify the type of the object it can refer to. For example, a `Dog` reference can only refer to `Dog` objects.
@@ -155,18 +152,5 @@ String phrase = wordList[(int)(Math.random() * wordList.length)];
 *   **A reference variable's type does not determine the type of the object**, but rather the type of object that a reference variable can refer to.
     *   For example, `Animal a = new Dog();` is valid because `Dog` is a type of `Animal` but a reference variable of type `Animal` called `a` is still referring to a `Dog` object.
 
-#### Keywords and Reserved Words
-*   Java has a set of **keywords, reserved words, and special identifiers** that cannot be used as variable names.
-*   These words are used by Java and have special meanings. It is important to know them.
-*   It is not necessary to memorize these words at this point in learning Java.
-
-#### Key Concepts Introduced
-*   **Variables** as a way of storing data.
-*   **Primitive types** for storing simple values, such as numbers and booleans.
-*   **Reference types** for storing references to objects.
-*   The **difference** between primitive values and object references.
-*   The concept of a reference variable as a **remote control** to an object.
-*  The notion of **type safety** in Java as it applies to both primitive and reference variables.
-
-This summary is focused solely on the content of Chapter 3, without references to any concepts or topics outside the chapter.
-
+#### Arrays
+*   Arrays are always objects, whether they’re declared to hold primitives or object references. Think of them as tray of cups. Now cups can either store the primitive itself or a remote control (reference) to object
