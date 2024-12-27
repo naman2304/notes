@@ -60,6 +60,8 @@ String[] wordList = {"innovative", "scalable", "next-generation"};
 String phrase = wordList[(int)(Math.random() * wordList.length)];
 ```
 
+----
+
 # A Trip to Objectville
 
 #### Objects
@@ -108,4 +110,63 @@ String phrase = wordList[(int)(Math.random() * wordList.length)];
 *   When an object is no longer needed, the garbage collector reclaims the memory that object was using.
 *   An object becomes **eligible for garbage collection** when the JVM determines that the object can no longer be accessed or used by the program.
 *   The garbage collector runs periodically, especially when the program is low on memory. The garbage collector **frees up the memory** that was used by unreachable objects, so that memory can be reused. The process is **automatic and invisible** to the programmer.
+
+----
+
+# Know Your Variables
+
+#### Core Concepts
+*   Chapter 3 focuses on the concept of **variables** in Java, and specifically what you can declare as a variable, what can be put inside a variable, and what you can do with a variable.
+*   The chapter introduces the crucial distinction between **primitive** types and **reference** types.
+
+#### Declaring Variables
+*   All variables must be declared with a **type** and a **name**.
+    *   The **type** of a variable determines the kind of value it can hold (for example, an integer, a character, or a reference to an object).
+    *  The **name** of a variable is used in code to access its value.
+*   Java **cares about the type** of variables. You cannot put a value of one type into a variable of another, incompatible type. For example, you cannot put a `Giraffe` reference in a `Rabbit` variable.
+
+#### Primitive Types
+*   Java has **eight primitive types**: `boolean`, `char`, `byte`, `short`, `int`, `long`, `float`, and `double`.
+*   These primitive types are used for storing simple values, not objects.
+*  Each primitive type has a specific size and range of values it can represent.
+* The mnemonic "Be Careful! Bears Shouldn't Ingest Large Donuts" can help you remember the order of these types.
+
+#### Primitive Type Examples
+*   `int` is used for integers, `double` is used for double-precision floating-point numbers, `boolean` is used for true/false values, etc.
+*   Examples of declaring primitive variables:
+    ```java
+    int count;
+    boolean isFinished;
+    double price;
+    char initial;
+    ```
+
+#### Reference Variables
+*   A reference variable holds a **reference** (or "remote control") to an **object**, not the object itself.
+*   Think of a reference variable as a remote control to an object, not the object itself.
+*   The reference variable can be programmed to refer to different objects of the same type during runtime unless declared as final.
+*   Multiple references can refer to the same object.
+*  If a reference variable is marked `final`, it can only ever refer to the same object.
+
+#### Object References
+*   When you declare a reference variable, you must specify the type of the object it can refer to. For example, a `Dog` reference can only refer to `Dog` objects.
+*   A reference can be set to `null`, which means it does not refer to any object.
+*   A reference can be redirected to a different object of the same class type.
+*   **A reference variable's type does not determine the type of the object**, but rather the type of object that a reference variable can refer to.
+    *   For example, `Animal a = new Dog();` is valid because `Dog` is a type of `Animal` but a reference variable of type `Animal` called `a` is still referring to a `Dog` object.
+
+#### Keywords and Reserved Words
+*   Java has a set of **keywords, reserved words, and special identifiers** that cannot be used as variable names.
+*   These words are used by Java and have special meanings. It is important to know them.
+*   It is not necessary to memorize these words at this point in learning Java.
+
+#### Key Concepts Introduced
+*   **Variables** as a way of storing data.
+*   **Primitive types** for storing simple values, such as numbers and booleans.
+*   **Reference types** for storing references to objects.
+*   The **difference** between primitive values and object references.
+*   The concept of a reference variable as a **remote control** to an object.
+*  The notion of **type safety** in Java as it applies to both primitive and reference variables.
+
+This summary is focused solely on the content of Chapter 3, without references to any concepts or topics outside the chapter.
 
