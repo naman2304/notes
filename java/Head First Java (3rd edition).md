@@ -204,6 +204,10 @@ floating points 0.0
 references null
 ```
 
+#### Comparing primitives and reference types
 *   Use == to compare two primitives or to see if two references refer to the same object. 
 *   Use the equals() method to see if two different objects are equal. 
 
+----
+
+# Extra Strength Methods
