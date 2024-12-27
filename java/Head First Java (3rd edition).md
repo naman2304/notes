@@ -17,4 +17,95 @@
 *   [Make a Connection](#make-a-connection)
 *   [Dealing with Concurrency Issues](#dealing-with-concurrency-issues)
 
-# Breaking the surface
+# Breaking the Surface
+
+#### The Way Java Works
+- Java is compiled into **bytecode** by the compiler, making it platform-independent.
+- The bytecode runs on the **Java Virtual Machine (JVM)**, which translates it into machine code specific to the operating system.
+- Compilation steps:
+  1. Write the source code in `.java` files.
+  2. Use the `javac` compiler to compile code into `.class` files containing bytecode.
+  3. Run the program using the `java` command, which invokes the JVM.
+
+#### Code Structure in Java
+- Basic structure includes:
+  - **Class**: Defines the blueprint of an object.
+  - **Method**: Defines the actions/behavior of objects.
+  - `main()` Method:
+    - Entry point for all Java applications.
+    - Syntax: 
+      ```java
+      public static void main(String[] args) {
+          // Code here
+      }
+      ```
+  - **Semicolons (`;`)**: End statements.
+
+#### Why Java?
+- Features that make Java popular:
+  - **Object-oriented**: Focuses on objects and their interactions.
+  - **Platform-independent**: Write once, run anywhere.
+  - **Automatic memory management**: Garbage collection eliminates memory leaks.
+  - **Secure and robust**: Type-checking and runtime error detection.
+
+#### Looping and Branching
+- **Loops**: Execute code repeatedly.
+  - `for`, `while`, `do-while`.
+- **Conditional Branching**: Makes decisions.
+  - `if`, `else`, `switch`.
+
+#### Example
+```java
+String[] wordList = {"innovative", "scalable", "next-generation"};
+String phrase = wordList[(int)(Math.random() * wordList.length)];
+```
+
+# A Trip to Objectville
+
+#### Objects
+*   An **object** is a thing that exists in the program. Objects have **state** and **behavior**.
+*   **State** is represented by **instance variables**. Instance variables hold data, and each object can have unique values for its instance variables.
+*   **Behavior** is represented by **methods**. Methods operate on an object's data.
+    *   For example, a `Song` object might have `title` and `artist` as instance variables (state) and methods like `setTitle()` and `play()` (behavior).
+*   Objects are created from a **class**.
+
+#### Classes
+*   A **class** is a **blueprint** for creating objects. A class defines what data an object will hold (instance variables), and what methods an object will have.
+*   A class has one or more **methods**.
+*   A source code file (with the `.java` extension) typically holds one class definition. The class definition must be within a pair of curly braces.
+
+#### Global variables or methods
+*   There is **no concept of "global" variables or methods** in a Java object-oriented program. In Java, everything must reside within a class.
+*   While true global variables don't exist, a method or constant can be made to behave similarly to a global entity by using the `public` and `static` keywords.
+    *   A `public static` method can be called from anywhere in an application.
+    *   A `public`, `static`, and `final` variable essentially creates a globally available constant.
+
+#### Methods
+*   Methods hold instructions for how an object should behave.
+*   A method has a name, and a body (the code within the method).
+*   A method is declared within the curly braces of a class.
+*   You can send things to a method (parameters), and get things back from a method (return types).
+
+#### Creating Objects
+*   Objects are created using the `new` keyword followed by the class name and parentheses. For example: `Dog d = new Dog();` creates a new `Dog` object.
+*   The `new` keyword allocates memory for the new object and calls the constructor.
+
+#### Using Objects
+*   The **dot operator** `.` is used to access an object's instance variables and methods.
+    *   For example: `d.bark();` calls the `bark` method of the `Dog` object `d`. Also, `d.size = 40;` sets the size of the dog object `d`.
+
+#### Object References
+*   A variable that holds an object is actually a **reference** (a remote control) to the object. It doesn't hold the object itself.
+*   Multiple reference variables can refer to the **same object**.
+*   A reference can be `null`, meaning it does not refer to any object.
+*   A reference can be redirected (reprogrammed to refer to a different object), as long as it’s an object of the same class type.
+*   If a reference is declared as `final`, it can only ever refer to the same object, and can never be reassigned to another object.
+
+#### Heap Memory
+*   When a new object is created using the `new` keyword, the Java Virtual Machine (JVM) allocates memory for that object on the heap. (area of memory where **all objects live**)
+*   The size of the memory allocated on the heap for an object depends on the amount of memory the object needs. For example, an object with 15 instance variables would likely need more space than an object with only two instance variables.
+*   The Java heap is specifically called the **Garbage-Collectible Heap**, because the memory allocated there is managed by Java's garbage collection process.
+*   When an object is no longer needed, the garbage collector reclaims the memory that object was using.
+*   An object becomes **eligible for garbage collection** when the JVM determines that the object can no longer be accessed or used by the program.
+*   The garbage collector runs periodically, especially when the program is low on memory. The garbage collector **frees up the memory** that was used by unreachable objects, so that memory can be reused. The process is **automatic and invisible** to the programmer.
+
