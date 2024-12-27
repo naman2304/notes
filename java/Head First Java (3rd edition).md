@@ -154,3 +154,56 @@ float f = 32.5f;      // notice f here for float
 
 #### Arrays
 *   Arrays are always objects, whether they’re declared to hold primitives or object references. Think of them as tray of cups. Now cups can either store the primitive itself or a remote control (reference) to object
+
+----
+
+# How Objects Behave
+
+#### Instance Variables
+*   Each **object** (instance of a class) can have its own unique values for its instance variables.
+*   Instance variables represent the **state** of an object.
+*   Instance variables should be marked **private**, to implement encapsulation.
+
+#### Methods
+*   **Methods** operate on the data (state) of an object.
+*   Methods use and can change the values of an object's **instance variables.**
+*   Methods can take **arguments** (also called **parameters**) that provide input to the method.
+*   Methods can also **return** a value as the result of their operation.
+*   Methods are declared within the curly braces of the class, and have a method signature (name and arguments) and a body.
+
+#### Encapsulation
+*   **Encapsulation** is the practice of keeping instance variables **private** and providing controlled access to them through public **getter** and **setter** methods.
+*   **Getters** are public methods that return the value of a private instance variable.
+*   **Setters** are public methods that allow you to change the value of a private instance variable.
+*   Encapsulation **protects the state** of an object from uncontrolled changes.
+*   Using **private instance variables** provides more flexibility in how data is handled and allows for future changes without breaking the program.
+
+#### Method Arguments (Parameters)
+*   Methods can accept one or more arguments (parameters).
+*   When a method is called, the values passed as arguments are copied to the method's parameter variables (a concept called "pass by value").
+*   Java is pass-by-value
+    *   **Primitive types** are passed by value, meaning that a copy of the value is passed to the method. Changing the value of the parameter in the method will not change the original variable.
+    *   **Reference types** are also passed by value. However, the value that is copied is the object's reference, not the object itself. So, if the method modifies the object using the copied reference, the original object outside of the method will be modified.
+
+#### Method Return Types
+*   Methods can have a **return type**, which specifies the type of value the method will return.
+*   If a method declares a non-void return type, it must return a value compatible with the declared return type.
+*   If a method does not return a value, its return type is declared as `void`.
+*   When a method returns a primitive value, a copy of the value is returned to the caller.
+*   When a method returns a reference value, the caller receives a copy of the reference, not a copy of the object.
+
+#### Default values
+*   Local variables do NOT get a default value! The compiler complains if you try to use a local variable before the variable is initialized.
+*   Instance variables always get a default value. If you don’t explicitly assign a value to an instance variable or you don’t call a setter method, the instance variable still has a value!
+
+```
+booleans false
+characters 0
+integers 0
+floating points 0.0
+references null
+```
+
+*   Use == to compare two primitives or to see if two references refer to the same object. 
+*   Use the equals() method to see if two different objects are equal. 
+
