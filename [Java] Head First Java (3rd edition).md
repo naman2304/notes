@@ -524,3 +524,41 @@ if (d instanceof Dog) {
   ``` 
 
 # Life and Death of an Object
+
+#### Constructors
+
+*   **Constructors** are special methods used to initialize objects when they are created.
+*   Constructors have the same name as the class.
+*   **Constructors do not have a return type**.
+*   A class can have multiple constructors with different parameter lists, which is called **constructor overloading**.
+*   If you don't define a constructor in a class, the compiler provides a **no-arg constructor** by default. However, if you define any constructor, the compiler will not provide the no-arg constructor.
+*   The **`new` keyword** is used to invoke the constructor and create a new instance of the class.
+*   Constructors are responsible for setting up the initial state of an object by initializing instance variables.
+*   Constructors can call **superclass constructors** using the `super()` keyword, which must be the first statement of a constructor.
+
+#### Object Creation
+
+*   Object creation is a multi-step process that includes allocating memory on the heap, initializing the object's instance variables and calling its constructor.
+*   When an object is created, space is allocated for all of the instance variables, including those inherited from its superclasses.
+*   The **constructor of the superclass runs before the constructor of the subclass**.
+*   The book also mentions that each object holds not just its own declared instance variables, but also everything from its superclasses.
+*   **Reference variables** hold the memory address of an object on the heap.
+
+#### Object Lifecycle
+
+*   Objects are born when they are created with the `new` keyword and a constructor.
+*   Objects die when they are no longer referenced and are eligible for garbage collection.
+*   **Garbage collection** is the process by which the JVM automatically reclaims memory occupied by objects that are no longer in use.
+*   You cannot explicitly control when an object will be garbage collected.
+*   If you use the dot operator on a **null reference**, you will get a **`NullPointerException`** at runtime.
+
+#### Additional Notes
+
+*   Instance variables are there to support an object, usually throughout the object’s entire life.
+*   The chapter emphasizes the importance of constructors in setting up the initial state of an object.
+*  The chapter highlights the lifecycle of an object from the time it is created using the `new` keyword to when the object is no longer in use and is ready to be garbage collected.
+*   The book touches on how constructors interact with inheritance and the order in which constructors are called when creating an object of a subclass.
+*  The chapter uses a Snowboard object with an inner core representing the Object portion of the Snowboard class, to illustrate that every object holds not just its own declared instance variables, but also everything from its superclasses.
+*   The chapter does not go into detail about static variables or methods, which are introduced later in the book.
+
+These notes summarize the core concepts from Chapter 9, focusing on constructors, object creation, and garbage collection.
