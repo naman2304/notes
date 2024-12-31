@@ -459,7 +459,7 @@ if (d instanceof Dog) {
 * Now say we want few animals (Cat and Dog) to have pet behaviors too
   * Option 1: Put pet methods (either as abstract or concrete) in Animal -- bad because many non-petable Animal (like lion) also inherit these pet methods then
   * Option 2: Create another abstract class Pet, and only Dog and Cat extend Pet too (alongside Animal). Deadly diamond of death problem here.
-  * Option 3: Pet as interface.
+  * Option 3: Pet as interface. Correct.
 
 #### **Diamond Problem in Java (Superclass and Interface)**
 ##### Conflict between superclass and interface
