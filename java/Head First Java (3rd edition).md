@@ -375,3 +375,46 @@ The three things that can prevent a class from being subclassed are
 *   **Private Constructors**: A class with only **private constructors** cannot be subclassed. Private constructors prevent the class from being instantiated by code outside the class, thus preventing subclassing.
 
 # Serious Polymorphism
+
+#### Interfaces
+
+*   **Interfaces** are a way to achieve **polymorphism** by defining a contract that classes can implement.
+*   Interfaces declare methods that implementing classes must provide.
+*   Interfaces are a **contract**, specifying what methods a class must have.
+*   **A class can implement multiple interfaces**, using the keyword `implements`.
+*   Interfaces do not have method implementations, only method signatures.
+*   Interfaces can be thought of as **"pure abstract classes"**.
+
+#### Abstract Classes
+
+*   **Abstract classes** cannot be instantiated.
+*   Abstract classes can have both **abstract methods** and **concrete methods**.
+*   Abstract methods must be implemented by concrete subclasses.
+*   Subclasses of an abstract class can implement abstract methods to provide specific behavior.
+*   Abstract classes can be thought of as **partially implemented classes**.
+*   The book notes that default methods in interfaces work a bit like a standard method in an abstract class, in that they have a body and will be inherited by subclasses.
+
+#### Polymorphism with Interfaces
+
+*   Interfaces allow a single method to take on many forms based on the type of the object.
+*   They are part of **polymorphism**, allowing for more flexible and extensible code.
+*   When using interfaces, you can invoke methods based on the declared interface type rather than the specific class type, which increases flexibility.
+
+#### `Object` Class
+
+*   The `Object` class is the root of all classes in Java.
+*   Every class implicitly extends `Object`.
+*   `Object` class has some basic methods available to all classes, such as:
+    *   `equals(Object o)`: Used to check if two objects are equal.
+    *   `getClass()`: Returns the class object of an object.
+    *   `toString()`: Returns a string representation of the object.
+    *   `hashCode()`: Returns an integer hash code value for the object.
+
+#### Additional Notes
+
+*   The chapter emphasizes that inheritance is just the beginning of polymorphism.
+*   The chapter refers to the "IS-A" test from the previous chapter to determine the use of interfaces and inheritance, but in a more broad context.
+*   The chapter introduces the concept of implementing multiple interfaces, expanding on the concept of inheritance covered in chapter 7.
+*   The chapter highlights the idea that interfaces help in creating more flexible and maintainable code.
+*   The chapter notes that even interfaces can have default and static methods that have a body and will be inherited by subclasses.
+
