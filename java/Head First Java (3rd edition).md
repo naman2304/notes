@@ -57,6 +57,7 @@
 #### Example
 ```java
 String[] wordList = {"innovative", "scalable", "next-generation"};
+// The Math.random method returns a number from zero to just less than one.
 String phrase = wordList[(int)(Math.random() * wordList.length)];
 ```
 
@@ -211,3 +212,27 @@ references null
 ----
 
 # Extra Strength Methods
+
+#### New Java Concepts
+
+*   **For Loops**:
+    *   Structure: **initialization**, **boolean test**, **iteration expression**.
+        *   **Initialization**: Executes once at loop start.
+        *   **Boolean test**: Evaluated before each iteration.
+        *   **Iteration expression**: Executes at end of each loop.
+    *   **Enhanced for loop**: Simplifies iteration through arrays and collections.
+        ```java
+        int[] locations = {1, 2, 5};
+        for (int location: locations) {
+        }
+        ```
+*   **Post-increment Operator (`++`)**:
+    *   Increments a variable *after* its value is used.
+*  **Break Statement**:
+    *   Exits a loop prematurely.
+*   `**ArrayList**` **vs. Regular Arrays**:
+    *  Regular arrays have fixed size.
+    *   `ArrayList` objects have a dynamic size.
+
+# Using the Java Library
+
