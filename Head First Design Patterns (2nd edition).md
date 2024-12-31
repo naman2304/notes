@@ -1,9 +1,3 @@
-[go back](https://github.com/pkardas/learning)
-
-# Head First Design Patterns: Building Extensible and Maintainable Object-Oriented Software
-
-Book by Eric Freeman and Elisabeth Robson
-
 Code here: [click](.)
 
 - [The Strategy Pattern](#the-strategy-pattern)  
