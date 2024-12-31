@@ -220,7 +220,7 @@ references null
         *   **Initialization**: Executes once at loop start.
         *   **Boolean test**: Evaluated before each iteration.
         *   **Iteration expression**: Executes at end of each loop.
-    *   **Enhanced for loop**: Simplifies iteration through arrays and collections.
+    *   **Enhanced for loop**: Simplifies iteration through arrays and collections implementing the `Iterable` interface.
         ```java
         int[] locations = {1, 2, 5};
         for (int location: locations) {
@@ -230,9 +230,78 @@ references null
     *   Increments a variable *after* its value is used.
 *  **Break Statement**:
     *   Exits a loop prematurely.
-*   `**ArrayList**` **vs. Regular Arrays**:
-    *  Regular arrays have fixed size.
-    *   `ArrayList` objects have a dynamic size.
+*   `ArrayList` **vs. Regular Arrays**:
+    *  Regular arrays have fixed size. `ArrayList` objects have a dynamic size.
+    *  Regular arrays you access only `length` instance variable, for `ArrayList` we can call so many methods on it (see below)
 
 # Using the Java Library
+
+#### ArrayList
+
+*   **`ArrayList`** is a class that implements the **`List` interface**, which is part of the Java Collections Framework.
+*   `ArrayList` is a dynamic array, which allows it to grow and shrink as needed.
+*   Common `ArrayList` methods:
+    *   `add(element)`: Adds an element to the end of the list.
+    *   `add(index, element)`: Inserts an element at a specific index.
+    *   `remove(index)`: Removes an element at a specific index.
+    *   `remove(Object o)`: Removes first occurrence of the specified element
+    *   `get(index)`: Retrieves the element at a specific index.
+    *   `size()`: Returns the number of elements in the list.
+    *   `contains(element)`: Checks if the element exists in the list.
+*   `ArrayList` objects can only hold **objects**, not primitives. Primitive values can be wrapped as objects using wrapper classes.
+
+```java
+ArrayList<Egg> myList = new ArrayList<Egg>();
+Egg egg1 = new Egg();
+myList.add(egg1);
+Egg egg2 = new Egg();
+myList.add(egg2);
+
+boolean isIn = myList.contains(egg1);
+int theSize = myList.size();
+int idx = myList.indexOf(egg2);
+boolean empty = myList.isEmpty();
+myList.remove(egg1);
+```
+
+#### Java API Documentation
+
+*   The **Java API documentation** provides comprehensive information about classes, methods, and packages.
+*   Navigating the API docs:
+    *   **Top down**: Find a package and drill down.
+    *   **Class-first**: Find the class and click it.
+    *   **Search**: Use search to go to a specific method, class, package or module.
+
+#### Packages
+
+*   Packages are used to
+    *   **organize** related classes and interfaces into a hierarchical namespace.
+    *   prevent **naming conflicts** when multiple classes with the same name exist.
+    *   provide a level of security, because you can restrict the code you write so that only other classes in the same package can access it.
+
+```java
+// javax.swing
+
+// java.util
+ArrayList
+
+// java.lang -- this is sort of pre-imported for free, hence we don't have to import this.
+System (System.out.println)
+Math
+String
+
+```
+
+```java
+// Either you add import statement and then you can use class name directly
+// NOTE: import does not actually make the imported class code to come to class that's importing it. It's not like C++'s #include
+//       Just saves you from typing, that's it. So don't have to worry about code getting bloated. 
+import java.util.ArrayList;
+ArrayList<Egg> eggs = ...
+
+// Or you use the full name explicitly everywhere in the code.
+
+java.util.ArrayList<Egg> eggs = ...
+```
+
 
