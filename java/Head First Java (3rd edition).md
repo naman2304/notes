@@ -380,9 +380,7 @@ The three things that can prevent a class from being subclassed are
 #### Abstract Classes
 
 *   **Abstract classes** cannot be instantiated.
-*   Abstract classes can have both **abstract methods** and **concrete methods**.
-*   Abstract methods must be implemented by concrete subclasses.
-*   Subclasses of an abstract class can implement abstract methods to provide specific behavior.
+*   Abstract classes can have both **abstract methods** and **concrete methods**. Abstract methods must be implemented by concrete subclasses.
 *   Abstract classes can be thought of as **partially implemented classes**.
 *   If you declare an abstract method, you MUST mark the class abstract as well. You can’t have an abstract method in a non-abstract class. Abstract methods exist solely for polymorphism purpose. In subclass you eventually override with similar conditions (same exact arg list, compatible return type and wider or same access modifier).
 
