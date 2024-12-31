@@ -522,3 +522,5 @@ if (d instanceof Dog) {
   A a = new A();
   a.foo(); // Output: "Y's foo"
   ``` 
+
+# Life and Death of an Object
