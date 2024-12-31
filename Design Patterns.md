@@ -1,8 +1,8 @@
-Source:
+Appendix:
 * Dive Into Design Patterns by Alexander Shvets (aka https://refactoring.guru/design-patterns)
 *  Head First Design Patterns (2nd edition)
 
-Appendix
+Index:
 * [Creational Patterns](#creational-patterns)
   * [Factory method](#factory-method)  
   * [Abstract Factory](#abstract-factory)  
