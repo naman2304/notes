@@ -1,3 +1,8 @@
+Source:
+* Dive Into Design Patterns by Alexander Shvets (aka https://refactoring.guru/design-patterns)
+*  Head First Design Patterns (2nd edition)
+
+Appendix
 * [Creational Patterns](#creational-patterns)
   * [Factory method](#factory-method)  
   * [Abstract Factory](#abstract-factory)  
@@ -24,3 +29,6 @@
   * [Template Method](#template-method)  
   * [Visitor](#visitor)  
 
+* Creational patterns provide object creation mechanisms that increase flexibility and reuse of existing code.
+* Structural patterns explain how to assemble objects and classes into larger structures, while keeping these structures flexible and efficient.
+* Behavioral patterns take care of effective communication and the assignment of responsibilities between objects.
