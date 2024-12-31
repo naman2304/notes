@@ -304,3 +304,74 @@ java.util.ArrayList<Egg> eggs = ...
 ```
 
 # Better living in Objectville
+
+#### Inheritance
+
+*   **Inheritance** allows a class (subclass) to inherit **members** (instance variables and methods) of the superclass.
+    *   Example: `Animal` superclass with `Feline` and `Canine` subclasses.
+*   The **`extends`** keyword is used to establish an inheritance relationship in Java.
+*   Subclasses can:
+    *   Add new methods and instance variables.
+    *   **Override** inherited methods. We do not override inherited instance variables, but rather redefine them (if required, though it's almost not required)
+*   **IS-A test**: Use the IS-A test to check if the inheritance hierarchy makes sense (e.g., a Cat IS-A Pet).
+    *   works anywhere in the inheritance tree. If your inheritance tree is well-designed, the IS-A test should make sense when you ask any subclass if it IS-A any of its supertypes. Example: Wolf --> Canine --> Animal (here Wolf IS-A Canine, and also Wolf IS-A Animal)
+    *   means that subclass can do anything that superclass can do + subclass can more things specific to that subclass.
+    *   works one-directionally. Wolf IS-A Animal, but reverse is not true.
+*   When you call a method on an object reference, you’re calling the most specific version of the method for that object type. **In other words, the lowest one wins!**    
+*   **HAS-A test**: There is a HAS-A test too, which is effectively composition (Bathroom HAS-A Tub means that Bathroom has a Tub instance variable)
+
+```java
+@Override
+public void roam() {
+ super.roam();          // calls inherited version of roam()
+ // my own roam stuff
+}
+
+@Override
+public void eat() {
+ // my own eat stuff, don't call the superclass's eat()
+}
+```
+
+#### Rules of Overriding
+*   The argument list (parameter types) of the overriding method must match **exactly** with the arguments of the overridden method.
+*   The return type of the overriding method must be **compatible** with the return type of the overridden method.
+*   The overriding method cannot be less accessible than the overridden method.
+    *   A `public` method cannot be overridden to be `private`.
+
+#### Rules of Overloading
+*   An overloaded method is just a different method that happens to have the same method name. It has nothing to do with inheritance and polymorphism. An overloaded method is NOT the same as an overridden method.
+    *  You can’t change ONLY the return type. You must change the argument list
+    *  The return types can be different.
+    *  You can vary the access levels in any direction.
+
+#### Polymorphism  
+```java
+Animal[] animals = new Animal[5];
+animals[0] = new Dog();
+animals[1] = new Cat();
+animals[2] = new Wolf();
+animals[3] = new Hippo();
+animals[4] = new Lion();
+
+for (Animal animal : animals) {
+ animal.eat();
+ animal.roam();
+}
+```
+
+```java
+class Vet {
+ // can take any class which IS-A Animal (say Canine, or Wolf)
+ public void giveShot(Animal a) {
+ a.makeNoise();
+ }
+}
+```
+
+The three things that can prevent a class from being subclassed are
+*   **Access Control**: A **non-public** class (a class that does not have the `public` keyword modifier) can only be subclassed by classes within the same package. Classes in different packages will not be able to subclass it.
+*   **`final` Keyword**: If a class is declared with the `final` modifier, it cannot be extended. A `final` class is at the end of the inheritance line, and no other class can inherit from it.
+*   **Private Constructors**: A class with only **private constructors** cannot be subclassed. Private constructors prevent the class from being instantiated by code outside the class, thus preventing subclassing.
+
+# Serious Polymorphism
