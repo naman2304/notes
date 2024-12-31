@@ -317,7 +317,8 @@ java.util.ArrayList<Egg> eggs = ...
     *   works anywhere in the inheritance tree. If your inheritance tree is well-designed, the IS-A test should make sense when you ask any subclass if it IS-A any of its supertypes. Example: Wolf --> Canine --> Animal (here Wolf IS-A Canine, and also Wolf IS-A Animal)
     *   means that subclass can do anything that superclass can do + subclass can more things specific to that subclass.
     *   works one-directionally. Wolf IS-A Animal, but reverse is not true.
-*   When you call a method on an object reference, you’re calling the most specific version of the method for that object type. **In other words, the lowest one wins!**    
+*   You can call a method on an object reference only if the class of the reference type actually has the method.
+*   When a method is invoked, it will use the object type's implementation of that method. You’re calling the most specific version of the method for that object type. **In other words, the lowest one wins!**.
 *   **HAS-A test**: There is a HAS-A test too, which is effectively composition (Bathroom HAS-A Tub means that Bathroom has a Tub instance variable)
 
 ```java
@@ -376,15 +377,6 @@ The three things that can prevent a class from being subclassed are
 
 # Serious Polymorphism
 
-#### Interfaces
-
-*   **Interfaces** are a way to achieve **polymorphism** by defining a contract that classes can implement.
-*   Interfaces declare methods that implementing classes must provide.
-*   Interfaces are a **contract**, specifying what methods a class must have.
-*   **A class can implement multiple interfaces**, using the keyword `implements`.
-*   Interfaces do not have method implementations, only method signatures.
-*   Interfaces can be thought of as **"pure abstract classes"**.
-
 #### Abstract Classes
 
 *   **Abstract classes** cannot be instantiated.
@@ -392,29 +384,143 @@ The three things that can prevent a class from being subclassed are
 *   Abstract methods must be implemented by concrete subclasses.
 *   Subclasses of an abstract class can implement abstract methods to provide specific behavior.
 *   Abstract classes can be thought of as **partially implemented classes**.
-*   The book notes that default methods in interfaces work a bit like a standard method in an abstract class, in that they have a body and will be inherited by subclasses.
+*   If you declare an abstract method, you MUST mark the class abstract as well. You can’t have an abstract method in a non-abstract class. Abstract methods exist solely for polymorphism purpose. In subclass you eventually override with similar conditions (same exact arg list, compatible return type and wider or same access modifier).
 
-#### Polymorphism with Interfaces
+```java
+abstract class Animal {
+  abstract void eat();
+  abstract void roam();
+}
 
-*   Interfaces allow a single method to take on many forms based on the type of the object.
-*   They are part of **polymorphism**, allowing for more flexible and extensible code.
-*   When using interfaces, you can invoke methods based on the declared interface type rather than the specific class type, which increases flexibility.
+abstract class Canine extends Animal {
+  abstract void cleanCanineTooth();   // must be overridden in the concrete class extending Canine;
+
+  void sharpenTooth() {        // need not be overridden in Canine's subclass as we have provided impl here
+    // random implementation
+  }
+
+  @Override
+  void eat() {    // we can implement eat here only so that Canine's subclass (say Wolf) don't have to.
+
+  }
+}
+
+Canine c;
+c = new Dog(); // Fine. Abstract class can be used as reference variable, which can point to an object of a concrete class.
+c = new Canine(); // Not fine, compilation error.
+```
+
+#### Interfaces
+
+*   **Interfaces** are a way to achieve **polymorphism** by defining a **contract** specifying what methods a class must implement.
+*   Interfaces declare methods that implementing classes must provide.
+*   **A class can implement multiple interfaces**, using the keyword `implements`.
+*   Interfaces do not have method implementations, only method signatures. After Java 8 however, interfaces's methods too can have impl, the method just needs to be marked `default`.
+*   Interfaces can be thought of as **"pure abstract classes"**.
+*   A Java class can have only one parent (superclass), and that parent class defines who you are. But you can implement multiple interfaces, and those interfaces defines role that you can play.
+
+| Feature                      | Abstract Class                  | Interface                       |
+|------------------------------|----------------------------------|---------------------------------|
+| Multiple inheritance         | Not supported                   | Supported                       |
+| Constructors                 | Allowed (but still can't instantiate this class)                        | Not allowed                     |
+| Fields                       | Any type                        | Only `public static final`      |
+| Method implementation        | Allowed                         | Allowed (default, static)       |
+| Relationship                 | "Is-a" relationship             | "Can-do" relationship like Serializable, Flyable         |
 
 #### `Object` Class
 
-*   The `Object` class is the root of all classes in Java.
-*   Every class implicitly extends `Object`.
-*   `Object` class has some basic methods available to all classes, such as:
+*   The `Object` (java.lang.Object) class is the root of all classes in Java.
+*   Any class that doesn’t explicitly extend another class, implicitly extends `Object`
+*   `Object` class has some basic methods available to all classes, such as (there are more):
     *   `equals(Object o)`: Used to check if two objects are equal.
     *   `getClass()`: Returns the class object of an object.
     *   `toString()`: Returns a string representation of the object.
     *   `hashCode()`: Returns an integer hash code value for the object.
+*   `Object` is a non-abstract class, so you can make object of `Object` class.
 
-#### Additional Notes
+```java
+ArrayList<Object> myDogArrayList = new ArrayList<Object>();
+Dog aDog = new Dog();
+myDogArrayList.add(aDog);
 
-*   The chapter emphasizes that inheritance is just the beginning of polymorphism.
-*   The chapter refers to the "IS-A" test from the previous chapter to determine the use of interfaces and inheritance, but in a more broad context.
-*   The chapter introduces the concept of implementing multiple interfaces, expanding on the concept of inheritance covered in chapter 7.
-*   The chapter highlights the idea that interfaces help in creating more flexible and maintainable code.
-*   The chapter notes that even interfaces can have default and static methods that have a body and will be inherited by subclasses.
+Dog d = myDogArrayList.get(0);    // won't compile, because get here returns type Object
 
+Object d = myDogArrayList.get(0); // works
+d.bark();                         // but this won't work, hence `d` is not of much use.
+
+Cat c = (Cat) d;                ` // runtime ClassCastException.
+
+if (d instanceof Dog) {
+  Dog x = (Dog) d;                // explicit casting
+  x.bark();                       // works now.
+}
+```
+
+* **Compiler checks the class of the reference variable, not the class of the actual object at the other end of the reference.**
+
+* Now say we want few animals (Cat and Dog) to have pet behaviors too
+  * Option 1: Put pet methods (either as abstract or concrete) in Animal -- bad because many non-petable Animal (like lion) also inherit these pet methods then
+  * Option 2: Create another abstract class Pet, and only Dog and Cat extend Pet too (alongside Animal). Deadly diamond of death problem here.
+  * Option 3: Pet as interface.
+
+#### **Diamond Problem in Java (Superclass and Interface)**
+##### Conflict between superclass and interface
+* Scenario
+  - **Class B**: Has an implemented method `foo()`.  
+  - **Interface X**: Has a default method `foo()`.  
+  - **Class A**: Extends `Class B` and implements `Interface X`.
+
+* Key Resolution Rule
+  - **Superclass Takes Precedence**:  If a method is present in both a superclass and an interface (as a default method), the superclass implementation is used automatically.  
+
+* **Example**
+  ```java
+  class B {
+      void foo() {
+          System.out.println("B's foo");
+      }
+  }
+  
+  interface X {
+      default void foo() {
+          System.out.println("X's foo");
+      }
+  }
+  
+  class A extends B implements X {
+      // No override needed; B's foo() is used.
+  }
+
+  A a = new A();
+  a.foo(); // Output: "B's foo"
+  ```
+
+* Explicit Override
+  - To explicitly use the interface's default method, override `foo()` in `Class A` and call `X.super.foo()`:
+
+  ```java
+  class A extends B implements X {
+      @Override
+      public void foo() {
+          X.super.foo(); // Calls X's foo
+      }
+  }
+  A a = new A();
+  a.foo(); // Output: "X's foo"
+  ```
+
+##### Conflict between multiple interfaces
+* If two interfaces have conflicting default methods, the implementing class must explicitly resolve the conflict or it won't compile.
+  ```java
+  interface Y { default void foo() { System.out.println("Y's foo"); } }
+  interface Z { default void foo() { System.out.println("Z's foo"); } }
+  
+  class A implements Y, Z {
+      @Override
+      public void foo() {
+          Y.super.foo(); // Resolve ambiguity
+      }
+  }
+  A a = new A();
+  a.foo(); // Output: "Y's foo"
+  ``` 
