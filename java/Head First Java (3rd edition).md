@@ -300,8 +300,7 @@ import java.util.ArrayList;
 ArrayList<Egg> eggs = ...
 
 // Or you use the full name explicitly everywhere in the code.
-
 java.util.ArrayList<Egg> eggs = ...
 ```
 
-
+# Better living in Objectville
