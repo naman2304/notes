@@ -772,6 +772,7 @@ final class MyMostPerfectClass {
 *   Final static variables must be initialized either
     * during declaration OR
     * static initializer
+* static imports, which allow you to import static members of a class directly, without needing to use the class name (e.g., `import static java.lang.Math.*;`).
 
 #### `Math` Class
 
@@ -835,8 +836,6 @@ String s = String.format("%,d", myBillion);                   // 1,000,000,000
 String.format("I have %.2f bugs to fix.", 476578.09876);      // "I have 476578.10 bugs to fix."
 String.format("I have %,.2f bugs to fix.", 476578.09876);     // "I have 476,578.10 bugs to fix."
 ```
-
-* static imports, which allow you to import static members of a class directly, without needing to use the class name (e.g., `import static java.lang.Math.*;`).
 
 
 
