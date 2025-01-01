@@ -383,6 +383,7 @@ The three things that can prevent a class from being subclassed are
 *   Abstract classes can have both **abstract methods** and **concrete methods**. Abstract methods must be implemented by concrete subclasses.
 *   Abstract classes can be thought of as **partially implemented classes**.
 *   If you declare an abstract method, you MUST mark the class abstract as well. You can’t have an abstract method in a non-abstract class. Abstract methods exist solely for polymorphism purpose. In subclass you eventually override with similar conditions (same exact arg list, compatible return type and wider or same access modifier).
+*   An abstract class cannot be declared as `final` because the purpose of abstract is to allow extension, while the purpose of final is to prevent it.
 
 ```java
 abstract class Animal {
@@ -649,4 +650,193 @@ class B extends A {
 ```
 
 # Numbers Matter
+
+#### Static Variables and Methods
+*   Methods in the Math class don’t use any instance variable values. And because the methods are `static` you don’t need to have an instance of Math. All you need is the Math class.
+*   **Static variables** are class variables, which means they belong to the class itself, not to any specific instance of the class. There is only one copy of a static variable for the entire class. Static variables are declared using the `static` keyword.
+    *   Static variables are shared. All instances of the same class share a single copy of the static variables
+    *   Static variables are initialized when the class is loaded, which happens when we either try to access static method/variable on a class, or try to create instance of the class for the first time. Thus, all static variables in a class are initialized before any object of that class can be created OR any static method of the class runs. Default values of static variables are same as of instance variables.
+*   **Static methods** also belong to the class, not an instance, and can be invoked directly using the class name.
+    *   Static methods cannot access instance variables (i.e. non static ones), but can access static variables (aka static instance variables though static "instance" variable itself is misnomer -- there is no such thing like that). Similarly static methods cannot access instance methods too because they do not have a `this` reference to a particular object.
+    *   Static methods are useful for utility methods that do not depend on the state of an object.
+*   The `main` method is always a static method.
+*   **Constants** are a type of static variable that are also marked with the `final` keyword, indicating that their values cannot be changed after initialization. Usually in CAPITAL_LETTERS
+
+```java
+public class A {
+  public static foo() {
+  }
+}
+
+// Ideally
+A.foo();
+
+// But this also works, though not recommended as it's misleading.
+A a = new A();
+a.foo();
+```
+
+* A static initializer is a block of code that runs when a class is loaded, before any other code can use the class, so it’s a great place to initialize a static variable.
+
+```java
+class ConstantInit1 {
+  final static int X;
+
+  static {
+    X = 42;
+  }
+}
+```
+
+```java
+class StaticSuper {
+  static {
+    System.out.println("super static block");
+  }
+
+  StaticSuper () {
+    System.out.println("super constructor");
+  }
+}
+
+public class StaticTests extends StaticSuper {
+  static int rand;
+
+  static {
+    rand = (int) (Math.random() * 6);
+    System.out.println("static block " + rand);
+  }
+
+  StaticTests() {
+    System.out.println("constructor");
+  }
+
+  public static void main(String[] args) {
+    System.out.println("in main");
+    StaticTests st = new StaticTests();
+  }
+}
+
+// Output -- the static blocks for both classes run before either of the constructors run
+super static block
+static block 4
+in main
+super constructor
+constructor
+```
+
+#### Final
+* Regarding final
+   * A final variable means you can’t change its value.
+   * A final method means you can’t override the method.
+   * A final class means you can’t extend the class (i.e. you can’t make a subclass).
+
+```java
+class Foof {
+  final int size = 3;
+  final int whuffie;
+
+  Foof() {
+    whuffie = 42;
+  }
+
+  void doStuff(final int x) {
+    // you can’t change x
+  }
+
+  void doMore() {
+    final int z = 7;
+    // you can’t change z
+  }
+}
+```
+
+```java
+class Poof {
+  final void calcWhuffie() {
+    // important things
+    // that must never be overridden
+  }
+}
+```
+
+```java
+final class MyMostPerfectClass {
+  // cannot be extended
+}
+```
+
+*   Final non-static variables must be initialized either
+    * during declaration OR
+    * constructor
+*   Final static variables must be initialized either
+    * during declaration OR
+    * static initializer
+
+#### `Math` Class
+
+*   The `Math` class provides a collection of static methods for performing mathematical operations (e.g., `Math.abs()`, `Math.max()`, `Math.min()`, `Math.round()`, `Math.random()`, `Math.sqrt()`, etc.).
+*   The `Math.random()` method returns a pseudorandom double value between 0.0 (inclusive) and 1.0 (exclusive).
+*   The `Math` class is a good example of how static methods can be used to provide utility functions. It's constructor is private.
+
+#### Wrapper Classes
+
+*   **Wrapper classes** are used to represent primitive values as objects. Each primitive type has a corresponding wrapper class (e.g., `Integer` for `int`, `Double` for `double`, `Boolean` for `boolean`, etc.). These are in java.lang package, hence we don't need to import them.
+*   **Autoboxing** is the automatic conversion of a primitive value into its corresponding wrapper object.
+*   **Unboxing** is the reverse process, where a wrapper object is automatically converted back to its primitive value.
+
+```java
+public void autoboxing() {
+ int x = 32;
+ ArrayList<Integer> list = new ArrayList<Integer>();
+ list.add(x);
+ 
+ int num = list.get(0);
+}
+```
+
+*   Wrapper classes provide utility methods for converting strings to numbers and for comparing numeric values.
+
+```java
+Integer.parseInt("3");
+
+// Every method or constructor that parses a String can throw a NumberFormatException.
+Integer.parseInt("three");
+```
+
+*   Wrapper objects are immutable, which means that once a wrapper object is created, its value cannot be changed.
+
+#### Number Formatting
+
+```java
+long hardToRead = 10000000;
+long betterToRead = 10_000_000_000;
+long sillyButCompilesFine = 10_00000_00;
+```
+
+*   The **`String.format()` method** is a powerful way to format strings, numbers, and dates, using a format string and arguments.
+*  Format specifiers is `% [argument number] [flags] [width] [.precision] type`
+   * `%` has to start with %
+   * `argument number` to specify which argument to format. It is useful when you're working with multiple arguments in the format string.
+   * `flags` These are for special formatting options like inserting commas, putting negative numbers in parentheses, or making the numbers left justified.
+   * `width` defines the MINIMUM number of characters that will be used. That’s *minimum* not TOTAL. If the number is longer than the width, it’ll still be used in full, but if it’s less than the width, it’ll be padded with zeros.
+   * `.precision` defines the precision. In other words, it sets the number of decimal places
+   * `type`
+     * `%d` for integers
+     * `%f` for floating-point numbers
+     * `%s` for strings.
+     * `%x` for hexadecimal
+     * `%c` for character
+
+```java
+long myBillion = 1_000_000_000;
+String s = String.format("%,d", myBillion);                   // 1,000,000,000
+
+String.format("I have %.2f bugs to fix.", 476578.09876);      // "I have 476578.10 bugs to fix."
+String.format("I have %,.2f bugs to fix.", 476578.09876);     // "I have 476,578.10 bugs to fix."
+```
+
+* static imports, which allow you to import static members of a class directly, without needing to use the class name (e.g., `import static java.lang.Math.*;`).
+
+
 
