@@ -420,7 +420,7 @@ c = new Canine(); // Not fine, compilation error.
 | Feature                      | Abstract Class                  | Interface                       |
 |------------------------------|----------------------------------|---------------------------------|
 | Multiple inheritance         | Not supported                   | Supported                       |
-| Constructors                 | Allowed (but still can't instantiate this class)                        | Not allowed                     |
+| Constructors                 | Allowed (all abstract classes have constructors -- implicit or explicit) (but still can't instantiate this class)                        | Not allowed                     |
 | Fields                       | Any type                        | Only `public static final`      |
 | Method implementation        | Allowed                         | Allowed (default, static)       |
 | Relationship                 | "Is-a" relationship             | "Can-do" relationship like Serializable, Flyable         |
@@ -529,36 +529,124 @@ if (d instanceof Dog) {
 
 *   **Constructors** are special methods used to initialize objects when they are created.
 *   Constructors have the same name as the class.
-*   **Constructors do not have a return type**.
-*   A class can have multiple constructors with different parameter lists, which is called **constructor overloading**.
-*   If you don't define a constructor in a class, the compiler provides a **no-arg constructor** by default. However, if you define any constructor, the compiler will not provide the no-arg constructor.
-*   The **`new` keyword** is used to invoke the constructor and create a new instance of the class.
-*   Constructors are responsible for setting up the initial state of an object by initializing instance variables.
+*   Constructors **do not have a return type**.
+*   A class can have multiple constructors with different parameter lists (**constructor overloading**).
+*   Only if you don't define a constructor, the compiler provides a **no-arg constructor** by default.
+*   The **`new` keyword** is used to invoke the constructor and create a new instance of the class. `new` is the only way to invoke a constructor and create objects of a class (from outside the class) (if another class inherits our class, it can invoke constructor of superclass using `super()`)
+*   Constructors set the initial state of an object by initializing instance variables.
 *   Constructors can call **superclass constructors** using the `super()` keyword, which must be the first statement of a constructor.
+*   Constructor can be of all 4 access modifiers (just like members aka instance variables and methods)
+
+```java
+public class Duck{
+
+  Duck() { }        // constructor
+
+  void Duck() {}    // valid method; Java lets us to create a method with same name as class -- but don't do it.
+}
+```
+
+```java
+public class Duck extends Animal {
+  int size;
+
+  public Duck(int newSize) {
+    // If you even don't put anything on top of the explicit constructor you created, compiler will call the default constructor of the Superclass i.e. it calls super()
+    // Also, call to `super` must be first statement in your constructor.
+    super();                  
+    size = newSize;
+  }
+}
+```
+
+```java
+public abstract class Animal {
+  private String name;
+  public String getName() {
+    return name;
+  }
+  public Animal(String theName) {
+    name = theName;
+  }
+}
+
+public class Hippo extends Animal {
+  public Hippo(String name) {
+    super(name);
+  }
+}
+
+Hippo h = new Hippo("Buffy");
+System.out.println(h.getName());
+```
+
+* Use `this()` to call a constructor from another overloaded constructor in the same class; the call to `this()` can be used only in a constructor and must be the first statement in a constructor; a constructor can have a call to `super()` OR `this()`, but never both!
+
+```java
+class Mini extends Car {
+  private Color color;
+
+  public Mini() {
+    this(Color.RED);
+  }
+
+  public Mini(Color c) {
+    super("Mini");
+    color = c;
+    // more initialization
+  }
+
+  // Won't work.
+  public Mini(int size) {
+    this(Color.RED);
+    super(size);
+  }
+} 
+```
+
+#### The Stack and the Heap
+
+*   Java has two main areas of memory: **the Stack and the Heap**.
+*   **The Heap** is where **all objects live**. This includes objects of all classes, and arrays. The Java heap is also known as the **garbage-collectible heap**.
+    *   Instance variables live inside object on the heap. Even if instance variable is primitive or reference, it is on the heap. If instance variable is a reference, the actual object lives separately in the heap only and it's address (aka reference) is stored in this reference instance variable.
+    *   Objects are allocated space on the heap according to their size.
+*   **The Stack** is where **method invocations and local variables live**.
+    *   When a method is called, a **stack frame** is pushed onto the stack, holding the method's state.
+    *   Local variables, including method parameters, are stored in the stack frame.
+    *   **Object reference variables**, when declared as local variables, are placed on the stack, holding a way to get to an object on the heap.
+*   The **JVM** is responsible for starting the main thread and the garbage collection thread.
 
 #### Object Creation
 
-*   Object creation is a multi-step process that includes allocating memory on the heap, initializing the object's instance variables and calling its constructor.
-*   When an object is created, space is allocated for all of the instance variables, including those inherited from its superclasses.
-*   The **constructor of the superclass runs before the constructor of the subclass**.
-*   The book also mentions that each object holds not just its own declared instance variables, but also everything from its superclasses.
-*   **Reference variables** hold the memory address of an object on the heap.
+*   Object creation involves allocating space on the heap, initializing instance variables, and calling the constructor.
+*   Space is allocated for all instance variables, including inherited ones.
+*   The superclass constructor runs before the subclass constructor.
+*   Reference variables hold the memory address of an object on the heap.
 
 #### Object Lifecycle
 
-*   Objects are born when they are created with the `new` keyword and a constructor.
-*   Objects die when they are no longer referenced and are eligible for garbage collection.
-*   **Garbage collection** is the process by which the JVM automatically reclaims memory occupied by objects that are no longer in use.
+*   Objects are born when created with `new` and a constructor.
+*   Objects die when they are no longer referenced and become eligible for **garbage collection**.
+    *   The **Garbage Collector (gc)** reclaims memory occupied by unreachable objects.
+    *   An object is eligible for GC when there are no more live references to it.
 *   You cannot explicitly control when an object will be garbage collected.
 *   If you use the dot operator on a **null reference**, you will get a **`NullPointerException`** at runtime.
 
-#### Additional Notes
+```java
+class A {
 
-*   Instance variables are there to support an object, usually throughout the object’s entire life.
-*   The chapter emphasizes the importance of constructors in setting up the initial state of an object.
-*  The chapter highlights the lifecycle of an object from the time it is created using the `new` keyword to when the object is no longer in use and is ready to be garbage collected.
-*   The book touches on how constructors interact with inheritance and the order in which constructors are called when creating an object of a subclass.
-*  The chapter uses a Snowboard object with an inner core representing the Object portion of the Snowboard class, to illustrate that every object holds not just its own declared instance variables, but also everything from its superclasses.
-*   The chapter does not go into detail about static variables or methods, which are introduced later in the book.
+  private int yo;
 
-These notes summarize the core concepts from Chapter 9, focusing on constructors, object creation, and garbage collection.
+  A() {}
+}
+
+class B extends A {
+  B() {}
+}
+
+// If we create instance of B, then "yo" variable will be there in memory, it's just not accessible from B and is accessible only from A.
+// So when a subclass extends a Superclass, it inherits everything, but only few things are accessible to it depending on access modifiers.
+```
+
+# Numbers Matter
+
