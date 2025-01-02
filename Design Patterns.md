@@ -3,7 +3,7 @@ Appendix
 * Head First Design Patterns (2nd edition)
 
 Index:
-* [Prerequisite comcepts](#prerequisite-concepts)
+* [Prerequisite concepts](#prerequisite-concepts)
 * [Creational Patterns](#creational-patterns)
   * [Factory method](#factory-method)  
   * [Abstract Factory](#abstract-factory)  
@@ -30,7 +30,7 @@ Index:
   * [Template Method](#template-method)  
   * [Visitor](#visitor)  
 
-# Prerequisite comcepts
+# Prerequisite concepts
 
 #### Basics of OOP
 
