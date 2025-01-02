@@ -271,4 +271,8 @@ Here, if client doesn't check if document is not of read type and calls save, it
 
 
 
+# Creational Patterns
 
+# Structural Patterns
+
+# Behavioral Patterns
