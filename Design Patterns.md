@@ -1,4 +1,4 @@
-Appendix
+Appendix:
 * Dive Into Design Patterns by Alexander Shvets (aka https://refactoring.guru/design-patterns)
 * Head First Design Patterns (2nd edition)
 
@@ -18,7 +18,7 @@ Index:
   * [Facade](#facade)  
   * [Flyweight](#flyweight)  
   * [Proxy](#proxy)  
-* [Behavioral Patterns](behavioral-patterns)
+* [Behavioral Patterns](#behavioral-patterns)
   * [Chain of Responsibility](#chain-of-responsibility)  
   * [Command](#command)  
   * [Iterator](#iterator)  
