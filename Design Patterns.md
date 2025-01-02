@@ -128,8 +128,8 @@ Index:
 |------------------|---------------------|------------------------------|-------------------------------------| ----------------------- |
 | **Association**  | "Knows-a"           | Independent                  | Teacher ↔ Students                  | ` Professor → Student ` (solid arrow) |
 | **Dependency**   | "Uses-a"            | Short-lived (temporary)      | Car ↔ FuelStation                   | ` Car  ---> FuelStation ` (dotted arrow) |
-| **Aggregation**  | "Has-a" (shared)    | Independent                  | University ↔ Departments            | ` University <>----- Department ` (unfilled diamond with solid line) |
-| **Composition**  | "Owns-a" (exclusive)| Part depends on the whole    | Car ↔ Engine                        | ` Car ◆----- Engine ` (filled diamond with solid line) |
+| **Aggregation**  | "Has-a" (shared)    | Independent                  | University ↔ Departments            | ` University <>-----> Department ` (unfilled diamond with solid arrow) (yes it looks dotted, but consider it solid) |
+| **Composition**  | "Owns-a" (exclusive)| Part depends on the whole    | Car ↔ Engine                        | ` Car ◆-----> Engine ` (filled diamond with solid arrow) (yes it looks dotted, but consider it solid) |
 
 #### Introduction to Design Patterns
 
@@ -137,23 +137,138 @@ Index:
 *   A pattern is like a blueprint, showing the result, features, and a flexible order of implementation.
 *   A typical pattern description includes the **Intent**, **Motivation**, **Structure**, and a **Code Example**.
 *   Design patterns can be categorized by:
-    *   **Complexity**, **level of detail**, and **scale** of applicability.
-    *   **Idioms**, which are low-level and language-specific patterns.
-    *   **Architectural patterns**, which are high-level and apply to entire applications.
-    *   **Creational patterns** that handle object creation.
-    *    **Structural patterns** that focus on how objects are assembled into larger structures.
-   *  **Behavioral patterns** which address communication and responsibility between objects.
-*   Design patterns are not invented concepts; rather they are discovered solutions to recurring problems.
-*   The concept of patterns was first described by Christopher Alexander, and was later applied to software engineering by the Gang of Four (GoF).
-
-#### Why Learn Patterns?
-
-*   Design patterns offer **tested solutions** for common software design problems.
-*   Learning patterns teaches object-oriented design principles.
-*   Design patterns provide a **common language** for developers to communicate more efficiently.
+    *   **Creational patterns** provide object creation mechanisms that increase flexibility and reuse of existing code.
+    *   **Structural patterns** explain how to assemble objects and classes into larger structures, while keeping these structures flexible and efficient.
+    *   **Behavioral patterns** take care of effective communication and the assignment of responsibilities between objects.
 
 
+#### Features of Good Design
 
-*   Creational patterns provide object creation mechanisms that increase flexibility and reuse of existing code.
-*   Structural patterns explain how to assemble objects and classes into larger structures, while keeping these structures flexible and efficient.
-*   Behavioral patterns take care of effective communication and the assignment of responsibilities between objects.
+*   **Code Reuse**
+    *   **Reduces development costs** by avoiding redundant work and saving time.
+    *   Allows for **faster time to market**, which gives a competitive advantage.
+    *   Promotes more efficient and broader reach to potential customers because it lowers costs of development and allows for more money to be spent on marketing.
+    *   Usually there are 3 levels of reuse
+        *   Lowest level is reusing a class
+        *   Middle level is design patterns
+        *   Highest level is framework (like JUnit), common theme here is "don't call us, let us call you" -- like JUnit executes the tests.
+    *   Good design anticipates future changes and enables code reuse by **extracting common functionality into separate modules or classes**.
+    *   Changes to an application should not affect the whole program.
+    *   Code reuse enhances efficiency and **reduces the need for redundant code**.
+
+*   **Flexibility and Adaptability**
+    *   Good software design accounts for future changes in requirements.
+    *   **Encapsulating what varies** is a key principle to minimize the impact of changes in software.
+    *   Changes should be isolated to specific modules or classes, **preventing widespread issues**.
+    *   Software must be able to adapt to new features, changes requested by clients, and changes in the environment.
+    *   When changes occur, the program should not break and should be able to adapt to the change easily.
+
+#### Design Principles
+
+*   **Encapsulate What Varies**
+    *   This principle involves identifying the aspects of an application that change and separating them from what stays the same.
+    *   The main goal is to **minimize the effect caused by changes**.
+    *   Isolating the parts of a program that vary into independent modules **protects the rest of the code from adverse effects**.
+    *   This principle can be applied at both the method level and class level.
+        *   At the **method level**, it involves extracting complex behavior to reduce the complexity and blur the primary responsibility of the method.
+        *   At the **class level**, it involves extracting related behaviors, fields, and methods to a new class when they blur the primary responsibility of the containing class.
+
+*   **Program to an Interface, not an Implementation**
+    *    Depend on abstractions, not on concrete classes.
+ 
+    <a href="url"><img src="/metadata/didp_programtointerface.png" width="480" ></a>
+
+*   **Favor Composition Over Inheritance**. Problems with inheritance:
+    *   A subclass can’t reduce the interface of the superclass. You have to implement all abstract methods of the parent class even if you won’t be using them.
+    *   When overriding methods you need to make sure that the new behavior is compatible with the base one. It’s important because objects of the subclass may be passed to any code that expects objects of the superclass and you don’t want that code to break.
+    *   Inheritance breaks encapsulation of the superclass because the internal details of the parent class become available to the subclass
+    *   Subclasses are tightly coupled to superclasses. Any change in a superclass may break the functionality of subclasses.
+    *   Trying to reuse code through inheritance can lead to creating parallel inheritance hierarchies. Inheritance usually takes place in a single dimension. But whenever there are two or more dimensions, you have to create lots of class combinations, bloating the class hierarchy to a ridiculous size.
+    *   Example: right hand side is actually Strategy Pattern.
+
+    <a href="url"><img src="/metadata/didp_inbadcompgood_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_inbadcompgood_1.png" width="480" ></a>
+
+#### SOLID Principles
+
+*   **Single Responsibility Principle (SRP)**
+    *   A class should have only **one reason to change**.
+    *   Each class should be responsible for a single part of the functionality provided by the software.
+    *   This principle aims to reduce complexity.
+    *   By encapsulating a single responsibility within a class, the code is more focused and maintainable.
+
+    <a href="url"><img src="/metadata/didp_solid1_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_solid1_1.png" width="480" ></a>
+    
+
+*   **Open/Closed Principle (OCP)**
+    *   Classes should be **open for extension but closed for modification**.
+    *   You should be able to extend a class by creating a subclass without modifying its existing code.
+    *   If a class is already developed, tested, reviewed, and included in some framework or otherwise used in an app, trying to mess with its code is risky. Instead of changing the code of the class directly, you can create a subclass and override parts of the original class that you want to behave differently. You’ll achieve your goal but also won’t break any existing clients of the original class.
+    *   This principle isn’t meant to be applied for all changes to a class. If you know that there’s a bug in the class, just go on and fix it; don’t create a subclass for it.
+    *   Classes should have a **well-defined interface** that is stable and will not change in the future.
+    *   Example: say we want to add more shipping ways, then we would have to change Order class. Using Strategy pattern we decouple it, and now we can simply add another Shipping way.
+
+    <a href="url"><img src="/metadata/didp_solid2_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_solid2_1.png" width="480" ></a>
+    
+*   **Liskov Substitution Principle (LSP)**
+    *   Subclasses should be substitutable for their base classes **without altering the correctness of the program**.
+    *   **Invariants of a superclass must be preserved** by its subclasses. Invariants are conditions in which an object makes sense.
+        *   Parameter types in a method of a subclass should match the parameter types in the method of the superclass.
+        *   The return type in a method of a subclass should match or be a subtype of the return type in the method of the superclass (inverse of above rule)
+        ```java
+        class A {
+          Cat buyCat() {}
+        }
+
+        class B extends A {
+          // GOOD, won't break client.
+          BengalCat buyCat() {}
+
+          // BAD, will break client -- won't compile.
+          Animal buyCat() {}
+        }
+        ```
+        *    A method in a subclass shouldn’t throw types of exceptions which the base method isn’t expected to throw. In other words, types of exceptions should match or be subtypes of the ones that the base method is already able to throw
+        *    A subclass shouldn’t strengthen pre-conditions. For example, if a base method has a parameter of type `int`, and a subclass overrides it by requiring the argument to be positive (throwing an exception for negatives), it strengthens the preconditions, breaking client code that previously worked with negative values.
+        *    A subclass shouldn’t weaken post-conditions. Say you have a class with a method that works with a database. A method of the class is supposed to always close all opened database connections upon returning a value. You created a subclass and changed it so that database connections remain open so you can reuse them. But the client might not know anything about your intentions.
+        *    A subclass shouldn’t change values of private fields of the superclass. Possible via reflection mechanisms.
+        ```java
+        class Superclass {
+            private int value = 42;
+        }
+        
+        class Subclass extends Superclass {
+            public void accessPrivateField() throws Exception {
+                Field field = Superclass.class.getDeclaredField("value");
+                field.setAccessible(true);
+                int value = (int) field.get(this);
+                System.out.println("Private value: " + value);
+            }
+        }
+        ```
+
+
+Here, if client doesn't check if document is not of read type and calls save, it will blow up!
+    <a href="url"><img src="/metadata/didp_solid3_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_solid3_1.png" width="480" ></a>
+
+*   **Interface Segregation Principle (ISP)**
+    *   Clients shouldn't be forced to **depend on methods they do not use**.
+    *   Interfaces should be narrow enough so that client classes do not need to implement behaviors they do not require.
+    *   This principle aims to **keep classes focused** by avoiding implementing methods that are not relevant.
+
+    <a href="url"><img src="/metadata/didp_solid4_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_solid4_1.png" width="480" ></a>
+    
+*   **Dependency Inversion Principle (DIP)**
+    *   High-level classes shouldn’t depend on low-level classes. Both should depend on abstractions. Abstractions shouldn’t depend on details. Details should depend on abstractions.
+    *   The dependency inversion principle often goes along with the open/closed principle (see example there)
+
+    <a href="url"><img src="/metadata/didp_solid5_0.png" width="480" ></a>
+    <a href="url"><img src="/metadata/didp_solid5_1.png" width="480" ></a>
+
+
+
+
