@@ -90,10 +90,10 @@ String phrase = wordList[(int)(Math.random() * wordList.length)];
 *   You can send things to a method (parameters), and get things back from a method (return types).
 
 #### Naming
-*  You can name a class, method, or variable according to the following rules:
-  *  It must start with a letter, underscore (_), or dollar sign ($). You can’t start a name with a number.
-  *  After the first character, you can use numbers as well. Just don’t start it with a number.
-  *  It can be anything you like, subject to those two rules, just so long as it isn’t one of Java’s reserved words.
+*   You can name a class, method, or variable according to the following rules:
+    *   It must start with a letter, underscore (_), or dollar sign ($). You can’t start a name with a number.
+    *   After the first character, you can use numbers as well. Just don’t start it with a number.
+    *   It can be anything you like, subject to those two rules, just so long as it isn’t one of Java’s reserved words.
 
 #### Creating Objects
 *   Objects are created using the `new` keyword followed by the class name and parentheses. For example: `Dog d = new Dog();` creates a new `Dog` object.
