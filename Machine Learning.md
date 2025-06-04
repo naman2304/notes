@@ -468,13 +468,27 @@ $w = w - \alpha \frac{\partial}{\partial w} J(w)$ (simplified to one parameter, 
 
 In both cases, the derivative term (scaled by $\alpha$) guides $w$ in the direction that **reduces the cost $J(w)$**, moving towards the minimum.
 
+# Gradient Descent: The Importance of Learning Rate ($\alpha$)
+
+The **learning rate ($\alpha$)** critically affects **gradient descent's efficiency and convergence**. The update rule is $W = W - \alpha \frac{\partial}{\partial W} J(W)$.
+
+## Impact of $\alpha$ on Convergence:
+
+* **$\alpha$ too small:** Leads to **slow convergence**. Steps are tiny, requiring many iterations to reach the minimum.
+* **$\alpha$ too large:** Can cause **overshooting, oscillations, or divergence**, potentially failing to reach the minimum. The cost might even increase.
+
 ---
 
-## The Learning Rate ($\alpha$)
+## Gradient Descent at a Local Minimum:
 
-**$\alpha$ (alpha)**, the **learning rate**, controls the **size of each step** taken during the parameter update. **It is always positive**. Its choice is critical:
+* If $W$ is at a **local minimum**, the **derivative $\frac{\partial}{\partial W} J(W)$ is zero**.
+* The update becomes $W = W - \alpha \times 0 = W$, meaning the parameter **remains unchanged**, correctly staying at the minimum.
 
-* **Too small $\alpha$:** Leads to very slow convergence.
-* **Too large $\alpha$:** Can cause oscillations or divergence, failing to reach the minimum.
+---
 
-The next video will delve deeper into the learning rate $\alpha$ and how to choose an appropriate value.
+## Automatic Step Adjustment:
+
+* As gradient descent approaches a local minimum, the **slope (derivative) naturally decreases**, becoming flatter.
+* This automatically leads to **smaller update steps**, even with a fixed $\alpha$, allowing the algorithm to gradually settle into the minimum.
+
+Gradient descent is a versatile optimization algorithm for any cost function $J$. Next, we'll combine it with the **mean squared error cost function** to build the **linear regression algorithm**.
