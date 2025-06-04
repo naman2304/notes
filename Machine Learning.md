@@ -434,4 +434,8 @@ A key property of the squared error cost function used with linear regression is
 * **Convex Function:** Informally, a "bowl-shaped" function. It has **only one global minimum** and no other local minima.
 * **Impact on Gradient Descent:** For convex cost functions, as long as the learning rate $\alpha$ is appropriately chosen, gradient descent is **guaranteed to converge to the global minimum**, regardless of the starting point of $w$ and $b$.
 
-**Congratulations!** You now understand how to implement gradient descent for linear regression. The next video will demonstrate this algorithm in action.
+## Batch Gradient Descent:
+
+* Specific implementation we learned till now is called **batch gradient descent**.
+* **"Batch"** refers to the fact that **every step of the algorithm uses *all* training examples** (the entire "batch" of data) to compute the derivatives for the parameter updates.
+* Other versions of gradient descent exist that use subsets of data.
