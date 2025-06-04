@@ -407,6 +407,8 @@ This video combines the linear regression model, the squared error cost function
 
 ## Derivatives for Gradient Descent
 
+$J(w, b) = \frac{1}{2m} \sum_{i=1}^{m} (f_{w,b}(x^{(i)}) - y^{(i)})^2$
+
 To implement gradient descent for linear regression, we need the partial derivatives of the cost function $J(w,b)$ with respect to $w$ and $b$:
 
 * **Derivative w.r.t. $w$:**
@@ -420,7 +422,7 @@ To implement gradient descent for linear regression, we need the partial derivat
 
 The algorithm iteratively updates $w$ and $b$ simultaneously until convergence:
 
-$w = w - \alpha \left( \frac{1}{m} \sum_{i=1}^{m} (f_{w,b}(x^{(i)}) - y^{(i)})x^{(i)} \right)$
+$w = w - \alpha \left( \frac{1}{m} \sum_{i=1}^{m} (f_{w,b}(x^{(i)}) - y^{(i)})x^{(i)} \right)$  
 $b = b - \alpha \left( \frac{1}{m} \sum_{i=1}^{m} (f_{w,b}(x^{(i)}) - y^{(i)}) \right)$
 
 where $f_{w,b}(x) = wx + b$ is the linear regression model.
