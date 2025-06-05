@@ -439,3 +439,336 @@ A key property of the squared error cost function used with linear regression is
 * Specific implementation we learned till now is called **batch gradient descent**.
 * **"Batch"** refers to the fact that **every step of the algorithm uses *all* training examples** (the entire "batch" of data) to compute the derivatives for the parameter updates.
 * Other versions of gradient descent exist that use subsets of data.
+
+# Multiple Linear Regression: Beyond a Single Feature
+
+This week, we enhance linear regression to handle **multiple input features**, significantly boosting its power.
+
+## Model with Multiple Features
+
+Previously, we used a single feature ($x_1$, house size) to predict price ($y$). Now, let's incorporate multiple features:
+* $x_1$: Size
+* $x_2$: Number of bedrooms
+* $x_3$: Number of floors
+* $x_4$: Age of home
+
+We denote these features as $x_j$ (where $j=1$ to $n$, and $n$ is the total number of features; here $n=4$). A training example $x^{(i)}$ becomes a **vector** (list) of these $n$ features for the $i$-th example: $x^{(i)} = [x_1^{(i)}, x_2^{(i)}, x_3^{(i)}, x_4^{(i)}]$.
+
+The linear regression model with multiple features becomes:
+$f_{w,b}(x) = w_1x_1 + w_2x_2 + w_3x_3 + w_4x_4 + b$
+
+* **Interpreting Parameters ($w_j$):** Each $w_j$ indicates how much the output ($y$) changes for a unit increase in feature $x_j$, holding other features constant. For example, if $w_1=0.1$ and $x_1$ is in sq ft, it means $0.1 \times \$1000 = \$100$ increase per sq ft. $b$ is the base price.
+
+## Vectorized Notation for Multiple Linear Regression
+
+For $n$ features, the model is $f_{w,b}(x) = w_1x_1 + w_2x_2 + \dots + w_nx_n + b$.
+
+To simplify this, we use **vector notation**:
+* **Parameters Vector ($\vec{w}$):** $\vec{w} = [w_1, w_2, \dots, w_n]$
+* **Features Vector ($\vec{x}$):** $\vec{x} = [x_1, x_2, \dots, x_n]$
+
+Using the **dot product**, the model can be written compactly as:
+$f_{\vec{w},b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$
+
+Where $\vec{w} \cdot \vec{x} = w_1x_1 + w_2x_2 + \dots + w_nx_n$.
+
+This type of model is called **Multiple Linear Regression**. This is NOT multivariate regression (that's something else)
+
+# Vectorization: Speeding Up Machine Learning Code
+
+**Vectorization** is a crucial technique for implementing learning algorithms. It makes code both **shorter** and **significantly more efficient**, leveraging modern hardware like CPUs and GPUs.
+
+## What is Vectorization?
+
+It means performing operations on entire arrays (vectors) at once, rather than iterating through individual elements using loops.
+
+### Example: Computing the Model's Prediction ($f_{w,b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$)
+
+Let's assume we have $n=3$ features, so $\vec{w} = [w_1, w_2, w_3]$ and $\vec{x} = [x_1, x_2, x_3]$. In Python with NumPy, array indexing starts from 0 (e.g., `w[0]`, `x[0]`).
+
+1.  **Non-Vectorized (Manual calculation):**
+    ```python
+    f = w[0]*x[0] + w[1]*x[1] + w[2]*x[2] + b
+    ```
+    * **Issue:** Inefficient for large $n$, cumbersome to write.
+
+2.  **Non-Vectorized (Using a for loop):**
+    ```python
+    f = 0
+    for j in range(n): # j goes from 0 to n-1
+        f += w[j]*x[j]
+    f += b
+    ```
+    * **Issue:** Better for writing, but still computationally inefficient due to the explicit loop.
+
+3.  **Vectorized (Using NumPy):**
+    ```python
+    import numpy as np
+    f = np.dot(w, x) + b
+    ```
+    * **Benefits:**
+        * **Shorter Code:** One line for the dot product.
+        * **Faster Execution:** NumPy's `dot` function is highly optimized. Behind the scenes, it utilizes **parallel hardware** (CPU's SIMD instructions, GPU cores) to perform computations on multiple data elements simultaneously. This dramatically speeds up operations, especially for large vectors.
+
+# How Vectorization Works: The Magic Behind the Speed
+
+Vectorization dramatically speeds up machine learning code by leveraging your computer's hardware for parallel processing.
+
+## Non-Vectorized (Sequential) Execution:
+
+* A traditional `for` loop executes operations **one after another**.
+* For example, in a loop calculating `w[j]*x[j]`, each multiplication and addition is done sequentially for `j=0`, then `j=1`, and so on. This is slow for large datasets.
+
+## Vectorized (Parallel) Execution:
+
+* **NumPy functions** (like `np.dot` for dot products) are **vectorized implementations**.
+* **Behind the scenes, your computer's hardware (CPU with SIMD instructions, or GPU cores) can:**
+    1.  Perform **multiple element-wise operations (e.g., multiplications)** **simultaneously in parallel**.
+    2.  Use **specialized hardware** to efficiently perform subsequent operations (e.g., summing up results) much faster than sequential additions.
+
+## Why Vectorization Matters for ML:
+
+* **Speed:** Vectorized code runs **much faster** than non-vectorized code, especially for large datasets and complex models. This can reduce computation time from hours to minutes.
+* **Scalability:** It's essential for **scaling learning algorithms** to the massive datasets prevalent in modern machine learning.
+* **Conciseness:** It makes code **shorter and easier to read**.
+
+## Example: Updating Multiple Parameters in Gradient Descent
+
+For $n$ features, updating $w_j = w_j - \alpha \cdot d_j$ (where $d_j$ is the derivative for $w_j$):
+
+* **Non-Vectorized (for loop):**
+    ```python
+    for j in range(n):
+        w[j] = w[j] - 0.1 * d[j]
+    ```
+    * Executes each update sequentially.
+
+* **Vectorized (NumPy):**
+    ```python
+    w = w - 0.1 * d # w and d are NumPy arrays
+    ```
+    * The computer performs all $n$ subtractions and multiplications **in parallel** in a single step using specialized hardware.
+
+The accompanying optional lab introduces NumPy and demonstrates how vectorized code runs significantly faster than explicit loops. This foundational understanding of vectorization is key to efficient machine learning implementation.
+
+# Gradient Descent for Multiple Linear Regression with Vectorization
+
+This video consolidates **gradient descent**, **multiple linear regression**, and **vectorization** for efficient model training.
+
+## Multiple Linear Regression Model (Vectorized)
+
+* **Parameters:** Instead of individual $w_1, \dots, w_n$ and $b$, we represent them as a **vector $\vec{w}$ (of length $n$) and a scalar $b$**.
+* **Model Equation:**
+    $f_{\vec{w},b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$
+    where $\vec{w} \cdot \vec{x}$ is the dot product.
+* **Cost Function:** The cost function $J$ is now $J(\vec{w}, b)$, taking a vector and a scalar as input.
+
+## Gradient Descent Update Rules (Vectorized)
+
+The parameters $\vec{w}$ and $b$ are updated repeatedly and **simultaneously**:
+
+* **For each $w_j$ (where $j=1 \dots n$):**
+    $w_j = w_j - \alpha \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(\vec{x}^{(i)}) - y^{(i)})x_j^{(i)}$
+* **For $b$:**
+    $b = b - \alpha \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})$
+
+These derivatives are derived from the squared error cost function and extend naturally from the single-feature case.
+
+## The Normal Equation (Alternative Method - Optional)
+
+* The **Normal Equation** is an **alternative, non-iterative method** to find optimal $w$ and $b$ for **linear regression *only***. It uses advanced linear algebra to solve directly.
+* **Disadvantages:**
+    * **Not generalizable** to most other ML algorithms (e.g., logistic regression, neural networks).
+    * **Slow for large number of features (n)**.
+* While not recommended for manual implementation in most cases, some mature ML libraries might use it internally for linear regression. Gradient descent is generally preferred for its broader applicability and scalability.
+
+# Feature Scaling: Accelerating Gradient Descent
+
+**Feature scaling** is a technique that can significantly **speed up gradient descent**. It addresses the issue where features have vastly different ranges of values.
+
+## The Problem: Feature Scale and Parameter Relationship
+
+Consider predicting house prices with:
+* **$x_1$ (size):** e.g., 300 - 2000 sq ft (large range)
+* **$x_2$ (bedrooms):** e.g., 0 - 5 bedrooms (small range)
+
+* **Impact on Parameters:**
+    * For features with a **large range ($x_1$)**, the corresponding parameter ($w_1$) in a good model tends to be **relatively small** (e.g., $w_1=0.1$). A small change in $w_1$ has a large impact on the prediction.
+    * For features with a **small range ($x_2$)**, the corresponding parameter ($w_2$) tends to be **relatively large** (e.g., $w_2=50$). A large change in $w_2$ is needed to significantly impact the prediction.
+
+## Impact on Cost Function Contours
+
+When features have disparate scales, the **cost function's contour plot becomes elongated and "tall and skinny"** (like a narrow, stretched oval).
+
+* This happens because small changes in $w_1$ (associated with large $x_1$) cause significant changes in cost, creating steep gradients in one direction.
+* Conversely, larger changes in $w_2$ (associated with small $x_2$) are needed to have a similar effect on cost, making gradients less steep in that dimension.
+
+<img src="/metadata/tall_and_skinny.png" width="700" />
+
+## Gradient Descent Without Feature Scaling
+
+* On such elongated contours, gradient descent takes an inefficient path.
+* It tends to **"bounce back and forth"** across the narrow valleys, making slow progress towards the minimum.
+
+## The Solution: Feature Scaling
+
+<img src="/metadata/tall_and_skinny_2.png" width="700" />
+
+**Feature scaling transforms your data so that all features take on comparable ranges of values** (e.g., all between 0 and 1, or -1 and 1).
+
+* **Effect:** This makes the cost function contours more **circular** (less elongated).
+* **Benefit:** Gradient descent can then take a **much more direct path to the global minimum**, significantly **speeding up convergence**.
+
+# Feature Scaling Techniques
+
+Feature scaling standardizes feature ranges, making gradient descent converge faster.
+
+## Scaling to 0-1 Range (Rescaling)
+
+To scale feature $x_j$ (e.g., $x_1$ size: 300-2000 sq ft, $x_2$ bedrooms: 0-5):
+* For each $x_j$ value, divide by its maximum value in the training set.
+* Example: $x_1 \rightarrow x_1 / 2000$; $x_2 \rightarrow x_2 / 5$.
+* Result: $x_1$ now ranges 0.15-1; $x_2$ ranges 0-1.
+
+## Mean Normalization
+
+Rescales features to be centered around zero.
+* For each $x_j$: $(x_j - \mu_j) / (\text{max}_j - \text{min}_j)$
+    * $\mu_j$ is the mean of feature $j$.
+    * $\text{max}_j$ and $\text{min}_j$ are the max and min values of feature $j$.
+* Example: $x_1$ (mean 600) $\rightarrow (x_1 - 600) / (2000 - 300)$.
+* Result: Features typically range between approximately -1 and +1.
+
+## Z-score Normalization
+
+Rescales features to have zero mean and unit variance (**new feature set now have mean = 0 and std deviation = 1**)
+* For each $x_j$: $(x_j - \mu_j) / \sigma_j$
+    * $\mu_j$ is the mean of feature $j$.
+    * $\sigma_j$ is the standard deviation of feature $j$.
+* Example: $x_1$ (mean 600, std dev 450) $\rightarrow (x_1 - 600) / 450$.
+* Result: Features are typically in a range like -3 to +3.
+
+## Rule of Thumb for Feature Ranges
+
+Aim for features to be within the range of **approximately -1 to +1**.
+* Ranges like [-3, 3] or [-0.3, 0.3] are usually fine.
+* **Rescale if:**
+    * Range is very large (e.g., [-100, 100]).
+    * Range is very small (e.g., [-0.001, 0.001]).
+    * Values are large but within a narrow range (e.g., [98.6, 105]).
+* **When in doubt, perform feature scaling.** It almost never hurts and often speeds up gradient descent.
+
+# Monitoring Gradient Descent Convergence
+
+When running gradient descent, it's crucial to know if it's converging, meaning it's effectively finding parameters (w, b) close to the global minimum of the cost function J. This insight also helps in choosing a good learning rate ($\alpha$).
+
+## The Cost Function Plot (Learning Curve)
+
+<img src="/metadata/learning_curve.png" width="400" />
+
+A standard practice is to plot the cost function J (calculated on the training set) against the **number of iterations** of gradient descent.
+
+* **X-axis:** Number of iterations (each representing a simultaneous update of w and b).
+* **Y-axis:** Value of the cost function J.
+
+### Interpreting the Learning Curve:
+
+1.  **Decreasing Cost:** If gradient descent is working correctly, the cost J **must decrease after every single iteration**.
+    * If J ever **increases** after an iteration, it typically means $\alpha$ is too large, or there's a bug in the code.
+2.  **Convergence:** The curve will eventually **level off** and flatten out. This indicates that gradient descent has largely converged, as the cost is no longer significantly decreasing.
+    * The number of iterations needed for convergence varies greatly (e.g., 30 to 100,000 iterations). Plotting helps determine this visually.
+
+## Automatic Convergence Test (Alternative)
+
+An alternative to visual inspection is an **automatic convergence test**.
+
+* Define a small threshold, $\epsilon$ (e.g., 0.001 or $10^{-3}$).
+* If the decrease in cost J from one iteration to the next is **less than $\epsilon$**, declare convergence.
+* **Caveat:** Choosing an appropriate $\epsilon$ can be difficult. Visual inspection of the learning curve is often preferred as it provides more insights and can flag issues earlier.
+
+Understanding how to interpret this learning curve is vital for diagnosing and improving your gradient descent implementation, especially when choosing the learning rate, which is the topic of the next video.
+
+# Choosing the Learning Rate ($\alpha$) for Gradient Descent
+
+The learning rate ($\alpha$) is critical for gradient descent efficiency. A poorly chosen $\alpha$ can lead to slow convergence or outright failure.
+
+## Diagnosing $\alpha$ Issues from the Cost Plot
+
+* **Cost J increases or oscillates (goes up and down):** This is a strong sign that $\alpha$ is **too large**. Gradient descent is overshooting the minimum.
+    * **Solution:** Decrease $\alpha$.
+* **Cost J consistently increases:** This also indicates $\alpha$ is too large, but could also mean a **bug in the code** (e.g., using `+` instead of `-` in the update rule).
+
+<img src="/metadata/learning_rate.png" width="500" />
+
+## Debugging Tip:
+
+* If gradient descent is not working, try setting $\alpha$ to a **very small number** (e.g., 0.00001).
+* If J still doesn't decrease on every iteration, there's likely a **bug** in your code.
+* (Note: A very small $\alpha$ is for debugging, not efficient training.)
+
+## Finding a Good $\alpha$:
+
+There's a trade-off:
+* **Too small $\alpha$:** Gradient descent will be very slow.
+* **Too large $\alpha$:** Gradient descent may fail to converge.
+
+**Practical approach:**
+1.  **Try a range of $\alpha$ values:** Start with a small value (e.g., 0.001) and increase by factors of 3 (e.g., 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, etc.).
+2.  **Plot J vs. iterations:** For each $\alpha$, run gradient descent for a few hundred iterations and plot the cost function.
+3.  **Select the best $\alpha$:** Choose the largest $\alpha$ that consistently and rapidly decreases the cost without diverging or oscillating. This typically balances speed and convergence.
+
+
+# Feature Engineering: Creating Effective Features
+
+Choosing the right features is crucial for a learning algorithm's performance in many applications. **Feature engineering** involves using domain knowledge to design new, more effective features, typically by transforming or combining existing ones.
+
+## Example: Predicting House Prices
+
+Consider predicting house prices with two features:
+* $x_1$: Lot width
+* $x_2$: Lot length
+
+A simple model might use $f(x) = w_1x_1 + w_2x_2 + b$.
+
+However, intuition suggests that **land area** ($x_1 \times x_2$) might be a stronger predictor of price than width and depth separately.
+
+* Define a new feature, $x_3 = x_1 \times x_2$ (area).
+* Then, update the model to include this new feature: $f(x) = w_1x_1 + w_2x_2 + w_3x_3 + b$.
+
+This allows the model to learn the importance of frontage, depth, or the newly engineered area feature in predicting price. Feature engineering makes it easier for the learning algorithm to make accurate predictions.
+
+# Polynomial Regression: Fitting Curves to Data
+
+So far, we've focused on fitting straight lines. Now, let's explore **polynomial regression**, a powerful technique that uses **feature engineering** to fit non-linear curves to your data.
+
+## Creating Polynomial Features
+
+If a straight line doesn't fit your data well (e.g., house prices vs. size), you can create new features by raising the original feature to various powers.
+
+* **Example: Quadratic Function**
+    * Original feature: $x$ (house size)
+    * New features: $x_1 = \text{size}$, $x_2 = \text{size}^2$
+    * Model: $f(x) = w_1x_1 + w_2x_2 + b$
+    * *Consideration:* A quadratic function might eventually predict decreasing prices for larger houses, which might not be realistic.
+
+* **Example: Cubic Function**
+    * New features: $x_1 = \text{size}$, $x_2 = \text{size}^2$, $x_3 = \text{size}^3$
+    * Model: $f(x) = w_1x_1 + w_2x_2 + w_3x_3 + b$
+    * This can produce curves that capture increasing prices for larger sizes more realistically.
+
+## Importance of Feature Scaling
+
+When creating polynomial features (like $x^2$ or $x^3$), the new features will have **vastly different ranges** compared to the original feature.
+
+* If $x$ ranges from 1 to 1,000:
+    * $x^2$ ranges from 1 to 1,000,000.
+    * $x^3$ ranges from 1 to 1,000,000,000.
+* **Crucial:** Apply **feature scaling** (e.g., mean normalization or Z-score normalization) to these new features before running gradient descent. This ensures all features are in comparable ranges, allowing gradient descent to converge much faster and more reliably.
+
+## Other Feature Choices
+
+You have flexibility in choosing features. For instance, using the square root of $x$ (e.g., $w_1x + w_2\sqrt{x} + b$) can also create a non-linear curve that might fit data well without undesirable dips.
+
+## Deciding on Features
+
+Later in this specialization, you'll learn systematic processes to evaluate different feature choices and models, helping you decide which features to include for the best performance. For now, understand that **feature engineering and polynomial functions expand the types of relationships linear regression can model beyond just straight lines**.
