@@ -1,143 +1,135 @@
-# Multiple Linear Regression: Beyond a Single Feature
+---
 
-This week, we enhance linear regression to handle **multiple input features**, significantly boosting its power.
+Welcome to Week 3! This week, we'll shift from **linear regression (predicting numbers)** to **classification (predicting categories)**, specifically **binary classification** (two output classes). Linear regression is generally **not suitable for classification problems**.
 
-## Model with Multiple Features
+## Why Linear Regression Fails for Classification
 
-Previously, we used a single feature ($x_1$, house size) to predict price ($y$). Now, let's incorporate multiple features:
-* $x_1$: Size
-* $x_2$: Number of bedrooms
-* $x_3$: Number of floors
-* $x_4$: Age of home
+Let's use the example of classifying a tumor as **malignant (1, positive class)** or **benign (0, negative class)** based on tumor size.
 
-We denote these features as $x_j$ (where $j=1$ to $n$, and $n$ is the total number of features; here $n=4$). A training example $x^{(i)}$ becomes a **vector** (list) of these $n$ features for the $i$-th example: $x^{(i)} = [x_1^{(i)}, x_2^{(i)}, x_3^{(i)}, x_4^{(i)}]$.
+1.  **Initial Attempt with Linear Regression:**
+    * If you plot tumor size (x) vs. label (y=0 or 1) and fit a straight line (linear regression), it might look reasonable for a small dataset.
+    * You could then set a **threshold** (e.g., 0.5):
+        * Predict y=0 if output $< 0.5$.
+        * Predict y=1 if output $\ge 0.5$.
+    * This creates a **decision boundary** (a vertical line) separating the classes.
 
-The linear regression model with multiple features becomes:
-$f_{w,b}(x) = w_1x_1 + w_2x_2 + w_3x_3 + w_4x_4 + b$
+<img src="/metadata/classification_motivation.png" width="600" />
 
-* **Interpreting Parameters ($w_j$):** Each $w_j$ indicates how much the output ($y$) changes for a unit increase in feature $x_j$, holding other features constant. For example, if $w_1=0.1$ and $x_1$ is in sq ft, it means $0.1 \times \$1000 = \$100$ increase per sq ft. $b$ is the base price.
+2.  **The Problem with Outliers:**
 
-## Vectorized Notation for Multiple Linear Regression
+    * If you add just one more training example (e.g., a very large tumor that is also malignant) far to the right, the **best-fit linear regression line will significantly shift**.
+    * This shift causes the **decision boundary to also shift** to the right, leading to incorrect classifications for previously well-classified examples. A large tumor shouldn't change how smaller tumors are classified.
 
-For $n$ features, the model is $f_{w,b}(x) = w_1x_1 + w_2x_2 + \dots + w_nx_n + b$.
+## Introducing Logistic Regression
 
-To simplify this, we use **vector notation**:
-* **Parameters Vector ($\vec{w}$):** $\vec{w} = [w_1, w_2, \dots, w_n]$
-* **Features Vector ($\vec{x}$):** $\vec{x} = [x_1, x_2, \dots, x_n]$
+* Linear regression can predict values outside [0, 1], which is problematic for binary classification where outputs are 0 or 1.
+* **Logistic regression**, despite its name, is a classification algorithm designed to output values **always between 0 and 1**, avoiding the problems seen with linear regression. It's one of the most popular and widely used learning algorithms today.
 
-Using the **dot product**, the model can be written compactly as:
-$f_{\vec{w},b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$
+The next video will delve into the concept of the decision boundary and introduce the logistic regression algorithm in detail. The optional lab will let you experience why linear regression often fails for classification.
 
-Where $\vec{w} \cdot \vec{x} = w_1x_1 + w_2x_2 + \dots + w_nx_n$.
+## Logistic Regression: A Classification Algorithm
 
-This type of model is called **Multiple Linear Regression**. This is NOT multivariate regression (that's something else)
+**Logistic regression** is a widely used classification algorithm, especially for **binary classification** problems where the output variable $y$ can only be one of two values (e.g., 0 or 1, No or Yes, False or True). By convention, we often use 0 for the "negative class" and 1 for the "positive class."
 
-# Vectorization: Speeding Up Machine Learning Code
+### The Sigmoid (Logistic) Function
 
-**Vectorization** is a crucial technique for implementing learning algorithms. It makes code both **shorter** and **significantly more efficient**, leveraging modern hardware like CPUs and GPUs.
+Logistic regression uses the **Sigmoid function** (or logistic function) to map any real-valued input to an output between 0 and 1.
 
-## What is Vectorization?
+* **Formula:** $g(z) = \frac{1}{1 + e^{-z}}$
+* **Properties:**
+    * As $z \rightarrow \infty$, $g(z) \rightarrow 1$.
+    * As $z \rightarrow -\infty$, $g(z) \rightarrow 0$.
+    * When $z = 0$, $g(z) = 0.5$.
+* This S-shaped curve is ideal for classification as it naturally outputs probabilities.
 
-It means performing operations on entire arrays (vectors) at once, rather than iterating through individual elements using loops.
+<img src="/metadata/sigmoid.png" width="600" />
 
-### Example: Computing the Model's Prediction ($f_{w,b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$)
+### The Logistic Regression Model
 
-Let's assume we have $n=3$ features, so $\vec{w} = [w_1, w_2, w_3]$ and $\vec{x} = [x_1, x_2, x_3]$. In Python with NumPy, array indexing starts from 0 (e.g., `w[0]`, `x[0]`).
+The logistic regression model combines a linear function with the Sigmoid function:
 
-1.  **Non-Vectorized (Manual calculation):**
-    ```python
-    f = w[0]*x[0] + w[1]*x[1] + w[2]*x[2] + b
-    ```
-    * **Issue:** Inefficient for large $n$, cumbersome to write.
+1.  **Linear Part (z):** First, calculate a linear combination of input features and parameters, similar to linear regression:
+    $z = \vec{w} \cdot \vec{x} + b$
+2.  **Sigmoid Part (f(x)):** Pass this $z$ value through the Sigmoid function:
+    $f_{\vec{w},b}(\vec{x}) = g(z) = \frac{1}{1 + e^{-(\vec{w} \cdot \vec{x} + b)}}$
 
-2.  **Non-Vectorized (Using a for loop):**
-    ```python
-    f = 0
-    for j in range(n): # j goes from 0 to n-1
-        f += w[j]*x[j]
-    f += b
-    ```
-    * **Issue:** Better for writing, but still computationally inefficient due to the explicit loop.
+This model takes input features $\vec{x}$ and outputs a value between 0 and 1.
 
-3.  **Vectorized (Using NumPy):**
-    ```python
-    import numpy as np
-    f = np.dot(w, x) + b
-    ```
-    * **Benefits:**
-        * **Shorter Code:** One line for the dot product.
-        * **Faster Execution:** NumPy's `dot` function is highly optimized. Behind the scenes, it utilizes **parallel hardware** (CPU's SIMD instructions, GPU cores) to perform computations on multiple data elements simultaneously. This dramatically speeds up operations, especially for large vectors.
+### Interpreting the Output
 
-# How Vectorization Works: The Magic Behind the Speed
+The output of logistic regression, $f_{\vec{w},b}(\vec{x})$, is interpreted as the **predicted probability that the output class $y$ is 1 (positive class) given the input $\vec{x}$**.
 
-Vectorization dramatically speeds up machine learning code by leveraging your computer's hardware for parallel processing.
+* Example: If $f(\text{tumor size}) = 0.7$, it means there's a 70% chance the tumor is malignant.
+* Since $y$ must be either 0 or 1, if $P(y=1|\vec{x}; \vec{w},b) = 0.7$, then $P(y=0|\vec{x}; \vec{w},b) = 1 - 0.7 = 0.3$ (30% chance of being benign). This is read as probability of y = 1 given input $\vec{x}$, parameters $\vec{w}$ and b.
 
-## Non-Vectorized (Sequential) Execution:
+While the term "regression" is in its name, logistic regression is fundamentally a **classification algorithm**.
 
-* A traditional `for` loop executes operations **one after another**.
-* For example, in a loop calculating `w[j]*x[j]`, each multiplication and addition is done sequentially for `j=0`, then `j=1`, and so on. This is slow for large datasets.
+## Logistic Regression: The Decision Boundary
 
-## Vectorized (Parallel) Execution:
+Logistic regression predicts probabilities $f_{\vec{w},b}(\vec{x}) = g(\vec{w} \cdot \vec{x} + b)$, where $g$ is the Sigmoid function. To classify, we set a **threshold**, typically 0.5:
 
-* **NumPy functions** (like `np.dot` for dot products) are **vectorized implementations**.
-* **Behind the scenes, your computer's hardware (CPU with SIMD instructions, or GPU cores) can:**
-    1.  Perform **multiple element-wise operations (e.g., multiplications)** **simultaneously in parallel**.
-    2.  Use **specialized hardware** to efficiently perform subsequent operations (e.g., summing up results) much faster than sequential additions.
+* If $f_{\vec{w},b}(\vec{x}) \ge 0.5$, predict $y=1$.
+* If $f_{\vec{w},b}(\vec{x}) < 0.5$, predict $y=0$.
 
-## Why Vectorization Matters for ML:
+### When does $f_{\vec{w},b}(\vec{x}) \ge 0.5$?
 
-* **Speed:** Vectorized code runs **much faster** than non-vectorized code, especially for large datasets and complex models. This can reduce computation time from hours to minutes.
-* **Scalability:** It's essential for **scaling learning algorithms** to the massive datasets prevalent in modern machine learning.
-* **Conciseness:** It makes code **shorter and easier to read**.
+Recall that $g(z) \ge 0.5$ whenever $z \ge 0$. Since $z = \vec{w} \cdot \vec{x} + b$, the model predicts 
+* $y=1$ when $\vec{w} \cdot \vec{x} + b \ge 0$, and
+* $y=0$ when $\vec{w} \cdot \vec{x} + b < 0$.
 
-## Example: Updating Multiple Parameters in Gradient Descent
+### The Decision Boundary
 
-For $n$ features, updating $w_j = w_j - \alpha \cdot d_j$ (where $d_j$ is the derivative for $w_j$):
+The **decision boundary** is the line (or surface) where $\vec{w} \cdot \vec{x} + b = 0$. This is the point where the model is 50/50 on its prediction.
 
-* **Non-Vectorized (for loop):**
-    ```python
-    for j in range(n):
-        w[j] = w[j] - 0.1 * d[j]
-    ```
-    * Executes each update sequentially.
+<img src="/metadata/decision_boundary.png" width="400" />
 
-* **Vectorized (NumPy):**
-    ```python
-    w = w - 0.1 * d # w and d are NumPy arrays
-    ```
-    * The computer performs all $n$ subtractions and multiplications **in parallel** in a single step using specialized hardware.
+* **Example (Two Features):** If $x_1$ and $x_2$ are features, and parameters are $w_1=1, w_2=1, b=-3$, then the decision boundary is $1 \cdot x_1 + 1 \cdot x_2 - 3 = 0$, or $x_1 + x_2 = 3$.
+    * Points where $x_1 + x_2 \ge 3$ predict $y=1$.
+    * Points where $x_1 + x_2 < 3$ predict $y=0$.
+    * This forms a **linear decision boundary** (a straight line).
 
-The accompanying optional lab introduces NumPy and demonstrates how vectorized code runs significantly faster than explicit loops. This foundational understanding of vectorization is key to efficient machine learning implementation.
+### Non-Linear Decision Boundaries with Polynomial Features
 
-# Gradient Descent for Multiple Linear Regression with Vectorization
+Just like in linear regression, you can use **polynomial features** in logistic regression to create complex, **non-linear decision boundaries**.
 
-This video consolidates **gradient descent**, **multiple linear regression**, and **vectorization** for efficient model training.
+<img src="/metadata/non_linear_boundary.png" width="250" />
 
-## Multiple Linear Regression Model (Vectorized)
+* **Example: Circular Boundary**
+    * Define $z = w_1x_1^2 + w_2x_2^2 + b$.
+    * If $w_1=1, w_2=1, b=-1$, the decision boundary is $x_1^2 + x_2^2 - 1 = 0$, or $x_1^2 + x_2^2 = 1$, which is a circle.
+    * Points outside the circle predict $y=1$; points inside predict $y=0$.
+* By including higher-order polynomial terms (e.g., $x_1^2, x_1x_2, x_2^2$), logistic regression can define even more complex decision boundaries (e.g., ellipses, arbitrary shapes).
 
-* **Parameters:** Instead of individual $w_1, \dots, w_n$ and $b$, we represent them as a **vector $\vec{w}$ (of length $n$) and a scalar $b$**.
-* **Model Equation:**
-    $f_{\vec{w},b}(\vec{x}) = \vec{w} \cdot \vec{x} + b$
-    where $\vec{w} \cdot \vec{x}$ is the dot product.
-* **Cost Function:** The cost function $J$ is now $J(\vec{w}, b)$, taking a vector and a scalar as input.
+**Note:** If you only use linear features ($x_1, x_2, \dots$), the decision boundary will always be linear.
 
-## Gradient Descent Update Rules (Vectorized)
+## Cost Function for Logistic Regression
 
-The parameters $\vec{w}$ and $b$ are updated repeatedly and **simultaneously**:
+The **cost function** measures how well a model's parameters fit the training data. For logistic regression, the **squared error cost function (used in linear regression) is not suitable** because it results in a **non-convex cost function** with many local minima, preventing gradient descent from reliably finding the global minimum.
 
-* **For each $w_j$ (where $j=1 \dots n$):**
-    $w_j = w_j - \alpha \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})x_j^{(i)}$
-* **For $b$:**
-    $b = b - \alpha \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})$
+Instead, a different **loss function** is used for logistic regression that makes the overall cost function **convex**.
 
-These derivatives are derived from the squared error cost function and extend naturally from the single-feature case.
+### The Logistic Loss Function (for a single training example)
 
-## The Normal Equation (Alternative Method - Optional)
+Let $f(\vec{x})$ be the logistic regression model's prediction (a probability between 0 and 1), and $y$ be the true label (0 or 1).
 
-* The **Normal Equation** is an **alternative, non-iterative method** to find optimal $w$ and $b$ for **linear regression *only***. It uses advanced linear algebra to solve directly.
-* **Disadvantages:**
-    * **Not generalizable** to most other ML algorithms (e.g., logistic regression, neural networks).
-    * **Slow for large number of features (n)**.
-* While not recommended for manual implementation in most cases, some mature ML libraries might use it internally for linear regression. Gradient descent is generally preferred for its broader applicability and scalability.
+The loss, $L(f(\vec{x}), y)$, for a single training example is defined as:
 
-**You now know how to implement multiple linear regression**, one of the most widely used learning algorithms. The next videos will cover practical tricks like feature scaling and choosing an appropriate learning rate to make this algorithm even more effective.
+* If $y = 1$: $L(f(\vec{x}), y) = -\log(f(\vec{x}))$
+    * **Intuition:**
+        * If $f(\vec{x})$ is close to 1 (correct prediction), loss is very small (near 0).
+        * If $f(\vec{x})$ is close to 0 (incorrect prediction), loss is very large (approaching infinity), penalizing the model heavily. This incentivizes the model to predict values close to 1 when the true label is 1.
+
+* If $y = 0$: $L(f(\vec{x}), y) = -\log(1 - f(\vec{x}))$
+    * **Intuition:**
+        * If $f(\vec{x})$ is close to 0 (correct prediction), loss is very small (near 0).
+        * If $f(\vec{x})$ is close to 1 (incorrect prediction), loss is very large (approaching infinity), penalizing the model heavily. This incentivizes the model to predict values close to 0 when the true label is 0.
+
+### Overall Cost Function
+
+The **cost function $J(\vec{w}, b)$** for the entire training set is the average of these individual losses:
+
+$J(\vec{w}, b) = \frac{1}{m} \sum_{i=1}^{m} L(f_{\vec{w},b}(x^{(i)}), y^{(i)})$
+
+This cost function is **convex**, ensuring that gradient descent can reliably converge to a single global minimum.
+
+The next video will provide a more compact way to write this cost function and then discuss how to apply gradient descent to train the logistic regression model. The optional lab will visually demonstrate the difference between the non-convex squared error cost and the convex logistic loss cost.
