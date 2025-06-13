@@ -772,3 +772,372 @@ You have flexibility in choosing features. For instance, using the square root o
 ## Deciding on Features
 
 Later in this specialization, you'll learn systematic processes to evaluate different feature choices and models, helping you decide which features to include for the best performance. For now, understand that **feature engineering and polynomial functions expand the types of relationships linear regression can model beyond just straight lines**.
+
+Welcome to Week 3! This week, we'll shift from **linear regression (predicting numbers)** to **classification (predicting categories)**, specifically **binary classification** (two output classes). Linear regression is generally **not suitable for classification problems**.
+
+## Why Linear Regression Fails for Classification
+
+Let's use the example of classifying a tumor as **malignant (1, positive class)** or **benign (0, negative class)** based on tumor size.
+
+1.  **Initial Attempt with Linear Regression:**
+    * If you plot tumor size (x) vs. label (y=0 or 1) and fit a straight line (linear regression), it might look reasonable for a small dataset.
+    * You could then set a **threshold** (e.g., 0.5):
+        * Predict y=0 if output $< 0.5$.
+        * Predict y=1 if output $\ge 0.5$.
+    * This creates a **decision boundary** (a vertical line) separating the classes.
+
+<img src="/metadata/classification_motivation.png" width="600" />
+
+2.  **The Problem with Outliers:**
+
+    * If you add just one more training example (e.g., a very large tumor that is also malignant) far to the right, the **best-fit linear regression line will significantly shift**.
+    * This shift causes the **decision boundary to also shift** to the right, leading to incorrect classifications for previously well-classified examples. A large tumor shouldn't change how smaller tumors are classified.
+
+## Introducing Logistic Regression
+
+* Linear regression can predict values outside [0, 1], which is problematic for binary classification where outputs are 0 or 1.
+* **Logistic regression**, despite its name, is a classification algorithm designed to output values **always between 0 and 1**, avoiding the problems seen with linear regression. It's one of the most popular and widely used learning algorithms today.
+
+The next video will delve into the concept of the decision boundary and introduce the logistic regression algorithm in detail. The optional lab will let you experience why linear regression often fails for classification.
+
+## Logistic Regression: A Classification Algorithm
+
+**Logistic regression** is a widely used classification algorithm, especially for **binary classification** problems where the output variable $y$ can only be one of two values (e.g., 0 or 1, No or Yes, False or True). By convention, we often use 0 for the "negative class" and 1 for the "positive class."
+
+### The Sigmoid (Logistic) Function
+
+Logistic regression uses the **Sigmoid function** (or logistic function) to map any real-valued input to an output between 0 and 1.
+
+* **Formula:** $g(z) = \frac{1}{1 + e^{-z}}$
+* **Properties:**
+    * As $z \rightarrow \infty$, $g(z) \rightarrow 1$.
+    * As $z \rightarrow -\infty$, $g(z) \rightarrow 0$.
+    * When $z = 0$, $g(z) = 0.5$.
+* This S-shaped curve is ideal for classification as it naturally outputs probabilities.
+
+<img src="/metadata/sigmoid.png" width="600" />
+
+### The Logistic Regression Model
+
+The logistic regression model combines a linear function with the Sigmoid function:
+
+1.  **Linear Part (z):** First, calculate a linear combination of input features and parameters, similar to linear regression:
+    $z = \vec{w} \cdot \vec{x} + b$
+2.  **Sigmoid Part (f(x)):** Pass this $z$ value through the Sigmoid function:
+    $f_{\vec{w},b}(\vec{x}) = g(z) = \frac{1}{1 + e^{-(\vec{w} \cdot \vec{x} + b)}}$
+
+This model takes input features $\vec{x}$ and outputs a value between 0 and 1.
+
+### Interpreting the Output
+
+The output of logistic regression, $f_{\vec{w},b}(\vec{x})$, is interpreted as the **predicted probability that the output class $y$ is 1 (positive class) given the input $\vec{x}$**.
+
+* Example: If $f(\text{tumor size}) = 0.7$, it means there's a 70% chance the tumor is malignant.
+* Since $y$ must be either 0 or 1, if $P(y=1|\vec{x}; \vec{w},b) = 0.7$, then $P(y=0|\vec{x}; \vec{w},b) = 1 - 0.7 = 0.3$ (30% chance of being benign). This is read as probability of y = 1 given input $\vec{x}$, parameters $\vec{w}$ and b.
+
+While the term "regression" is in its name, logistic regression is fundamentally a **classification algorithm**.
+
+## Logistic Regression: The Decision Boundary
+
+Logistic regression predicts probabilities $f_{\vec{w},b}(\vec{x}) = g(\vec{w} \cdot \vec{x} + b)$, where $g$ is the Sigmoid function. To classify, we set a **threshold**, typically 0.5:
+
+* If $f_{\vec{w},b}(\vec{x}) \ge 0.5$, predict $y=1$.
+* If $f_{\vec{w},b}(\vec{x}) < 0.5$, predict $y=0$.
+
+### When does $f_{\vec{w},b}(\vec{x}) \ge 0.5$?
+
+Recall that $g(z) \ge 0.5$ whenever $z \ge 0$. Since $z = \vec{w} \cdot \vec{x} + b$, the model predicts 
+* $y=1$ when $\vec{w} \cdot \vec{x} + b \ge 0$, and
+* $y=0$ when $\vec{w} \cdot \vec{x} + b < 0$.
+
+### The Decision Boundary
+
+The **decision boundary** is the line (or surface) where $\vec{w} \cdot \vec{x} + b = 0$. This is the point where the model is 50/50 on its prediction.
+
+<img src="/metadata/decision_boundary.png" width="400" />
+
+* **Example (Two Features):** If $x_1$ and $x_2$ are features, and parameters are $w_1=1, w_2=1, b=-3$, then the decision boundary is $1 \cdot x_1 + 1 \cdot x_2 - 3 = 0$, or $x_1 + x_2 = 3$.
+    * Points where $x_1 + x_2 \ge 3$ predict $y=1$.
+    * Points where $x_1 + x_2 < 3$ predict $y=0$.
+    * This forms a **linear decision boundary** (a straight line).
+
+### Non-Linear Decision Boundaries with Polynomial Features
+
+Just like in linear regression, you can use **polynomial features** in logistic regression to create complex, **non-linear decision boundaries**.
+
+<img src="/metadata/non_linear_boundary.png" width="250" />
+
+* **Example: Circular Boundary**
+    * Define $z = w_1x_1^2 + w_2x_2^2 + b$.
+    * If $w_1=1, w_2=1, b=-1$, the decision boundary is $x_1^2 + x_2^2 - 1 = 0$, or $x_1^2 + x_2^2 = 1$, which is a circle.
+    * Points outside the circle predict $y=1$; points inside predict $y=0$.
+* By including higher-order polynomial terms (e.g., $x_1^2, x_1x_2, x_2^2$), logistic regression can define even more complex decision boundaries (e.g., ellipses, arbitrary shapes).
+
+**Note:** If you only use linear features ($x_1, x_2, \dots$), the decision boundary will always be linear.
+
+## Cost Function for Logistic Regression
+
+The **cost function** measures how well a model's parameters fit the training data. For logistic regression, the **squared error cost function (used in linear regression) is not suitable** because it results in a **non-convex cost function** with many local minima, preventing gradient descent from reliably finding the global minimum.
+
+Instead, a different **loss function** is used for logistic regression that makes the overall cost function **convex**.
+
+### The Logistic Loss Function (for a single training example)
+
+Let $f(\vec{x})$ be the logistic regression model's prediction (a probability between 0 and 1), and $y$ be the true label (0 or 1).
+
+The loss, $L(f(\vec{x}), y)$, for a single training example is defined as:
+
+* If $y = 1$: $L(f(\vec{x}), y) = -\log(f(\vec{x}))$
+    * **Intuition:**
+        * If $f(\vec{x})$ is close to 1 (correct prediction), loss is very small (near 0).
+        * If $f(\vec{x})$ is close to 0 (incorrect prediction), loss is very large (approaching infinity), penalizing the model heavily. This incentivizes the model to predict values close to 1 when the true label is 1.
+
+* If $y = 0$: $L(f(\vec{x}), y) = -\log(1 - f(\vec{x}))$
+    * **Intuition:**
+        * If $f(\vec{x})$ is close to 0 (correct prediction), loss is very small (near 0).
+        * If $f(\vec{x})$ is close to 1 (incorrect prediction), loss is very large (approaching infinity), penalizing the model heavily. This incentivizes the model to predict values close to 0 when the true label is 0.
+
+### Overall Cost Function
+
+The **cost function $J(\vec{w}, b)$** for the entire training set is the average of these individual losses:
+
+$J(\vec{w}, b) = \frac{1}{m} \sum_{i=1}^{m} L(f_{\vec{w},b}(x^{(i)}), y^{(i)})$
+
+This cost function is **convex**, ensuring that gradient descent can reliably converge to a single global minimum.
+
+The next video will provide a more compact way to write this cost function and then discuss how to apply gradient descent to train the logistic regression model.
+
+## Simplified Loss and Cost Functions for Logistic Regression
+
+This video presents a more concise way to write the loss and cost functions for binary classification in logistic regression, which simplifies implementation for gradient descent.
+
+### Simplified Loss Function
+
+For a binary classification problem where $y \in \{0, 1\}$, the loss for a single training example, $L(f(\vec{x}), y)$, can be written in a single equation:
+
+$L(f(\vec{x}), y) = -y \log(f(\vec{x})) - (1-y) \log(1-f(\vec{x}))$
+
+**Why this works:**
+
+* **Case 1: If $y=1$**
+    * The second term, $(1-y)\log(1-f(\vec{x}))$, becomes $(1-1)\log(1-f(\vec{x})) = 0 \times \text{stuff} = 0$.
+    * The loss simplifies to $-1 \times \log(f(\vec{x})) = -\log(f(\vec{x}))$, which matches the definition from the previous video for $y=1$.
+
+* **Case 2: If $y=0$**
+    * The first term, $y \log(f(\vec{x}))$, becomes $0 \times \log(f(\vec{x})) = 0$.
+    * The loss simplifies to $-(1-0)\log(1-f(\vec{x})) = -\log(1-f(\vec{x}))$, which matches the definition for $y=0$.
+
+This single equation elegantly captures both cases, simplifying implementation.
+
+### Overall Cost Function
+
+The overall cost function $J(\vec{w}, b)$ for logistic regression is the average of these simplified loss functions over all $m$ training examples:
+
+$J(\vec{w}, b) = \frac{1}{m} \sum_{i=1}^{m} \left[ -y^{(i)} \log(f_{\vec{w},b}(x^{(i)})) - (1-y^{(i)}) \log(1-f_{\vec{w},b}(x^{(i)})) \right]$
+
+This specific cost function is widely used for training logistic regression. It is derived from the statistical principle of **maximum likelihood estimation** and importantly, it is **convex**, ensuring that gradient descent can reliably find the global minimum.
+
+## Training Logistic Regression with Gradient Descent
+
+To fit a logistic regression model, we find the parameters $\vec{w}$ and $b$ that minimize the cost function $J(\vec{w}, b)$ using **gradient descent**.
+
+### Gradient Descent Update Rules
+
+The update rules for parameters $w_j$ (for each feature $j=1 \dots n$) and $b$ are:
+
+$w_j = w_j - \alpha \frac{\partial}{\partial w_j} J(\vec{w}, b)$  
+$b = b - \alpha \frac{\partial}{\partial b} J(\vec{w}, b)$
+
+Where $\alpha$ is the learning rate.
+
+The partial derivatives of the cost function are:
+
+$\frac{\partial}{\partial w_j} J(\vec{w}, b) = \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})x_j^{(i)}$  
+$\frac{\partial}{\partial b} J(\vec{w}, b) = \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})$
+
+**Crucial Note:** These update equations *look identical* to those for linear regression. However, the key difference is the definition of $f_{\vec{w},b}(x)$:
+
+* **Linear Regression:** $f_{\vec{w},b}(x) = \vec{w} \cdot \vec{x} + b$
+* **Logistic Regression:** $f_{\vec{w},b}(x) = g(\vec{w} \cdot \vec{x} + b)$ (where $g$ is the Sigmoid function)
+
+This change in $f(\vec{x})$ makes them fundamentally different algorithms.
+
+### Implementation Considerations:
+
+* **Simultaneous Updates:** Always compute all new parameter values based on the *current* parameters, then update all parameters simultaneously.
+* **Vectorization:** Just like with linear regression, vectorizing these derivative calculations using libraries like NumPy will significantly speed up computation, especially for large datasets and many features.
+* **Feature Scaling:** Applying feature scaling (e.g., mean normalization or Z-score normalization) to input features will also help gradient descent converge faster for logistic regression.
+* **Monitoring Convergence:** Use the same technique as in linear regression: plot the cost $J$ against the number of iterations to ensure $J$ consistently decreases and eventually flattens out.
+
+**Scikit-learn** is a popular library used to train logistic regression.
+
+## Overfitting and Underfitting in Machine Learning
+
+This video explains **overfitting** and **underfitting**, common problems that cause learning algorithms to perform poorly. The goal in ML is to find a "just right" model that avoids both.
+
+### Underfitting (High Bias)
+
+* **Definition:** The model is **too simple** or has **too few features** to capture the underlying patterns in the training data. It performs poorly on the training set itself.
+* **Analogy:** It has a strong "preconception" (bias) about the data's shape (e.g., assumes linearity despite non-linear data).
+* **Example (Linear Regression):** Fitting a straight line to non-linear housing price data (where prices flatten out with size). The line clearly doesn't fit the data well.
+* **Example (Logistic Regression):** Using a simple linear decision boundary for non-linearly separable classification data. It fails to adequately separate positive and negative examples.
+* **Consequence:** Poor performance on both training and new, unseen data.
+
+### Overfitting (High Variance)
+
+* **Definition:** The model is **too complex** or has **too many features**, causing it to fit the training data **too perfectly**, including noise and outliers. It essentially "memorizes" the training data rather than learning general patterns.
+* **Analogy:** The algorithm tries too hard to fit every single training example.
+* **Example (Linear Regression):** Fitting a high-order polynomial (e.g., 4th order) to a small housing price dataset. The curve might pass through all training points exactly but be very "wiggly," making unrealistic predictions for new data points.
+* **Example (Logistic Regression):** Using very high-order polynomial features to create an overly complex, contorted decision boundary that perfectly separates every training example, but looks unnatural and unlikely to generalize.
+* **Consequence:** Excellent performance on the training data, but **poor generalization** to new, unseen data. The model is highly sensitive (high variance) to small changes in the training set.
+
+### The "Just Right" Model
+
+The ideal model is one that is **neither underfitting nor overfitting**.
+
+* It fits the training data well, but not perfectly, capturing the general trends.
+* It generalizes well to new, unseen examples.
+* This balances **bias** (underfitting) and **variance** (overfitting).
+
+The next video will discuss techniques, particularly **regularization**, to address overfitting, and touch upon strategies for underfitting.
+
+## Addressing Overfitting (High Variance)
+
+When a model overfits (has high variance), it performs well on training data but poorly on new, unseen data. Here are three main strategies to address it:
+
+1.  **Collect More Training Data:**
+    * **Mechanism:** Providing more training examples (e.g., more house size/price data) helps the algorithm learn the true underlying patterns rather than just memorizing noise.
+    * **Benefit:** Even complex models with many features (like high-order polynomials) can perform well if there's sufficient data.
+    * **Limitation:** More data isn't always available or feasible to collect.
+
+2.  **Use Fewer Features (Feature Selection):**
+    * **Mechanism:** Reduce the complexity of the model by using only a subset of the most relevant input features.
+    * **Example:** Instead of 100 features for house price prediction, select just size, bedrooms, and age if those are deemed most important.
+    * **Disadvantage:** You might discard useful information if all features are indeed relevant. Algorithms for automatically selecting features will be covered in Course 2.
+
+3.  **Regularization (Shrink Parameters):**
+
+    * **Mechanism:** This is a more "gentle" approach than outright feature elimination. Regularization encourages the learning algorithm to **shrink the values of its parameters** ($\vec{w}$) towards zero.
+    * **Intuition:** Large parameter values often lead to "wiggly" or overly complex models that overfit. By penalizing large parameters, regularization "smoothes" the model, making it less sensitive to individual training examples.
+    * **Benefit:** Allows you to keep all features, but reduces the impact of less important ones.
+    * **Note:** By convention, the bias term ($b$) is usually *not* regularized, as it typically makes little practical difference.
+
+<img src="/metadata/regularization.png" width="600" />
+
+## Summary of Anti-Overfitting Strategies:
+
+* **More data:** Best solution when possible.
+* **Fewer features:** Simple approach, but might discard useful info.
+* **Regularization:** Very common and powerful technique; allows keeping all features while preventing overfitting.
+
+## Regularization: Modifying the Cost Function to Prevent Overfitting
+
+Regularization encourages smaller parameter values ($w_j$) to reduce overfitting. We modify the cost function to include a penalty term for large parameters.
+
+### Example: High-Order Polynomial Regression
+
+Suppose we have a 4th-order polynomial model: $f(x) = w_1x + w_2x^2 + w_3x^3 + w_4x^4 + b$. If this model overfits, it will produce a very "wiggly" curve.
+
+The idea is to **penalize large values of $w_3$ and $w_4$** by adding terms to the cost function:
+
+Original Cost ($J$) + $1000 w_3^2 + 1000 w_4^2$
+
+Minimizing this new cost forces $w_3$ and $w_4$ to be very small (near zero), effectively reducing the influence of $x^3$ and $x^4$ and resulting in a smoother, less overfit curve (closer to a quadratic fit).
+
+### Generalizing Regularization
+
+Instead of penalizing specific parameters, it's common practice to **penalize *all* $w_j$ parameters** (typically not $b$ as its regularization usually makes little practical difference). This leads to a smoother, simpler model less prone to overfitting.
+
+For a model with $n$ features and parameters $w_1, \dots, w_n, b$:
+
+**New Cost Function $J(\vec{w}, b)$ (with regularization):**
+
+$J(\vec{w}, b) = \left[ \frac{1}{2m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})^2 \right] + \left[ \frac{\lambda}{2m} \sum_{j=1}^{n} w_j^2 \right]$
+
+Where:
+* The first term is the **original cost** (e.g., mean squared error).
+* The second term is the **regularization term**.
+* **$\lambda$ (lambda):** The **regularization parameter**. It controls the trade-off between:
+    1.  **Minimizing the original cost** (fitting the training data well).
+    2.  **Keeping parameter values ($w_j$) small** (reducing overfitting).
+    * The $1/2m$ scaling factor for the regularization term is a convention that simplifies later calculus and makes $\lambda$ less sensitive to the training set size $m$.
+
+### Impact of $\lambda$ on Model Fit
+
+* **$\lambda = 0$:** No regularization. The model fits the training data well (potentially overfitting).
+* **$\lambda$ is very large (e.g., $10^{10}$):** Heavily penalizes parameters, forcing all $w_j$ to be very close to zero. This effectively makes $f(x) \approx b$, resulting in an overly simple model (like a horizontal line) that **underfits** the data.
+* **$\lambda$ is "just right":** Balances fitting the data and keeping parameters small, leading to a model that is neither underfit nor overfit.
+
+## Regularized Linear Regression with Gradient Descent
+
+This video explains how to apply gradient descent to the regularized cost function for linear regression.
+
+### Regularized Cost Function
+
+The cost function for regularized linear regression is:
+
+$J(\vec{w}, b) = \left[ \frac{1}{2m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})^2 \right] + \left[ \frac{\lambda}{2m} \sum_{j=1}^{n} w_j^2 \right]$
+
+Where $f_{\vec{w},b}(x) = \vec{w} \cdot \vec{x} + b$.
+
+### Gradient Descent Update Rules
+
+The update rules for $w_j$ and $b$ are modified to include the regularization term's derivative:
+
+* **For $w_j$ (for $j=1 \dots n$):**
+    $w_j = w_j - \alpha \left[ \left( \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})x_j^{(i)} \right) + \frac{\lambda}{m} w_j \right]$
+* **For $b$:**
+    $b = b - \alpha \left[ \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)}) \right]$
+
+**Key points:**
+
+* **Simultaneous updates:** All parameters $w_j$ and $b$ must be updated simultaneously.
+* **No regularization for $b$:** The parameter $b$ is typically not regularized, so its update rule remains the same as in unregularized linear regression.
+* **Derivative derivation (Optional):** The additional term $\frac{\lambda}{m} w_j$ in the $w_j$ update comes from the derivative of the regularization term $\frac{\lambda}{2m} \sum_{j=1}^{n} w_j^2$.
+
+### Intuition Behind the $w_j$ Update
+
+The $w_j$ update rule can be rewritten as:
+
+$w_j = w_j \left( 1 - \alpha \frac{\lambda}{m} \right) - \alpha \left( \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})x_j^{(i)} \right)$
+
+The term $\left( 1 - \alpha \frac{\lambda}{m} \right)$ is a number slightly less than 1 (since $\alpha$, $\lambda$, $m$ are positive and usually $\alpha \frac{\lambda}{m}$ is small). This means that on every iteration of gradient descent, $w_j$ is slightly **shrunk towards zero** before the usual gradient descent update is applied. This "shrinking" effect is what helps prevent overfitting.
+
+By implementing regularized linear regression, you can significantly reduce overfitting, especially with many features and limited training data. The next video will apply this regularization idea to logistic regression.
+
+## Regularized Logistic Regression
+
+This video covers how to implement **regularized logistic regression** to prevent overfitting, particularly when using many features, such as high-order polynomials.
+
+### Regularized Cost Function for Logistic Regression
+
+To counter overfitting, a regularization term is added to the logistic regression cost function:
+
+$J(\vec{w}, b) = \left[ \frac{1}{m} \sum_{i=1}^{m} \left( -y^{(i)} \log(f_{\vec{w},b}(x^{(i)})) - (1-y^{(i)}) \log(1-f_{\vec{w},b}(x^{(i)})) \right) \right] + \left[ \frac{\lambda}{2m} \sum_{j=1}^{n} w_j^2 \right]$
+
+* **First term:** The original logistic regression cost (average loss).
+* **Second term:** The regularization term, which penalizes large values of parameters $w_j$.
+* **$\lambda$ (lambda):** The regularization parameter, controlling the trade-off between fitting the training data and keeping parameters small.
+
+This modified cost function encourages the model to find smaller $w_j$ values, leading to a smoother, less complex decision boundary that generalizes better to new examples, even with high-order polynomial features.
+
+### Gradient Descent for Regularized Logistic Regression
+
+The gradient descent update rules are almost identical to regularized linear regression, with the key difference being the definition of $f_{\vec{w},b}(x)$:
+
+* **For $w_j$ (for $j=1 \dots n$):**
+    $w_j = w_j - \alpha \left[ \left( \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)})x_j^{(i)} \right) + \frac{\lambda}{m} w_j \right]$
+* **For $b$:**
+    $b = b - \alpha \left[ \frac{1}{m} \sum_{i=1}^{m} (f_{\vec{w},b}(x^{(i)}) - y^{(i)}) \right]$
+
+**Key Points:**
+* $f_{\vec{w},b}(x)$ is now the **Sigmoid function** applied to $\vec{w} \cdot \vec{x} + b$.
+* **Simultaneous updates** for all parameters are essential.
+* The parameter $b$ is **not regularized**, hence its update rule is unchanged.
+
+Regularized logistic regression is a powerful and widely used algorithm. Knowing how to implement it, along with understanding overfitting and regularization, is a valuable skill in real-world ML applications.
+
+**Congratulations!** You've completed Course 1. The next course in this specialization will introduce **Neural Networks (Deep Learning)**, which build upon the concepts of cost functions, gradient descent, and Sigmoid functions learned here.
+
+---
+---
