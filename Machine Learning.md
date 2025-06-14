@@ -1,10 +1,19 @@
+**Appendix**
 [Machine Learning Specialization](https://www.coursera.org/specializations/machine-learning-introduction)
 * [Supervised Machine Learning: Regression and Classification](https://www.coursera.org/learn/machine-learning?specialization=machine-learning-introduction)
 * [Advanced Learning Algorithms](https://www.coursera.org/learn/advanced-learning-algorithms?specialization=machine-learning-introduction)
 * [Unsupervised Learning, Recommenders, Reinforcement Learning](https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning?specialization=machine-learning-introduction)
 
+Table of Contents
+* [Supervised Machine Learning: Regression and Classification](#supervised-machine-learning-regression-and-classification)
+* [Advanced Learning Algorithms](#advanced-learning-algorithms)
+* [Unsupervised Learning, Recommenders, Reinforcement Learning](#unsupervised-learning-recommenders-reinforcement-learning)
 
-# Machine Learning: An Introduction
+---
+
+# Supervised Machine Learning: Regression and Classification
+
+## Machine Learning: An Introduction
 
 **Machine Learning (ML)** is the science of enabling computers to **learn without explicit programming**. You use it daily in many ways, like:
 
@@ -1141,3 +1150,807 @@ Regularized logistic regression is a powerful and widely used algorithm. Knowing
 
 ---
 ---
+
+# Advanced Learning Algorithms
+
+## Neural Networks, Decision Trees, and Practical ML Advice
+
+Welcome to Course 2! This course will equip you with knowledge and practical skills in **neural networks (deep learning)** and **decision trees**, two powerful and widely used machine learning algorithms. A unique aspect of this course is its focus on **practical advice for building effective ML systems**, helping you make better decisions and avoid common pitfalls in development.
+
+### Course Outline:
+
+* **Week 1: Neural Network Inference:** Learn how neural networks work and how to use a pre-trained network to make predictions (inference).
+* **Week 2: Neural Network Training:** Discover how to train your own neural networks from labeled training data.
+* **Week 3: Practical ML System Building:** Gain invaluable tips and strategies for efficiently building and debugging machine learning applications.
+* **Week 4: Decision Trees:** Explore decision trees, another powerful and widely used algorithm, despite receiving less media attention than neural networks.
+
+We'll start by diving into neural networks, beginning with a brief look at how the biological brain functions.
+
+## The Rise of Neural Networks (Deep Learning)
+
+Neural networks, originally inspired by the human brain, have evolved significantly from their early biological motivations. While attempts to mimic the brain began in the 1950s, the field saw periods of favor and disfavor. A major resurgence began around 2005, branded as "deep learning," which became a dominant force in AI due to its improved performance.
+
+### Historical Trajectory and Impact
+
+* **Early Successes (1980s-1990s):** Showed promise in areas like handwritten digit recognition (e.g., postal codes, bank checks).
+* **Modern Resurgence (Post-2005):**
+    * **Speech Recognition:** First major impact, significantly improving system accuracy.
+    * **Computer Vision (2012 ImageNet moment):** Revolutionized image recognition, capturing public imagination.
+    * **Natural Language Processing (NLP):** Made rapid inroads into text-based applications.
+    * **Widespread Application:** Now used across diverse fields like climate change, medical imaging, online advertising, and product recommendations.
+
+### Biological Inspiration (and its Limits)
+
+* The human brain's intelligence motivated early neural network research.
+* **Biological Neuron:** Takes multiple electrical impulses as inputs (dendrites), performs computation, and sends an output impulse (axon) to other neurons.
+* **Artificial Neuron:** A simplified mathematical model, represented as a circle taking numerical inputs, performing computation, and outputting a number. Neural networks simulate many such neurons.
+* **Caveat:** While inspired by biology, modern neural networks are largely driven by engineering principles and mathematical effectiveness, not a deep understanding of brain function. We still know very little about how the human brain truly learns and thinks.
+
+### Why Neural Networks Took Off Now: Data and Computation
+
+The recent explosion in neural network success is primarily due to two factors:
+
+1.  **Big Data:** The digitization of society (Internet, mobile phones) has led to an **explosion in available digital data**.
+    * **Traditional ML (e.g., logistic regression):** Performance plateaued even with more data, unable to effectively leverage large datasets.
+    * **Neural Networks:** Show a **"scaling property"**; their performance continues to improve significantly as they are fed more data and as network size increases. A "large neural network" can take advantage of "big data" to achieve performance levels unattainable by older algorithms.
+
+2.  **Computational Power:**
+    * **Faster Processors:** General CPU advancements.
+    * **GPUs (Graphics Processing Units):** Originally for graphics, GPUs proved highly effective for the parallel computations inherent in training large neural networks, providing the necessary computational horsepower.
+
+These two factors, combined with algorithmic advancements, enabled neural networks to achieve breakthrough performance across numerous applications.
+
+## Neural Networks: From Neurons to Layers
+
+Neural networks, also known as deep learning algorithms, are powerful tools for complex predictions. They are built by wiring together simplified "artificial neurons."
+
+### The Artificial Neuron (Logistic Unit)
+
+* A single logistic regression unit can be thought of as a simplified artificial neuron.
+* It takes numerical inputs (features, e.g., T-shirt price) and computes an output, 'a', representing the "activation" or a probability (e.g., probability of being a top seller).
+* **Formula:** $a = g(\vec{w} \cdot \vec{x} + b)$, where $g$ is the sigmoid function.
+
+<img src="/metadata/simple_model.png" width="700" />
+
+### Building a Neural Network: Layers
+
+Neural networks combine multiple neurons into **layers**.
+
+* **Example: T-shirt Top Seller Prediction**
+    * **Input Features ($\vec{x}$):** Price, shipping cost, marketing, material quality.
+    * **Hidden Layer:** Instead of directly predicting "top seller," imagine intermediate factors like "affordability," "awareness," and "perceived quality."
+        * We can create an artificial neuron for each factor (e.g., one for affordability, taking price & shipping cost as input).
+        * In practice, each neuron in a hidden layer receives **all inputs** from the previous layer (e.g., the affordability neuron would see all four input features, but learn to focus on price and shipping cost through its parameters).
+    * **Output Layer:** The outputs of the hidden layer neurons (e.g., affordability, awareness, quality activations) are then fed as inputs to a final neuron in the output layer. This neuron then predicts the final probability (e.g., top seller probability).
+
+<img src="/metadata/simple_neural.png" width="700" />
+
+### Neural Network Structure and Terminology
+
+* **Input Layer:** The initial vector of raw features ($\vec{x}$).
+* **Hidden Layer(s):** Layers between the input and output layers. The "correct" values (like affordability) for these intermediate layers are *not* directly observed in the training data; they are "hidden."
+    * Each hidden layer computes a vector of "activation values."
+* **Output Layer:** The final layer that produces the network's prediction.
+
+### Neural Networks as Feature Learners
+
+A powerful aspect of neural networks is their ability to **learn their own features**.
+
+* Instead of manual feature engineering (like creating "area" from "width" and "depth" in the previous course), the hidden layers of a neural network can automatically learn useful intermediate features (like "affordability") from the raw inputs. This greatly simplifies the feature engineering process.
+
+### Deep Neural Networks (Multiple Hidden Layers)
+
+* Neural networks can have **multiple hidden layers**.
+* **Architecture:** The number of hidden layers and neurons per layer is part of the neural network's **architecture**, a key design decision you'll learn about later.
+* **Multilayer Perceptron:** A common term for neural networks with multiple layers.
+
+The next video will illustrate how these concepts apply to other real-world applications, such as face recognition.
+
+## Neural Networks in Computer Vision: Face Recognition
+
+Neural networks are powerful for computer vision tasks like face recognition. A common approach involves feeding raw image data into a network that learns hierarchical features.
+
+### Input Representation:
+
+* A 1000x1000 pixel image can be represented as a **vector of 1 million pixel intensity values** (e.g., 0-255 brightness). This vector serves as the input ($\vec{x}$) to the neural network.
+
+### Hierarchical Feature Learning:
+
+When a neural network is trained on a large dataset of faces, its hidden layers learn to detect features at increasing levels of abstraction:
+
+* **First Hidden Layer:** Neurons in this initial layer often learn to detect very basic, low-level features such as **short lines or edges** at various orientations within small regions of the image.
+* **Second Hidden Layer:** Neurons here combine the learned edges from the first layer to detect **parts of faces**, such as eyes, nose corners, or ear bottoms. These neurons effectively look at larger windows of the image.
+* **Third Hidden Layer:** This layer aggregates the "parts" detected by the second layer to identify **larger, coarser face shapes** or entire facial components.
+* **Output Layer:** The rich set of features (face shapes) from the final hidden layer is then used by the output layer to determine the **identity of the person** in the picture.
+
+### Key Advantage: Automatic Feature Learning
+
+A remarkable aspect of neural networks is their ability to **automatically learn these hierarchical feature detectors from data**, without explicit programming. No one "tells" the network to look for edges, then eyes, then face shapes. It discovers these optimal features through the training process.
+
+### Adaptability:
+
+The same neural network architecture, when trained on different datasets (e.g., pictures of cars), will automatically learn to detect relevant features for that specific domain (e.g., car parts and car shapes).
+
+The next video will delve into the concrete mathematical and implementation details of building layers within a neural network.
+
+## Building a Neural Network: Layers and Computations
+
+The fundamental building block of neural networks is a **layer of neurons**. By understanding how a single layer works, you can then combine multiple layers to form a larger neural network.
+
+### Computation within a Single Layer (e.g., Hidden Layer 1)
+
+Let's consider a hidden layer with 3 neurons, taking 4 input features ($\vec{x} = [x_1, x_2, x_3, x_4]$). Each neuron in this layer functions as a **logistic regression unit**:
+
+1.  **Neuron 1:**
+    * **Parameters:** $\vec{w}_1^{[1]}, b_1^{[1]}$ (superscript `[1]` denotes Layer 1)
+    * **Calculates $z_1^{[1]}$:** $\vec{w}_1^{[1]} \cdot \vec{x} + b_1^{[1]}$
+    * **Outputs Activation $a_1^{[1]}$:** $a_1^{[1]} = g(z_1^{[1]})$ (where $g$ is the Sigmoid function). This $a_1^{[1]}$ is the neuron's output (e.g., probability of high affordability).
+
+2.  **Neuron 2:**
+    * **Parameters:** $\vec{w}_2^{[1]}, b_2^{[1]}$
+    * **Calculates $z_2^{[1]}$:** $\vec{w}_2^{[1]} \cdot \vec{x} + b_2^{[1]}$
+    * **Outputs Activation $a_2^{[1]}$:** $a_2^{[1]} = g(z_2^{[1]})$ (e.g., probability of high awareness).
+
+3.  **Neuron 3:**
+    * **Parameters:** $\vec{w}_3^{[1]}, b_3^{[1]}$
+    * **Calculates $z_3^{[1]}$:** $\vec{w}_3^{[1]} \cdot \vec{x} + b_3^{[1]}$
+    * **Outputs Activation $a_3^{[1]}$:** $a_3^{[1]} = g(z_3^{[1]})$ (e.g., probability of high perceived quality).
+
+The outputs of these three neurons form a **vector of activations** for Layer 1: $\vec{a}^{[1]} = [a_1^{[1]}, a_2^{[1]}, a_3^{[1]}]$. This vector then becomes the input to the next layer.
+
+### Computation in the Next Layer (e.g., Output Layer 2)
+
+The output layer (Layer 2 in this example) receives the activation vector $\vec{a}^{[1]}$ from Layer 1 as its input. If it has a single neuron:
+
+1.  **Neuron 1 (Output):**
+    * **Parameters:** $\vec{w}_1^{[2]}, b_1^{[2]}$ (superscript `[2]` denotes Layer 2)
+    * **Calculates $z_1^{[2]}$:** $\vec{w}_1^{[2]} \cdot \vec{a}^{[1]} + b_1^{[2]}$
+    * **Outputs Activation $a_1^{[2]}$:** $a_1^{[2]} = g(z_1^{[2]})$. This final $a_1^{[2]}$ is the network's overall prediction (e.g., probability of being a top seller).
+
+### Final Prediction (Optional Thresholding)
+
+If a binary prediction (0 or 1) is desired, the final activation $a_1^{[2]}$ can be thresholded at 0.5:
+* If $a_1^{[2]} \ge 0.5$, predict $y=1$.
+* If $a_1^{[2]} < 0.5$, predict $y=0$.
+
+### Notation Summary:
+
+* **Layer 0:** Input Layer ($\vec{x}$)
+* **Layer 1:** First Hidden Layer (outputs $\vec{a}^{[1]}$)
+* **Layer 2:** Output Layer (outputs $\vec{a}^{[2]}$)
+* **Superscript `[l]`:** Denotes quantities associated with layer $l$.
+* **Subscript `j`:** Denotes the $j$-th neuron within a layer.
+
+Neural networks pass vectors of numbers (activations) from one layer to the next, performing computations at each step. The next video will show more complex neural network examples to solidify these concepts.
+
+## Understanding Neural Network Layers and Notation
+
+This video delves deeper into neural network layers, especially their computation and the notation used, by examining a more complex network.
+
+### Neural Network Structure Example
+
+Consider a neural network with:
+* **Layer 0:** Input Layer (e.g., a vector $\vec{x}$)
+* **Layer 1:** Hidden Layer 1
+* **Layer 2:** Hidden Layer 2
+* **Layer 3:** Hidden Layer 3
+* **Layer 4:** Output Layer
+
+By convention, when we say a neural network has "N layers," we count the hidden layers and the output layer, but not the input layer (Layer 0). So, this example is a 4-layer neural network.
+
+### Computation within an Arbitrary Layer $L$
+
+Each neuron (or "unit") $j$ in Layer $L$ takes the **activations from the previous layer ($L-1$) as its input** and performs a logistic regression-like computation:
+
+* **Input to Layer $L$:** The vector of activations $\vec{a}^{[L-1]}$ from Layer $L-1$.
+* **Neuron $j$ in Layer $L$:**
+    * **Parameters:** $\vec{w}_j^{[L]}, b_j^{[L]}$ (where $j$ is the unit's index in layer $L$)
+    * **Calculates $z_j^{[L]}$:** $\vec{w}_j^{[L]} \cdot \vec{a}^{[L-1]} + b_j^{[L]}$
+    * **Outputs Activation $a_j^{[L]}$:** $a_j^{[L]} = g(z_j^{[L]})$
+        * $g$ is the **activation function** (so far, the Sigmoid function).
+* **Output of Layer $L$:** A vector $\vec{a}^{[L]}$ comprising the activations of all neurons in Layer $L$.
+
+### General Notation Summary:
+
+* **Superscript `[L]`:** Denotes quantities associated with Layer $L$.
+* **Subscript `j`:** Denotes the $j$-th neuron/unit within a layer.
+* **$\vec{x}$ (Input Vector):** Often denoted as $\vec{a}^{[0]}$ for consistency, making the same equation work for the first hidden layer (Layer 1).
+
+This layered structure, where each layer takes a vector input and produces a vector output using multiple logistic units, forms the core of neural network computation. The next video will build upon this foundation to describe the overall inference (prediction) process for a neural network.
+
+## Neural Network Inference: Forward Propagation
+
+This video explains **forward propagation**, the algorithm used for **inference (making predictions)** with a trained neural network.
+
+### Example: Handwritten Digit Recognition (0 or 1)
+
+Consider an 8x8 image (64 pixels) of a handwritten digit. Each pixel's intensity (0-255) is an input feature.
+* **Input:** $x$ (a vector of 64 pixel values, also denoted as $a^{[0]}$).
+* **Network Architecture:**
+    * **Layer 1 (Hidden):** 25 neurons/units
+    * **Layer 2 (Hidden):** 15 neurons/units
+    * **Layer 3 (Output):** 1 neuron/unit (predicts probability of being '1')
+
+### The Forward Propagation Sequence:
+
+The network computes activations layer by layer, from input to output:
+
+1.  **Input to Layer 1 ($a^{[0]}$ to $a^{[1]}$):**
+    * For each of the 25 neurons in Layer 1, a logistic unit computation occurs:
+        $a_j^{[1]} = g(\vec{w}_j^{[1]} \cdot \vec{x} + b_j^{[1]})$
+    * This produces a vector $\vec{a}^{[1]}$ of 25 activation values.
+
+2.  **Layer 1 to Layer 2 ($a^{[1]}$ to $a^{[2]}$):**
+    * For each of the 15 neurons in Layer 2:
+        $a_k^{[2]} = g(\vec{w}_k^{[2]} \cdot \vec{a}^{[1]} + b_k^{[2]})$
+    * This produces a vector $\vec{a}^{[2]}$ of 15 activation values.
+
+3.  **Layer 2 to Layer 3 ($a^{[2]}$ to $a^{[3]}$):**
+    * For the single neuron in Layer 3 (output layer):
+        $a_1^{[3]} = g(\vec{w}_1^{[3]} \cdot \vec{a}^{[2]} + b_1^{[3]})$
+    * This produces a single scalar activation $a_1^{[3]}$, which is the predicted probability of the digit being '1'. **This can also be denoted as $f(\vec{x})$**.
+
+4.  **Optional Thresholding:**
+    * To get a binary classification (0 or 1), threshold $a_1^{[3]}$ at 0.5:
+        * If $a_1^{[3]} \ge 0.5$, predict $\hat{y} = 1$.
+        * If $a_1^{[3]} < 0.5$, predict $\hat{y} = 0$.
+
+### Why "Forward Propagation"?
+
+The computations proceed in a "forward" direction (left-to-right, input to output), propagating activations through the network. This contrasts with "backward propagation" (backprop), which is used for learning and will be discussed next week.
+
+This process allows you to use a trained neural network to make predictions on new data. The next video will cover implementing this in TensorFlow.
+
+**Note**
+* traditional / simple ML: scikit-learn library
+* neural networks / deep learning: tensorflow, pytorch, JAX library
+
+## Neural Network Inference with TensorFlow
+
+TensorFlow is a leading deep learning framework. This video demonstrates how to perform **inference (prediction)** using TensorFlow, specifically with its `Dense` layers.
+
+### Example: Coffee Roasting Optimization
+
+Let's use a simplified coffee roasting example where we predict "good coffee" (1) or "bad coffee" (0) based on:
+* **$x_1$:** Temperature (e.g., 200 degrees Celsius)
+* **$x_2$:** Duration (e.g., 17 minutes)
+
+The task is to take an input $(x_1, x_2)$ and predict the outcome using a neural network. This dataset suggests a non-linear decision boundary, with good coffee in a "sweet spot" of temperature and duration, and undercooked or overcooked coffee outside it.
+
+### TensorFlow Inference Steps:
+
+1.  **Define Input:** Represent your input features as a NumPy array (e.g., `x = np.array([200.0, 17.0])`).
+2.  **Define Layers (using `tf.keras.layers.Dense`):**
+    * **Layer 1 (Hidden):** `layer1 = tf.keras.layers.Dense(units=3, activation='sigmoid')`
+        * `units=3`: This layer has 3 neurons.
+        * `activation='sigmoid'`: Each neuron uses the Sigmoid activation function.
+        * `Dense` refers to the fully connected layers we've discussed.
+    * **Layer 2 (Output):** `layer2 = tf.keras.layers.Dense(units=1, activation='sigmoid')`
+        * `units=1`: The output layer has a single neuron for binary classification.
+3.  **Compute Activations (Forward Propagation):**
+    * `a1 = layer1(x)`: Compute activations of Layer 1 by applying `layer1` to input `x`. `a1` will be an array of 3 numbers.
+    * `a2 = layer2(a1)`: Compute activations of Layer 2 by applying `layer2` to `a1`. `a2` will be a single number (the predicted probability).
+4.  **Optional Thresholding:**
+    * `y_hat = 1 if a2 >= 0.5 else 0`: Convert the probability `a2` into a binary prediction.
+
+### Another Example: Handwritten Digit Classification
+
+```
+import tensorflow as tf
+import numpy as np
+
+# Example input size (x_dim = number of features)
+x_dim = 10  # replace with actual number of features
+
+# Example data (dummy) -- used to train the data.
+x_train = np.random.rand(1000, x_dim)
+y_train = np.random.randint(0, 2, size=(1000, 1))
+
+# Used to do generalization (avoid overfitting)
+x_val = np.random.rand(200, x_dim)
+y_val = np.random.randint(0, 2, size=(200, 1))
+
+# Used to test how our model is behaving
+x_test = np.random.rand(100, x_dim)
+y_test = np.random.randint(0, 2, size=(100, 1))
+
+# Build model
+a0 = tf.keras.Input(shape=(x_dim,))
+
+layer1 = tf.keras.layers.Dense(25, activation='sigmoid')
+a1 = layer1(a0)
+
+layer2 = tf.keras.layers.Dense(12, activation='sigmoid')
+a2 = layer2(a1)
+
+layer3 = tf.keras.layers.Dense(1, activation='sigmoid')
+a3 = layer3(a2)
+
+model = tf.keras.Model(inputs=a0, outputs=a3)
+
+# Compile
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_data=(x_val, y_val))
+
+# Evaluate
+loss, acc = model.evaluate(x_test, y_test)
+print(f"Test accuracy: {acc:.4f}")
+
+# Inference on new data
+x_new = np.random.rand(5, x_dim)
+predictions = model(x_new)
+print("Predictions:", predictions.numpy())
+```
+
+The next video will discuss how TensorFlow handles data structures, particularly NumPy arrays.
+
+## Data Representation in NumPy and TensorFlow
+
+This video clarifies how data, particularly matrices and vectors, are represented in NumPy and TensorFlow, addressing historical inconsistencies between the two libraries that often arise in deep learning implementations.
+
+### NumPy's Representation of Matrices and Vectors
+
+* **Matrices (2D Arrays):** Represented using nested lists within `np.array()`.
+    * Example: A 2x3 matrix (2 rows, 3 columns) `[[1, 2, 3], [4, 5, 6]]` is created as `x = np.array([[1, 2, 3], [4, 5, 6]])`.
+    * The outer square brackets group the rows.
+* **Row Vector (1xN Matrix):** A 2D array with one row.
+    * Example: `x = np.array([[200, 17]])` creates a 1x2 matrix.
+* **Column Vector (Nx1 Matrix):** A 2D array with one column.
+    * Example: `x = np.array([[200], [17]])` creates a 2x1 matrix.
+* **1D Vector (1D Array):** A simple list of numbers. This was commonly used in Course 1.
+    * Example: `x = np.array([200, 17])` creates a 1D array.
+
+### TensorFlow's Conventions and Tensors
+
+* TensorFlow (TF) prefers **matrices** (2D arrays or higher-dimensional structures called **tensors**) for representing data, even for single input examples. This is due to its internal computational efficiencies, especially for large datasets.
+* When you pass a NumPy array to a TensorFlow operation, TF often **converts it to its own internal `tf.Tensor` format**.
+* **`tf.Tensor`:** TensorFlow's primary data type for efficient computation on matrices and higher-dimensional data. Think of it as TF's optimized version of a NumPy array.
+* **Example (Coffee Roasting):** If `x` is `np.array([[200, 17]])` (a 1x2 matrix), then `a1 = layer1(x)` will result in `a1` being a `tf.Tensor` with a shape of `(1, 3)` (1 row, 3 columns, if Layer 1 has 3 units), and a `dtype` like `float32`.
+* **Converting back to NumPy:** You can convert a `tf.Tensor` back to a NumPy array using the `.numpy()` method (e.g., `a1.numpy()`).
+
+### Key Takeaways:
+
+* Be aware of the distinction: NumPy often uses 1D arrays for vectors, while TensorFlow conventionally uses 2D matrices (even 1xN or Nx1) for input features.
+* TensorFlow handles data efficiently internally using `tf.Tensor` objects.
+* Conversion between `tf.Tensor` and NumPy arrays (`.numpy()`) is straightforward.
+
+Understanding these data representations is crucial for writing correct and efficient neural network code in TensorFlow. The next video will build upon this to construct an entire neural network.
+
+## Building Neural Networks with TensorFlow's Sequential API
+
+This video introduces TensorFlow's **Sequential API**, a simpler and more common way to build neural networks compared to explicitly defining and chaining layers manually.
+
+### Manual Forward Propagation (Review)
+
+Previously, forward propagation was shown as:
+1.  Define `x` (input data).
+2.  Create `layer1`.
+3.  Compute `a1 = layer1(x)`.
+4.  Create `layer2`.
+5.  Compute `a2 = layer2(a1)`.
+This involves explicitly passing activations from one layer to the next.
+
+### TensorFlow Sequential API
+
+The `tf.keras.Sequential` API streamlines this by stringing layers together:
+
+```python
+import tensorflow as tf
+import numpy as np
+
+# 1. Define the model architecture
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=3, activation='sigmoid'), # Layer 1
+    tf.keras.layers.Dense(units=1, activation='sigmoid')  # Layer 2 (Output)
+])
+```
+
+**Key benefits of `tf.keras.Sequential`:**
+
+* **Concise:** Defines the entire network architecture in one block.
+* **Automated Chaining:** TensorFlow handles passing activations between layers.
+
+### Training and Inference with Sequential Models
+
+Given training data `X` (as a NumPy matrix, e.g., 4x2 for coffee example) and labels `Y` (as a 1D NumPy array, e.g., 1D array of length 4):
+
+1.  **Compile the Model (Next Week):**
+    `model.compile(...)` - Configures the model for training (e.g., loss function, optimizer).
+2.  **Fit the Model (Next Week):**
+    `model.fit(X, Y)` - Trains the neural network on the provided data.
+3.  **Inference (Prediction):**
+    For new input `X_new` (e.g., `X_new = np.array([[200.0, 17.0]])`):
+    `predictions = model.predict(X_new)` - Performs forward propagation automatically and outputs predictions.
+
+### Common TensorFlow Coding Style
+
+You'll often see the layer definitions directly embedded within the `Sequential` call, without separate `layer1`, `layer2` variables:
+
+```python
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=3, activation='sigmoid'),
+    tf.keras.layers.Dense(units=1, activation='sigmoid')
+])
+```
+
+This applies to networks with any number of layers (e.g., the 3-layer digit classifier network).
+
+### Importance of Understanding Beyond Sequential API
+
+While `Sequential` makes coding easy, it's vital to understand what's happening "under the hood" (the manual forward propagation and mathematical computations). This deeper understanding is crucial for:
+
+* Debugging when things go wrong.
+* Making informed decisions about model changes.
+* Building intuition for advanced architectures.
+
+The next video will reinforce this by showing how to implement forward propagation from scratch in Python, without relying on TensorFlow, to build a foundational understanding.
+
+## Implementing Forward Propagation from Scratch in Python
+
+This video demonstrates how to implement **forward propagation from scratch in Python**, using NumPy, to build a deeper understanding of what libraries like TensorFlow and PyTorch do internally. This code will also be provided in the labs.
+
+### Example: Coffee Roasting Neural Network (Review)
+
+* **Input:** `x` (temperature, duration)
+* **Layer 1 (Hidden):** 3 neurons, outputs `a1`
+* **Layer 2 (Output):** 1 neuron, outputs `a2`
+
+### Code Implementation (using 1D NumPy arrays for vectors):
+
+We'll use `np.array` for 1D vectors and parameters, and a `g(z)` function for sigmoid.
+
+1.  **Define Sigmoid Function:**
+    ```python
+    import numpy as np
+
+    def g(z):
+        return 1 / (1 + np.exp(-z))
+    ```
+
+2.  **Define Layer 1 Parameters (Example values):**
+    ```python
+    # w_j for Layer 1, unit 1 (w1_1)
+    w1_1 = np.array([W_1_1_1_val, W_1_1_2_val]) # Example: [1.2, -0.5]
+    b1_1 = B_1_1_val # Example: -1.0
+
+    # w_j for Layer 1, unit 2 (w1_2)
+    w1_2 = np.array([W_1_2_1_val, W_1_2_2_val]) # Example: [-3.0, 4.0]
+    b1_2 = B_1_2_val # Example: 0.5
+
+    # w_j for Layer 1, unit 3 (w1_3)
+    w1_3 = np.array([W_1_3_1_val, W_1_3_2_val]) # Example: [2.0, -1.0]
+    b1_3 = B_1_3_val # Example: -2.0
+    ```
+
+3.  **Compute Activations for Layer 1 (a1):**
+    * Assume `x = np.array([200.0, 17.0])`
+    ```python
+    z1_1 = np.dot(w1_1, x) + b1_1
+    a1_1 = g(z1_1)
+
+    z1_2 = np.dot(w1_2, x) + b1_2
+    a1_2 = g(z1_2)
+
+    z1_3 = np.dot(w1_3, x) + b1_3
+    a1_3 = g(z1_3)
+
+    a1 = np.array([a1_1, a1_2, a1_3]) # Output vector of Layer 1
+    ```
+
+4.  **Define Layer 2 Parameters (Example values):**
+    ```python
+    # w_j for Layer 2, unit 1 (w2_1)
+    w2_1 = np.array([W_2_1_1_val, W_2_1_2_val, W_2_1_3_val]) # Example: [0.8, -0.2, 1.5]
+    b2_1 = B_2_1_val # Example: -0.7
+    ```
+
+5.  **Compute Activations for Layer 2 (a2):**
+    ```python
+    z2_1 = np.dot(w2_1, a1) + b2_1
+    a2 = g(z2_1) # Final output of the neural network
+    ```
+
+This detailed, step-by-step implementation illustrates the underlying dot products, additions, and sigmoid applications for each neuron. The next video will show how to generalize this implementation for any neural network structure, avoiding hardcoding for each neuron.
+
+## Generalized Forward Propagation from Scratch in Python
+
+This video demonstrates a more general Python implementation of forward propagation for a neural network, building on the concepts of individual neuron computations. The goal is to understand the underlying mechanics that libraries like TensorFlow abstract away.
+
+### Implementing a Dense Layer Function
+
+We can encapsulate the computation of a single layer within a `dense()` function:
+
+```python
+import numpy as np
+
+def g(z): # Sigmoid activation function
+    return 1 / (1 + np.exp(-z))
+
+def dense(A_prev, W, B):
+    """
+    Computes activations for a single dense layer.
+
+    Args:
+        A_prev (numpy.ndarray): Activations from the previous layer (or input features x).
+                                This should be a 1D array.
+        W (numpy.ndarray): Weight matrix for the current layer.
+                           Expected shape: (num_features_prev_layer, num_units_current_layer).
+                           Each column represents weights for one neuron in the current layer.
+        B (numpy.ndarray): Bias vector for the current layer.
+                           Expected shape: (num_units_current_layer,).
+
+    Returns:
+        numpy.ndarray: Activations of the current layer.
+    """
+    units = W.shape[1] # Number of neurons/units in the current layer (number of columns in W)
+    A_curr = np.zeros(units) # Initialize activations for current layer
+
+    for j in range(units):
+        # Extract weights and bias for the j-th neuron
+        w_j = W[:, j] # j-th column of W
+        b_j = B[j]    # j-th element of B
+
+        # Compute z for the j-th neuron
+        z_j = np.dot(w_j, A_prev) + b_j
+
+        # Compute activation for the j-th neuron
+        A_curr[j] = g(z_j)
+
+    return A_curr
+```
+
+### Stacking Parameters for Generalization:
+
+* **Weight Matrix (W):** If Layer $L$ has $N_L$ neurons and receives input from Layer $L-1$ with $N_{L-1}$ activations, the weights for Layer $L$ are stacked into a matrix $W^{[L]}$ of shape $(N_{L-1}, N_L)$. Each **column** of $W^{[L]}$ contains the weight vector for one neuron in Layer $L$.
+* **Bias Vector (B):** The biases for all neurons in Layer $L$ are stacked into a 1D array $B^{[L]}$ of shape $(N_L,)$.
+
+### Implementing Forward Propagation for a Multi-Layer Network:
+
+Using the `dense()` function, you can chain layers:
+
+```python
+# Assuming X_input is your initial feature vector (e.g., for coffee roasting)
+# And W1, B1, W2, B2, etc., are your pre-trained parameter matrices/vectors
+
+# Compute activations for Layer 1
+a1 = dense(X_input, W1, B1)
+
+# Compute activations for Layer 2
+a2 = dense(a1, W2, B2)
+
+# Compute activations for Layer 3 (if present)
+# a3 = dense(a2, W3, B3)
+
+# ... and so on, until the final output layer
+
+# Final prediction (e.g., if a2 is the output layer's activation)
+f_x = a2
+```
+
+### Why Implement from Scratch?
+
+* **Deeper Understanding:** Provides a foundational grasp of how TensorFlow and PyTorch operate, demystifying the "magic."
+* **Debugging:** Essential for effectively diagnosing issues (slowdowns, bugs) in more complex models built with libraries.
+* **Innovation:** Understanding the core mechanics is necessary for developing new, more advanced frameworks or algorithms in the future.
+
+This deeper understanding, even when primarily using high-level libraries, is crucial for becoming an effective machine learning engineer.
+
+The next video will explore the fascinating and controversial topic of the relationship between neural networks and Artificial General Intelligence (AGI).
+
+## Neural Networks, ANI, and AGI: A Speculative Journey
+
+The dream of **Artificial General Intelligence (AGI)**—building AI systems as intelligent and capable as humans—is a powerful inspiration, though its path remains unclear and challenging. There's often confusion and unnecessary hype surrounding AGI, partly due to conflating it with **Artificial Narrow Intelligence (ANI)**.
+
+### ANI vs. AGI
+
+* **Artificial Narrow Intelligence (ANI):** AI systems designed to perform **one specific, narrow task** exceptionally well.
+    * Examples: Smart speakers, self-driving cars (specific driving tasks), web search, AI for farming or factories.
+    * **Tremendous progress:** ANI has seen rapid advancements in recent decades, creating immense value. This correctly leads to the conclusion that "AI has made tremendous progress."
+* **Artificial General Intelligence (AGI):** The aspiration to build AI systems that can **perform any intellectual task a typical human can**.
+    * **Current State:** Despite ANI's progress, progress towards true AGI is far less clear. Concluding that ANI's success implies AGI progress is a logical leap.
+
+### Challenges to Simulating the Brain for AGI
+
+Early neural network development was inspired by the brain, with the hope that simulating many neurons would lead to intelligence. However, this has proven overly simplistic due to two main reasons:
+
+1.  **Oversimplified Models:** Artificial neurons (like logistic units) are vastly simpler than biological neurons.
+2.  **Limited Understanding of the Brain:** Our knowledge of how the human brain actually works and learns is still very rudimentary, with fundamental breakthroughs still occurring regularly. Blindly mimicking our current limited understanding is an incredibly difficult path to AGI.
+
+### Hope for AGI: The "One Learning Algorithm" Hypothesis
+
+Despite the challenges, some intriguing biological experiments offer a glimmer of hope:
+
+* **Brain Plasticity:** Studies (e.g., Roe et al.) show remarkable adaptability of brain tissue. For example:
+    * If visual signals are rerouted to the **auditory cortex** (normally processes sound), the auditory cortex **learns to see**.
+    * If visual signals are rerouted to the **somatosensory cortex** (normally processes touch), it also **learns to see**.
+* **Implications:** These experiments suggest that a single piece of brain tissue, depending on the data it receives, can learn diverse sensory processing tasks. This leads to the "one learning algorithm hypothesis" – the idea that a significant portion of intelligence might stem from one or a small handful of underlying learning algorithms. If we could discover and replicate these algorithms, it might lead to AGI.
+
+### Short-Term vs. Long-Term
+
+* While AGI remains a long-term, highly speculative goal, **neural networks are already incredibly powerful and useful tools** for a vast array of narrow AI applications.
+* Understanding and applying neural networks is highly valuable, even without pursuing human-level intelligence.
+
+This concludes the required videos for the week. The next optional videos will delve into efficient, vectorized implementations of neural networks.
+
+## Vectorization in Neural Networks: Leveraging Matrix Multiplication
+
+One of the key reasons behind the scalability and success of modern neural networks is their ability to be **vectorized**, allowing for highly efficient implementation using **matrix multiplications**. Parallel computing hardware like GPUs excels at these operations.
+
+### Non-Vectorized (Loop-based) Forward Propagation (Review)
+
+Previously, forward propagation for a single layer was implemented with explicit loops, calculating the output activation for each neuron one by one:
+
+```python
+# Assuming x, w_j, b_j are 1D arrays for vectors
+# ... (code for each z_j and a_j calculation)
+# a_out = np.array([a1_1, a1_2, a1_3])
+```
+This method processes computations sequentially, which is inefficient for layers with many neurons.
+
+### Vectorized Forward Propagation with `np.matmul`
+
+The entire set of computations for a dense layer can be vectorized using **matrix multiplication**.
+
+* **Data Representation:** All inputs and parameters are represented as **2D arrays (matrices)**:
+    * **Input (`A_in` or `X`):** A matrix (e.g., a 1xN matrix for a single example, or MxN for a batch of M examples).
+    * **Weights (`W`):** A matrix where each column corresponds to the weights of a single neuron in the current layer.
+    * **Biases (`B`):** A 2D array (e.g., 1xL for L units in the layer).
+
+* **Vectorized Code:**
+    ```python
+    import numpy as np
+
+    def dense_vectorized(A_in, W, B, g_activation_func):
+        """
+        Computes activations for a single dense layer using vectorized operations.
+
+        Args:
+            A_in (numpy.ndarray): Input activations from the previous layer (matrix).
+            W (numpy.ndarray): Weight matrix for the current layer.
+            B (numpy.ndarray): Bias matrix for the current layer.
+            g_activation_func (function): The activation function (e.g., g for sigmoid).
+
+        Returns:
+            numpy.ndarray: Output activations of the current layer (matrix).
+        """
+        Z = np.matmul(A_in, W) + B  # Matrix multiplication + broadcasted addition
+        A_out = g_activation_func(Z) # Element-wise application of activation function
+        return A_out
+    ```
+
+* **Explanation:**
+    * `np.matmul(A_in, W)` performs a matrix multiplication that simultaneously calculates the weighted sum (`w.x`) for *all* neurons in the current layer across *all* input examples (if `A_in` is a batch).
+    * Adding `B` performs **broadcasting** (adding the bias vector to each row of the result of the matrix multiplication).
+    * Applying the activation function `g` to `Z` is done element-wise.
+
+This vectorized approach is dramatically more efficient because underlying NumPy (and thus TensorFlow/PyTorch) implementations can leverage specialized hardware (CPUs' SIMD instructions, GPUs) to perform these matrix operations in parallel.
+
+## Matrix Multiplication Fundamentals
+
+Matrix multiplication, a core operation in neural networks, builds upon vector dot products.
+
+### 1. Vector-Vector Dot Product
+
+* **Concept:** Multiplies corresponding elements of two vectors and sums the results, yielding a single scalar.
+* **Example:** For a = [1, 2] and w = [3, 4], the dot product is (1 * 3) + (2 * 4) = 11.
+* **Formula:** a . w = a_1*w_1 + a_2*w_2 + ... + a_n*w_n.
+* **Alternative Notation (using transpose):** If a is a column vector, its transpose a^T is a row vector. The dot product can be written as a^T * w. This is a 1xN matrix multiplied by an Nx1 matrix, resulting in a 1x1 matrix (a scalar).
+
+### 2. Vector-Matrix Multiplication
+
+* **Concept:** Multiplies a row vector by a matrix.
+* **Process:** The resulting vector's elements are found by taking the dot product of the input row vector (a^T) with each **column** of the matrix W.
+* **Example:** a^T = [1, 2] and W = [[3, 5], [4, 6]]
+    * First result element: [1, 2] . [3, 4] = (1 * 3) + (2 * 4) = 11.
+    * Second result element: [1, 2] . [5, 6] = (1 * 5) + (2 * 6) = 17.
+    * Resulting matrix: [11, 17].
+
+### 3. Matrix-Matrix Multiplication
+
+* **Concept:** Generalizes vector-matrix multiplication to two matrices.
+* **Rule:** For A * W, the number of columns in A **must equal** the number of rows in W.
+* **Process:** Each element in the resulting matrix is the dot product of a **row from the first matrix (A)** and a **column from the second matrix (W)**.
+    * Think of matrix A as stacked row vectors, and matrix W as stacked column vectors.
+* **Example:** A^T = [[1, -1], [2, -2]] and W = [[3, 5], [4, 6]]
+    * First row of result: (row 1 of A^T) . (col 1 of W) = [1, 2] . [3, 4] = 11.
+    * First row of result: (row 1 of A^T) . (col 2 of W) = [1, 2] . [5, 6] = 17.
+    * Second row of result: (row 2 of A^T) . (col 1 of W) = [-1, -2] . [3, 4] = -11.
+    * Second row of result: (row 2 of A^T) . (col 2 of W) = [-1, -2] . [5, 6] = -17.
+    * Result: [[11, 17], [-11, -17]].
+
+Matrix multiplication is a collection of dot products arranged to form a new matrix.
+
+## General Matrix-Matrix Multiplication
+
+This video explains the general process of multiplying two matrices, building on the concepts of dot products and vector-matrix multiplication.
+
+### Setup
+
+* **Matrix A:** A `(rows) x (columns)` matrix. Example: a 2x3 matrix A = `[[1, -1, 0.1], [2, -2, 0.2]]`. Its columns are denoted `a_1, a_2, a_3`.
+* **Transpose of A (A^T):** Obtained by converting rows of A into columns, or columns of A into rows. So, A^T is a 3x2 matrix:
+    A^T =
+    ```
+    [[1, 2],
+     [-1, -2],
+     [0.1, 0.2]]
+    ```
+    Its rows are denoted `a_1^T, a_2^T, a_3^T`.
+* **Matrix W:** A 2x4 matrix (number of rows must match columns of A^T).
+    W =
+    ```
+    [[3, 5, 7, 9],
+     [4, 6, 8, 10]]
+    ```
+    Its columns are denoted `w_1, w_2, w_3, w_4`.
+
+### Computing Z = A^T W
+
+The resulting matrix Z will have dimensions `(rows of A^T) x (columns of W)`, which is 3x4.
+
+**The core rule:** Each element `Z_ij` (element in row `i`, column `j` of Z) is the **dot product of the i-th row of A^T and the j-th column of W**.
+
+Let's compute a few elements:
+
+1.  **Z_11 (Row 1, Column 1):**
+    * Grab row 1 of A^T: `[1, 2]`
+    * Grab column 1 of W: `[3, 4]`
+    * Dot product: `(1 * 3) + (2 * 4) = 3 + 8 = 11`. So, `Z_11 = 11`.
+
+2.  **Z_32 (Row 3, Column 2):**
+    * Grab row 3 of A^T: `[0.1, 0.2]`
+    * Grab column 2 of W: `[5, 6]`
+    * Dot product: `(0.1 * 5) + (0.2 * 6) = 0.5 + 1.2 = 1.7`. So, `Z_32 = 1.7`.
+
+3.  **Z_23 (Row 2, Column 3):**
+    * Grab row 2 of A^T: `[-1, -2]`
+    * Grab column 3 of W: `[7, 8]`
+    * Dot product: `(-1 * 7) + (-2 * 8) = -7 - 16 = -23`. So, `Z_23 = -23`.
+
+By repeating this for all elements, the full matrix Z is computed.
+
+### Requirements for Matrix Multiplication
+
+* **Inner Dimensions Must Match:** For `A^T x W`, the number of columns in `A^T` (2) **must equal** the number of rows in `W` (2). This ensures that the dot products between row vectors and column vectors are performed with vectors of the same length.
+* **Outer Dimensions Determine Result Size:** The resulting matrix Z will have the number of rows from the first matrix (`A^T`, which is 3) and the number of columns from the second matrix (`W`, which is 4). So, Z is a 3x4 matrix.
+
+## Vectorized Neural Network Implementation: Forward Propagation
+
+This video explains how to implement vectorized forward propagation in a neural network using matrix multiplication (`np.matmul`), which is key for efficient deep learning.
+
+### Matrix Transpose in NumPy
+
+* If `A` is a NumPy array (matrix), `A.T` computes its transpose. This swaps rows and columns.
+    * Example: If `A` is `[[1, -1, 0.1], [2, -2, 0.2]]`, then `A.T` will be `[[1, 2], [-1, -2], [0.1, 0.2]]`.
+
+### Single-Layer Forward Propagation (Vectorized)
+
+To compute the activations of a layer, we perform: $Z = A_{in} W + B$, then $A_{out} = g(Z)$.
+
+* **Input ($A_{in}$):** A 2D array (matrix), where each row is a training example. For a single example `x = [200, 17]`, it's represented as `A_in = np.array([[200, 17]])` (a 1x2 matrix).
+* **Weights ($W$):** A 2D array (matrix) where columns represent the weight vectors for each neuron in the current layer. If the current layer has 3 neurons and the previous layer had 2 features, W would be 2x3.
+* **Biases ($B$):** A 2D array (matrix) where rows correspond to bias vectors for each neuron. If the layer has 3 neurons, B would be 1x3.
+* **Matrix Multiplication for Z:**
+    * `Z = np.matmul(A_in, W) + B`
+    * This computes the weighted sum for all neurons in the layer for all input examples (if A_in contains multiple rows/examples).
+    * `np.matmul` (or the `@` operator in Python) efficiently performs this.
+* **Activation Calculation:**
+    * `A_out = g(Z)`
+    * The activation function `g` (e.g., sigmoid) is applied **element-wise** to every value in the matrix `Z`.
+* **Output:** `A_out` is the matrix of activations for the current layer.
+
+### Example Walkthrough (Coffee Roasting):
+
+Given `A_in = [[200, 17]]`, and specific `W` (2x3) and `B` (1x3) matrices for a layer with 3 neurons, `np.matmul(A_in, W) + B` would directly compute the `Z` values for all 3 neurons simultaneously. Applying the sigmoid `g(Z)` element-wise yields the `A_out` (e.g., `[[1, 0, 1]]`).
+
+### TensorFlow Convention:
+
+* TensorFlow's default convention is to arrange individual examples in **rows** of the input matrix (e.g., `X` or `A_in`). This is why `A_in` is used rather than `A_T` (A transpose).
+
+### Benefits:
+
+* **Efficiency:** Matrix multiplication functions (like `np.matmul` in NumPy, or internal TF/PyTorch operations) are highly optimized to leverage parallel processing hardware (CPUs, GPUs), leading to dramatically faster computation than loops.
+* **Conciseness:** Allows expressing complex layer computations in just a few lines of code.
+
+This vectorized approach is fundamental to building and scaling neural networks efficiently. The next week will focus on how to train these networks.
