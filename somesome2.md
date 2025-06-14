@@ -280,3 +280,81 @@ Once $\hat{\mu}$ and $\hat{\sigma}^2$ are estimated:
 * **Low $p(x)$:** Values of $x$ far from $\hat{\mu}$ have low probability. These are considered unusual or anomalous.
 
 This approach works for a single feature. For practical anomaly detection, which usually involves multiple features, we need to extend this concept. The next video will discuss how to build a multi-feature anomaly detection algorithm using these Gaussian distribution principles.
+
+## Anomaly Detection Algorithm (Multivariate Gaussian)
+
+This video builds the anomaly detection algorithm for data with multiple features, utilizing the Gaussian distribution for each feature.
+
+### Modeling p(x) for Multiple Features
+
+Given a training set $x^{(1)}, \dots, x^{(m)}$, where each $x^{(i)}$ is a vector with $n$ features (e.g., $x_1$ for heat, $x_2$ for vibrations, up to $x_n$):
+
+We model the probability of a feature vector $x = [x_1, x_2, \dots, x_n]$ as the **product of the probabilities of its individual features**:
+
+$$p(x) = p(x_1) \times p(x_2) \times \dots \times p(x_n)$$
+
+* This approach assumes that the features $x_1, \dots, x_n$ are **statistically independent**. Even if they are not perfectly independent, this model often works well in practice for anomaly detection.
+* For each feature $x_j$, we model its probability $p(x_j)$ as a **Gaussian distribution** with its own mean $\mu_j$ and variance $\sigma_j^2$.
+    $$p(x_j; \mu_j, \sigma_j^2) = \frac{1}{\sqrt{2\pi\sigma_j^2}} e^{-\frac{(x_j - \mu_j)^2}{2\sigma_j^2}}$$
+
+### Anomaly Detection System Steps:
+
+1.  **Choose Features:** Select features $x_j$ that are indicative of anomalous examples.
+2.  **Fit Parameters ($\mu_j, \sigma_j^2$):**
+    For each feature $j=1, \dots, n$:  
+    * Estimate $\mu_j$: The mean of feature $x_j$ across all $m$ training examples.  
+        $$\mu_j = \frac{1}{m} \sum_{i=1}^{m} x_j^{(i)}$$
+    * Estimate $\sigma_j^2$: The variance of feature $x_j$ across all $m$ training examples.  
+        $$\sigma_j^2 = \frac{1}{m} \sum_{i=1}^{m} (x_j^{(i)} - \mu_j)^2$$
+    * (These calculations can be vectorized to compute all $\mu_j$ and $\sigma_j^2$ simultaneously).
+3.  **Compute $p(x)$ for New Examples:**
+    For a new example $x_{test}$, calculate its overall probability $p(x_{test})$:  
+    $$p(x_{test}) = \prod_{j=1}^{n} p(x_{test, j}; \mu_j, \sigma_j^2)$$  
+    (This is the product of the probabilities of each individual feature $x_{test, j}$ using its corresponding estimated Gaussian distribution.)
+4.  **Flag as Anomaly:**
+    * If $p(x_{test}) < \epsilon$ (a small threshold), flag $x_{test}$ as an **anomaly**.
+    * Otherwise, it is considered normal.
+
+### Intuition:
+
+This algorithm flags an example as anomalous if one or more of its features are unusually large or unusually small (i.e., fall into the low-probability tails of their respective Gaussian distributions). If even one $p(x_j)$ term in the product is very small, the overall $p(x)$ will be very small.
+
+### Example: Heat and Vibration
+
+If $x_1$ (heat) and $x_2$ (vibration) are modeled by their respective Gaussians, then $p(x_1, x_2)$ forms a 3D probability surface. Points in the high-density center have high $p(x)$, while points far out in the "tails" of the distribution have low $p(x)$. An example like $x_{test2}$ with an unusually low $p(x)$ would be flagged as anomalous, while $x_{test1}$ with a high $p(x)$ would not.
+
+The next video will discuss how to choose the threshold $\epsilon$ and how to evaluate the performance of an anomaly detection system.
+
+## Practical Tips for Anomaly Detection Systems
+
+Developing an anomaly detection system benefits greatly from a method to **evaluate its performance with real numbers**. This allows for faster iteration and improvement.
+
+### Evaluation Setup: Labeled Data (Optional but Recommended)
+
+Even though anomaly detection is an unsupervised learning technique, having a **small number of labeled anomalous examples** ($y=1$) is extremely useful for evaluation. Most of your data will still be unlabeled normal examples ($y=0$).
+
+* **Training Set:** Consists predominantly of **unlabeled normal examples** (`X_train`, implicitly $y=0$). This is where the $p(x)$ model (Gaussian distributions) is learned. (A few accidental anomalies in this set are usually okay).
+* **Cross-Validation Set:** Contains a mix of **normal examples ($y=0$) and a small number of known anomalous examples ($y=1$)**. Used for tuning parameters (like $\epsilon$) and features.
+* **Test Set:** (If enough anomalies are available) Contains a separate mix of **normal examples ($y=0$) and known anomalous examples ($y=1$)**. Used for a final, unbiased evaluation of the system's performance.
+
+### Example: Aircraft Engine Dataset Split
+
+* **Total Data:** 10,000 good engines ($y=0$), 20 flawed engines ($y=1$).
+* **Training Set:** 6,000 good engines.
+* **Cross-Validation Set:** 2,000 good engines, 10 flawed engines.
+* **Test Set:** 2,000 good engines, 10 flawed engines.
+
+### Tuning and Evaluation Process:
+
+1.  **Train `p(x)`:** Fit the Gaussian distributions on the (unlabeled/assumed normal) training set.
+2.  **Make Predictions:** For each example `x` in the cross-validation or test set, compute `p(x)`. Predict $y=1$ (anomaly) if $p(x) < \epsilon$, else predict $y=0$ (normal).
+3.  **Evaluate:** Compare these predictions against the known labels in the cross-validation/test set.
+    * Use metrics like **precision, recall, or F1-score**, which are more appropriate than simple accuracy for highly skewed datasets (where $y=1$ examples are rare). This helps assess how well the system identifies anomalies without too many false alarms.
+    * **Tune $\epsilon$:** Adjust $\epsilon$ based on performance on the cross-validation set (e.g., raise $\epsilon$ if missing too many anomalies, lower $\epsilon$ if too many false positives).
+    * **Tune Features:** Also use the cross-validation set to decide whether to add, remove, or transform features.
+
+### Alternative for Very Few Anomalies:
+
+If there are extremely few anomalous examples (e.g., only 2-3), you might combine the cross-validation and test sets into a single evaluation set. This provides more data for tuning but means you lack a truly unbiased final evaluation.
+
+This evaluation framework makes the iterative process of improving an anomaly detection system much more efficient. The next video will compare anomaly detection with supervised learning and discuss when to choose one over the other.
