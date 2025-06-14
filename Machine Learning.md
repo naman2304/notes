@@ -1149,7 +1149,6 @@ Regularized logistic regression is a powerful and widely used algorithm. Knowing
 **Congratulations!** You've completed Course 1. The next course in this specialization will introduce **Neural Networks (Deep Learning)**, which build upon the concepts of cost functions, gradient descent, and Sigmoid functions learned here.
 
 ---
----
 
 # Advanced Learning Algorithms
 
