@@ -452,3 +452,192 @@ model.fit(X_train, Y_train, epochs=...)
 * **Industry Standard:** Adam is a de facto standard and widely used by practitioners for training neural networks today.
 
 The next videos will explore other advanced neural network concepts, starting with alternative layer types.
+
+You are absolutely correct! My apologies. I got caught up in the general explanation of convolutional layers and completely missed mentioning the digit classification example that was central to the start of the transcript.
+
+Thank you for catching that oversight. I will now provide a corrected and concise summary that includes the digit classification example within the context of convolutional layers, while maintaining all previous formatting constraints.
+
+Here is the corrected summary for the video:
+
+## Beyond Dense Layers: Convolutional Layers
+
+While **dense layers** (where every neuron connects to every activation in the previous layer) are powerful, neural networks can be even more effective using other layer types. One important example is the **convolutional layer**.
+
+**Note**: There are many architectures in ML
+* Feedforward architectures
+  * Linear models (Linear regression, Logistic regression(
+  * Multilayer Perceptrons / Deep Neural Network (DNN)
+* Spatial / structured input architectures
+  * Convolutional Neural Network (CNN) -- predominantly used for images, spatial data, video frames.
+* Sequence architectures
+  * Long Short-Term Memory (LSTM)
+  * Transformers
+* Special architectures
+  * Diffusion models  
+  
+### Introduction to Convolutional Layers:
+
+* **Concept:** In a convolutional layer, each neuron looks at only a **limited, local region (or "window") of the input** from the previous layer, rather than the entire input.
+
+* **Benefits:**
+    1.  **Speeds up Computation:** Fewer connections mean fewer calculations.
+    2.  **Less Training Data Needed:** The local receptive fields and parameter sharing (discussed in advanced courses) reduce the number of parameters, making the network **less prone to overfitting** and able to learn effectively with less data.
+    3.  **Better at Generalizing:** By focusing on local patterns, they are particularly good at recognizing patterns that might appear anywhere in the input.
+
+* **Originator:** Yann LeCun is credited with much of the foundational work on convolutional layers. A neural network using convolutional layers is often called a **Convolutional Neural Network (CNN)**.
+
+### Example: Handwritten Digit Classification
+
+Consider a handwritten digit image (e.g., a "9") as the input $X$.
+
+1.  **Input Layer ($X$):** The image is represented as a grid of pixels.
+2.  **First Hidden Layer (Convolutional):**
+    * Instead of each neuron looking at all pixels in the image, individual neurons are designed to look only at **small, specific rectangular regions** of the input image.
+    * Example: One neuron might only look at pixels in the top-left corner, another at a different small region.
+    * This is done to detect localized features like edges or corners.
+
+### Example: EKG Signal Classification (1D Convolution)
+
+Let's use a 1D input (like an EKG signal, a sequence of 100 numbers representing voltage over time) to classify heart conditions.
+
+1.  **Input Layer ($X$):** A 1D sequence of 100 numbers ($x_1, \dots, x_{100}$).
+2.  **First Hidden Layer (Convolutional):**
+    * Each neuron looks at a **small, defined "window"** of the input sequence.
+    * Example: Neuron 1: looks at $x_1$ through $x_{20}$. Neuron 2: looks at $x_{11}$ through $x_{30}$ (a shifted window), and so on.
+    * This is useful for detecting localized patterns in sequential data.
+3.  **Subsequent Layers:** Can also be convolutional, looking at windows of activations from previous layers.
+4.  **Output Layer:** Finally, these activations are fed into a standard sigmoid unit (for binary classification, like heart disease present/absent).
+
+### Architectural Choices and Importance:
+
+With convolutional layers, you choose:
+* **Window size (or "filter size"):** How large a region each neuron looks at.
+* **Stride:** How much the window shifts for the next neuron.
+* **Number of neurons/filters:** How many distinct feature detectors are in each layer.
+
+These choices, often leading to **Convolutional Neural Networks (CNNs)**, are particularly effective for data with spatial or temporal relationships (like images and time series). Research constantly explores new layer types (e.g., **Transformer models**, **LSTMs**) as fundamental building blocks for increasingly complex and powerful neural networks.
+
+## Backpropagation: Understanding Derivatives (Optional)
+
+Backpropagation is a key algorithm for training neural networks by computing the derivatives of the cost function with respect to its parameters. This optional video provides an intuitive understanding of derivatives.
+
+### Informal Definition of a Derivative
+
+If a parameter $w$ changes by a tiny amount $\epsilon$ (epsilon), and the cost function $J(w)$ changes by $k$ times $\epsilon$, then we say the derivative of $J(w)$ with respect to $w$ is $k$.
+* **Notation:** $\frac{d}{dw} J(w) = k$ (or $\frac{\partial}{\partial w} J(w)$ for multiple variables).
+
+### Example: $J(w) = w^2$
+
+Let $J(w) = w^2$.
+
+* **At $w=3$:**
+    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $3.001$.
+    * $J(3.001) = 3.001^2 = 9.006001$.
+    * Change in $J = 9.006001 - 9 = 0.006001$.
+    * This is approximately $6 \times 0.001 = 6 \times \epsilon$.
+    * Therefore, the derivative $\frac{d}{dw} J(w)$ at $w=3$ is $6$.
+* **At $w=2$:**
+    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $2.001$.
+    * $J(2.001) = 2.001^2 = 4.004001$.
+    * Change in $J \approx 4 \times \epsilon$.
+    * Derivative at $w=2$ is $4$.
+* **At $w=-3$:**
+    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $-2.999$.
+    * $J(-2.999) = (-2.999)^2 = 8.994001$.
+    * Change in $J = 8.994001 - 9 = -0.005999$.
+    * This is approximately $-6 \times \epsilon$.
+    * Derivative at $w=-3$ is $-6$.
+
+### Key Observations:
+
+1.  **Derivative depends on $w$:** Even for the same function $J(w)=w^2$, the derivative changes depending on the value of $w$.
+2.  **Calculus Rule:** For $J(w) = w^2$, the derivative is $\frac{d}{dw} J(w) = 2w$. (This matches our examples: $2 \times 3 = 6$, $2 \times 2 = 4$, $2 \times (-3) = -6$).
+3.  **Gradient Descent Link:** In gradient descent, $w_j = w_j - \alpha \frac{\partial}{\partial w_j} J(\vec{w})$. A large derivative indicates a steep slope, leading to a larger step in $w_j$ to reduce $J$ more efficiently.
+
+### Using SymPy to Compute Derivatives:
+
+SymPy is a Python library for symbolic mathematics, allowing you to compute derivatives:
+
+```python
+import sympy
+J, w = sympy.symbols('J w')
+J = w**2
+dJ_dw = sympy.diff(J, w) # dJ_dw will be 2*w
+dJ_dw.subs(w, 2) # Evaluates to 4
+```
+
+### Notational Convention:
+
+* For a function $J(w)$ of a **single variable** $w$, the derivative is written as $\frac{d}{dw} J(w)$. This uses the lowercase letter 'd'.
+* For a function $J(w_1, \dots, w_n)$ of **multiple variables**, the derivative with respect to one variable, say $w_i$, is called a **partial derivative** and is written as $\frac{\partial}{\partial w_i} J(w_1, \dots, w_n)$. This uses the squiggly $\partial$ symbol.
+* In this class, for conciseness and clarity, we often use the notation $\frac{d}{dw_i} J$ (or just $dJ/dw_i$) even when $J$ is a function of multiple variables. This simplifies the presentation, as $J$ typically depends on many parameters ($w_1, \dots, w_n, b$).
+
+Understanding derivatives as the "rate of change" is fundamental to backpropagation. The next video will introduce the concept of a computation graph to help compute derivatives in a neural network.
+
+## Backpropagation: The Computation Graph (Optional)
+
+The **computation graph** is a fundamental concept in deep learning and is how frameworks like TensorFlow automatically compute derivatives for neural networks. It visualizes the step-by-step calculation of the cost function.
+
+### Building a Computation Graph
+
+Consider a simple neural network for linear regression: $a = wx + b$. The cost function is $J = \frac{1}{2}(a - y)^2$.
+Let $x = -2$, $y = 2$, $w = 2$, $b = 8$.
+
+We can break down the computation of $J$ into individual nodes:
+
+1.  **Node `c`:** $c = w \times x$
+    * Input: $w=2, x=-2$
+    * Output: $c = -4$
+2.  **Node `a`:** $a = c + b$
+    * Input: $c=-4, b=8$
+    * Output: $a = 4$
+3.  **Node `d`:** $d = a - y$
+    * Input: $a=4, y=2$
+    * Output: $d = 2$
+4.  **Node `J`:** $J = \frac{1}{2} d^2$
+    * Input: $d=2$
+    * Output: $J = 2$
+
+This graph shows the **forward propagation** (left-to-right) to compute the cost $J$.
+
+### Backpropagation: Computing Derivatives (Right-to-Left)
+
+Backpropagation calculates the derivatives of $J$ with respect to parameters ($w, b$) by performing a **right-to-left** (backward) pass through the computation graph.
+
+The general idea is to compute $\frac{\partial J}{\partial \text{input_to_node}}$ for each node, using the derivatives already computed for subsequent nodes (chain rule).
+
+1.  **Derivative $\frac{\partial J}{\partial d}$:**
+    * Node: $J = \frac{1}{2} d^2$
+    * If $d$ changes by $\epsilon$, $J$ changes by approximately $d \times \epsilon$. (For $d=2$, $J$ changes by $2\epsilon$).
+    * So, $\frac{\partial J}{\partial d} = d = 2$.
+    (This is the first step of backprop, usually $\frac{\partial J}{\partial J} = 1$ is the start, but here simplified to $\frac{\partial J}{\partial d}$)
+
+2.  **Derivative $\frac{\partial J}{\partial a}$:**
+    * Node: $d = a - y$. (Change in $a$ by $\epsilon$ causes change in $d$ by $\epsilon$).
+    * From previous step, change in $d$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
+    * Therefore, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
+    * So, $\frac{\partial J}{\partial a} = 2$.
+
+3.  **Derivative $\frac{\partial J}{\partial c}$:**
+    * Node: $a = c + b$. (Change in $c$ by $\epsilon$ causes change in $a$ by $\epsilon$).
+    * From previous step, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
+    * So, $\frac{\partial J}{\partial c} = 2$.
+
+4.  **Derivative $\frac{\partial J}{\partial b}$:**
+    * Node: $a = c + b$. (Change in $b$ by $\epsilon$ causes change in $a$ by $\epsilon$).
+    * From previous step, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
+    * So, $\frac{\partial J}{\partial b} = 2$. (This is one of our target derivatives).
+
+5.  **Derivative $\frac{\partial J}{\partial w}$:**
+    * Node: $c = w \times x$. (Change in $w$ by $\epsilon$ causes change in $c$ by $x \times \epsilon$).
+    * For $x = -2$, change in $w$ by $\epsilon$ causes change in $c$ by $-2\epsilon$.
+    * From previous step, change in $c$ by amount $\Delta c$ causes change in $J$ by $2 \times \Delta c$.
+    * So, change in $J$ is $2 \times (-2\epsilon) = -4\epsilon$.
+    * Therefore, $\frac{\partial J}{\partial w} = -4$. (This is our other target derivative).
+
+### Efficiency of Backpropagation
+
+* Backprop efficiently computes all derivatives by reusing intermediate derivative calculations. For instance, $\frac{\partial J}{\partial a}$ is calculated once and then used to compute $\frac{\partial J}{\partial c}$ and $\frac{\partial J}{\partial b}$.
+* This efficiency is crucial: for a graph with $N$ nodes and $P$ parameters, backprop computes all derivatives in roughly $O(N+P)$ steps, rather than $O(N \times P)$ which would be required if each derivative was computed independently. This enables training very large neural networks with millions of parameters.
+
+The next video will apply these concepts to a larger neural network.
