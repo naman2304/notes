@@ -1,4 +1,4 @@
-**Appendix**
+**Appendix**  
 [Machine Learning Specialization](https://www.coursera.org/specializations/machine-learning-introduction)
 * [Supervised Machine Learning: Regression and Classification](https://www.coursera.org/learn/machine-learning?specialization=machine-learning-introduction)
 * [Advanced Learning Algorithms](https://www.coursera.org/learn/advanced-learning-algorithms?specialization=machine-learning-introduction)
