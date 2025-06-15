@@ -280,6 +280,8 @@ Learning curves plot the performance of a learning algorithm (training error $J_
 
 ### Learning Curves for High Variance (Overfitting)
 
+<img src="/metadata/lc_22.png" width="500" />
+
 * **Scenario:** The model is too complex (e.g., fitting a 4th-order polynomial to limited data).
 * **Learning Curve Shape:**
     * $J_{\text{train}}$ starts very low (often near zero for small $m_{\text{train}}$) and slowly **increases** as $m_{\text{train}}$ grows.
