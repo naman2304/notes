@@ -1,643 +1,299 @@
-## Training Neural Networks: An Overview
+## Welcome to Week 3: Practical Advice for Building ML Systems
 
-Welcome to Week 2! This week focuses on **training neural networks**, building on last week's understanding of inference.
+This week focuses on **practical strategies for building effective machine learning systems**. While you've learned powerful algorithms like linear/logistic regression and neural networks, efficient development hinges on making good decisions about where to invest your time. I've seen teams spend months on approaches that a more skilled team could have done in weeks.
 
-### Training Process in TensorFlow
+### The Problem: What to Try Next?
 
-Here's a high-level overview of the TensorFlow code for training a neural network:
+When your model (e.g., regularized linear regression for housing prices) performs poorly (makes large errors), there are many potential next steps:
 
-1.  **Define the Model Architecture:**
-    This step sets up the layers of your neural network sequentially. It's familiar from last week's inference discussion.
-    * Example:
-        ```python
-        import tensorflow as tf
-        from tensorflow.keras import Sequential
-        from tensorflow.keras.layers import Dense
-        model = Sequential([
-            Dense(units=25, activation='sigmoid'), # Layer 1 (Hidden)
-            Dense(units=15, activation='sigmoid'), # Layer 2 (Hidden)
-            Dense(units=1, activation='sigmoid')   # Layer 3 (Output)
-        ])
-        ```
-    * This defines how the network computes its output given an input.
+* **More Data:** Collect more training examples.
+* **Fewer Features:** Try a smaller subset of existing features.
+* **Additional Features:** Find and add new, relevant features.
+* **Polynomial Features:** Add non-linear transformations of existing features (e.g., $x^2$, $x_1x_2$).
+* **Regularization Parameter ($\lambda$):** Adjust $\lambda$ (decrease if too much bias, increase if too much variance).
 
-2.  **Compile the Model:**
-    This step configures the model for the training process. The key part here is specifying the **loss function**.
-    * Example:
-        ```python
-        from tensorflow.keras.losses import BinaryCrossentropy
-        model.compile(loss=BinaryCrossentropy())
-        ```
-    * `loss=BinaryCrossentropy()`: This tells TensorFlow to use the binary cross-entropy loss function, which is suitable for binary classification tasks. More details on this loss function will be covered in the next video.
+The key to efficiency is knowing which of these options will be most fruitful.
 
-3.  **Train (Fit) the Model:**
-    This step executes the training algorithm, fitting the model to your data.
-    * Example:
-        ```python
-        model.fit(X, Y, epochs=100) # X: input data, Y: true labels
-        ```
-    * `X, Y`: Your training dataset.
-    * `epochs=100`: Specifies how many steps (iterations of the underlying optimization algorithm, like gradient descent) to run the training for.
+### Diagnostics: Guiding Your ML Project
 
-### Why Understand Beyond the Code:
+This week will teach you about **diagnostics**: tests you can run to gain insights into what is or isn't working with your learning algorithm.
 
-While these few lines of code are powerful, understanding what happens "behind the scenes" is crucial for:
+* **Purpose of Diagnostics:** To provide guidance on where to invest your time and effort to improve performance. For example, a diagnostic can tell you if spending weeks or months collecting more data is truly worthwhile.
+* **Time Investment:** Diagnostics themselves take time to implement, but they can save far more time in the long run by preventing misguided efforts.
 
-* **Debugging:** Effectively identifying and fixing issues when your model doesn't perform as expected.
-* **Problem Solving:** Developing a conceptual framework to approach complex machine learning challenges.
+We'll begin by learning how to properly evaluate the performance of your machine learning algorithm.
 
-The next video will delve deeper into the details of these TensorFlow steps, starting with the `compile` function and the binary cross-entropy loss.
+## Evaluating Model Performance
 
-## Training Neural Networks in Detail (TensorFlow)
+Systematic evaluation of a machine learning model's performance is crucial for understanding its effectiveness and guiding improvements.
 
-This video delves into the details of how TensorFlow trains neural networks, drawing parallels with the logistic regression training process from Course 1.
+### The Need for Systematic Evaluation
 
-### Recap: Logistic Regression Training Steps
+When models become complex (e.g., using many features beyond what can be plotted), visual inspection of the fit is no longer sufficient to identify problems like overfitting. We need numerical metrics. **Note**: even after using regularization term in cost function, model can overfit -- hence we do following all things to avoid overfitting and choosing correct model-parameters (w and b) and hyperparameters (polynomial degree, lambda, architecture like # of layers or/and # of neurons per layer)
 
-1.  **Specify the Model (f(x)):** Define how the output is computed from inputs (x) and parameters (w, b). For logistic regression, $f(x) = g(\vec{w} \cdot \vec{x} + b)$.
-2.  **Specify Loss and Cost Functions:**
-    * **Loss:** Measures performance on a single example. For binary classification, it was the binary cross-entropy loss: $L(f(x), y) = -y \log(f(x)) - (1-y) \log(1-f(x))$.
-    * **Cost:** Average of the loss over the entire training set $J(W, B) = \frac{1}{m} \sum L(f(x^{(i)}), y^{(i)})$.
-3.  **Minimize the Cost Function:** Use an optimization algorithm (e.g., gradient descent) to find optimal parameters (w, b) by repeatedly updating them based on the derivatives of J.
+### Splitting the Dataset
 
-### Neural Network Training in TensorFlow: Three Steps
+To evaluate effectively, split your dataset into two subsets:
 
-The same three conceptual steps apply to training neural networks in TensorFlow:
+1.  **Training Set (e.g., 70% of data):** Used to fit (train) the model's parameters ($w, b$). Denoted as $({x_{train}^{(i)}}, {y_{train}^{(i)}})$ for $i = 1, \dots, m_{\text{train}}$.
+2.  **Test Set (e.g., 30% of data):** Used to evaluate the model's performance on unseen data. Denoted as $({x_{test}^{(i)}}, {y_{test}^{(i)}})$ for $i = 1, \dots, m_{\text{test}}$.
 
-1.  **Specify the Model Architecture (using `tf.keras.Sequential`):**
-    * This defines the layers (e.g., `Dense` layers with specific units and activation functions) and their connections. This fully specifies how the network computes its output $f(x)$ (or $a^{[L]}$) given an input $x$ and its parameters (all $W^{[l]}$ and $B^{[l]}$).
+### Evaluation for Regression Problems (Squared Error)
 
-2.  **Compile the Model (Specifying Loss & Optimizer):**
-    * This step tells TensorFlow *how* to train the model.
-    * **Loss Function:** For binary classification (like handwritten digit recognition), the most common loss is `tf.keras.losses.BinaryCrossentropy()`. This is the same cross-entropy loss function used for logistic regression.
-    * For **regression problems**, you would use a different loss, such as `tf.keras.losses.MeanSquaredError()`.
-    * **Cost Function:** TensorFlow implicitly uses the average of the specified loss function over the entire training set as the cost function it aims to minimize.
-    * Note: There is just one cost function for the entire neural network, not per neuron. It's for the final one neuron on the final layer to be precise.
+$$J(w,b) = \frac{1}{2m_{train}} \sum_{i=1}^{m_{train}} (f_{w,b}(x_{train}^{(i)}) - y_{train}^{(i)})^2  + \frac{\lambda}{2m_{train}} \sum_{j=1}^{n} w_j^2$$
 
-3.  **Train the Model (using `model.fit()`):**
-    * This is where the actual optimization happens.
-    * `model.fit(X, Y, epochs=...)`: Takes your input training data `X` and ground truth labels `Y`.
-    * `epochs`: Specifies the number of training iterations (similar to gradient descent steps).
-    * **Under the Hood:** `model.fit()` uses an optimization algorithm (like gradient descent, or more advanced variants) to minimize the specified cost function. Crucially, it employs **backpropagation** to efficiently compute the necessary partial derivatives of the cost function with respect to all network parameters (all $W^{[l]}$ and $B^{[l]}$ across all layers).
+After training the model on the training set by minimizing $J(w, b)$ (the cost function including regularization), evaluate its performance using:
 
-### Evolution of ML Implementation: Libraries
+* **Test Error ($$J_{test}(w,b)$$):** Average squared error on the test set.
 
-Historically, developers implemented ML algorithms from scratch. However, modern deep learning libraries like TensorFlow and PyTorch are highly mature. They abstract away complex details like backpropagation, allowing developers to train powerful models with just a few lines of code. While using these libraries is standard practice, understanding the underlying principles (forward propagation, loss/cost functions, gradient descent, backpropagation) is vital for debugging and effectively utilizing these tools.
+    $$J_{test}(w,b) = \frac{1}{2m_{test}} \sum_{i=1}^{m_{test}} (f_{w,b}(x_{test}^{(i)}) - y_{test}^{(i)})^2$$
+    * **Crucially, this formula does NOT include the regularization term ($\lambda \sum w_j^2$)**, as regularization is part of the *training objective*, not the *performance metric*.
+* **Training Error ($$J_{train}(w,b)$$):** Average squared error on the training set.
 
-The next video will explore different **activation functions** that can be used in neural networks, moving beyond just the Sigmoid function to enhance model power.
+    $$J_{train}(w,b) = \frac{1}{2m_{train}} \sum_{i=1}^{m_{train}} (f_{w,b}(x_{train}^{(i)}) - y_{train}^{(i)})^2$$
+    * Again, this also does NOT include the regularization term.
 
-## Beyond Sigmoid: Other Activation Functions
+**Example of Overfitting Detection:** If a model has very low $J_{\text{train}}$ (e.g., near zero, indicating a perfect fit on training data) but a high $J_{\text{test}}$, it signifies overfitting.
 
-So far, we've primarily used the Sigmoid activation function, which outputs values between 0 and 1, suitable for probabilities. However, neural networks become much more powerful with other activation functions.
+### Evaluation for Classification Problems (Logistic Loss / Misclassification Error)
 
-### The Need for Different Activation Functions
+$$J(w,b) = \frac{-1}{m_{train}} \sum_{i=1}^{m_{train}} [y^{(i)} \log(f_{\vec{w},b}(\vec{x}^{(i)})) + (1-y^{(i)}) \log(1-f_{\vec{w},b}(\vec{x}^{(i)}))] + \frac{\lambda}{2m_{train}} \sum_{j=1}^{n} w_j^2$$
 
-In the demand prediction example, modeling "awareness" as a binary 0/1 (or 0-1 probability) might be too restrictive. Awareness could be non-binary and potentially very high (e.g., viral). If we want an activation that can take on any non-negative value, Sigmoid isn't suitable.
+For classification, after training by minimizing the regularized logistic cost function, you can evaluate using:
 
-### Rectified Linear Unit (ReLU)
+1.  **Logistic Loss ($$J_{test} / J_{train}$$):** Compute the average logistic loss on the test/training sets, similar to regression but using the logistic loss formula.
+2.  **Misclassification Error (More Common):**
+    * **For each example:** Make a binary prediction $\hat{y}$ (e.g., $\hat{y}=1$ if $f(x) \ge 0.5$, else $\hat{y}=0$).
+    * **Test Error ($J_{\text{test}}$):** The fraction of examples in the test set where $\hat{y} \ne y_{\text{actual}}$.
+    * **Training Error ($J_{\text{train}}$):** The fraction of examples in the training set where $\hat{y} \ne y_{\text{actual}}$.
 
-* **Formula:** $g(z) = \max(0, z)$
-* **Graph:** Outputs 0 for any negative input $z$, and outputs $z$ itself for any positive $z$.
-* **Properties:** Allows activations to be any non-negative number, which is useful for modeling quantities that can grow indefinitely (e.g., "awareness" or "virality").
-* **Common Name:** ReLU (pronounced "ray-loo"), short for Rectified Linear Unit. This is a very common choice in modern neural networks.
+Splitting data into training and test sets provides a systematic way to measure a model's performance and is a foundational step in model selection. The next video will build on this to automate model selection.
 
-### Linear Activation Function
+## Model Selection: Using a Cross-Validation Set
 
-* **Formula:** $g(z) = z$
-* **Properties:** The output is simply equal to the input $z$.
-* **Usage:** Often used in the output layer of neural networks for **regression problems** (where you want to predict a continuous number rather than a probability or category).
-* **Terminology:** Sometimes referred to as "no activation function" because it doesn't transform $z$ in a non-linear way, but in this course, it's called the "linear activation function."
+To automatically choose the best model (e.g., polynomial degree, neural network architecture), we refine the data splitting strategy beyond just training and test sets.
 
-### Summary of Common Activation Functions:
+### The Flaw of Using Only a Test Set for Model Selection
 
-1.  **Sigmoid:** $g(z) = 1 / (1 + e^{-z})$ (Outputs 0 to 1; good for output layer probabilities in binary classification).
-2.  **ReLU:** $g(z) = \max(0, z)$ (Outputs 0 to positive infinity; common in hidden layers, allows for non-linear relationships and avoids vanishing gradients).
-3.  **Linear:** $g(z) = z$ (Outputs negative infinity to positive infinity; good for output layer in regression problems).
+* If you train different models (e.g., linear, quadratic, cubic) on the training set and then pick the one with the lowest error on the *test set*, your reported test error will be an **optimistic estimate** of the true generalization error.
+* This is because you've used the test set *itself* to select a model, effectively "fitting" the model selection parameter (like polynomial degree $d$) to the test set, similar to how training fits $w$ and $b$ to the training set.
 
-These three, along with the Softmax activation function (to be covered later), form the basis for building a wide variety of powerful neural networks. The next video will discuss how to choose among these different activation functions.
+### Three-Way Data Split for Model Selection
 
-## Choosing Activation Functions
+To perform unbiased model selection, split your dataset into three subsets:
 
-Selecting the right activation function for different layers is crucial for neural network performance.
+1.  **Training Set (e.g., 60% of data):** Denoted $X_{\text{train}}, Y_{\text{train}}$, with $m_{\text{train}}$ examples. Used **only for fitting the model's parameters** ($w, b$).
+2.  **Cross-Validation Set (or Validation Set, Dev Set) (e.g., 20% of data):** Denoted $X_{\text{cv}}, Y_{\text{cv}}$, with $m_{\text{cv}}$ examples. Used **only for choosing hyperparameters** (e.g., polynomial degree $d$, neural network architecture, regularization parameter $\lambda$).
+    * The name "cross-validation" means it's used to "cross-check" the validity of different models.
+    * This is also used to early stop the training set from overfitting on fixed set of hyperparameters. While training a model (with fixed hyperparameters), at each epoch, we calculate cross-validation loss too. If it is increasing consistently we stop as we might be overfitting the data. 
+3.  **Test Set (e.g., 20% of data):** Denoted $X_{\text{test}}, Y_{\text{test}}$, with $m_{\text{test}}$ examples. Used **only for the final, unbiased estimate** of the chosen model's generalization error on completely unseen data.
 
-### Output Layer Activation Function
+### Model Selection Procedure:
 
-The choice of output layer activation depends on the type of prediction:
+Let's say you are choosing among $D$ different models (e.g., polynomials of degree $d=1$ to $d=10$):
 
-* **Binary Classification (y is 0 or 1):**
-    * **Sigmoid** is the most natural choice. It outputs a probability between 0 and 1, directly interpretable as P(y=1|x).
-    * TensorFlow: `activation='sigmoid'`
+1.  **Train each model:** For each candidate model (e.g., for each polynomial degree $d$):
+    * Fit its parameters ($w, b$) by minimizing the cost function on the **training set only**.
+    * This yields parameters $w^{(d)}, b^{(d)}$ for each model $d$.
 
-* **Regression (y is a continuous number):**
-    * **Linear** activation is recommended if y can be **positive or negative** (e.g., predicting stock price change).
-    * TensorFlow: `activation='linear'`
-    * **ReLU** activation is recommended if y can only be **non-negative** (e.g., predicting house prices, which can't be negative).
-    * TensorFlow: `activation='relu'`
+2.  **Evaluate on Cross-Validation Set:** For each trained model:
+    * Compute its error on the **cross-validation set** ($$J_{cv}(w^{(d)}, b^{(d)})$$).
+    * For regression, this is the average squared error on $X_{cv}, Y_{cv}$.
+    * For classification, this is usually the misclassification error (fraction of errors) on $X_{cv}, Y_{cv}$.
 
-### Hidden Layer Activation Function
+3.  **Choose the Best Model:** Select the model (e.g., degree $d^*$) that has the **lowest error on the cross-validation set**. This is your chosen model.
 
-* **ReLU** is the **most common and recommended default choice** for hidden layers.
-    * TensorFlow: `activation='relu'`
+4.  **Estimate Generalization Error:**
+    * Report the error of the *chosen model* ($w^{(d*)}, b^{(d*)}$) on the **test set** ($$J_{test}(w^{(d*)}, b^{(d*)})$$).
+    * Since the test set was not used for training parameters or for model selection, this $J_{test}$ provides a fair and unbiased estimate of how well your final model will perform on new data.
 
-* **Why ReLU over Sigmoid for hidden layers?**
-    1.  **Computational Efficiency:** ReLU (max(0,z)) is faster to compute than Sigmoid (which involves exponentiation).
-    2.  **Avoids "Flatness" (Vanishing Gradients):**
-        * Sigmoid is "flat" on both ends (for very large positive or negative z).
-        * ReLU is "flat" only on one side (for negative z).
-        * Flat regions mean very small gradients, which significantly slow down gradient descent and can hinder learning. ReLU's less severe flatness helps neural networks learn faster.
+### Importance of This Procedure:
 
-### Summary of Activation Function Choices:
+* **Unbiased Evaluation:** Prevents overly optimistic estimates of generalization error.
+* **Systematic Model Selection:** Provides a clear, data-driven way to choose between different model complexities or architectures.
+* **Best Practice:** Considered standard best practice in machine learning for any project involving model selection.
 
-* **Output Layer:**
-    * Binary Classification: Sigmoid
-    * Regression (positive/negative y): Linear
-    * Regression (non-negative y): ReLU
-* **Hidden Layers:** ReLU (default)
+This refined evaluation technique is crucial for building robust and generalizable machine learning systems. It sets the stage for using powerful diagnostics like bias and variance, which will be discussed next.
 
-While other activation functions exist (e.g., tanh, LeakyReLU, Swish), ReLU is generally sufficient for most applications.
+## Diagnosing Bias and Variance
 
-A fundamental question remains: Why do we need activation functions at all, especially non-linear ones? The next video will explain why simply using linear activation functions everywhere would make neural networks ineffective.
+After training a machine learning model, it rarely performs perfectly on the first try. The key to improvement is diagnosing *why* it's not performing well. Looking at **bias** and **variance** helps guide your next steps.
 
-## Why Neural Networks Need Non-Linear Activation Functions
+### Bias vs. Variance Visualized (1D Example)
 
-Neural networks fundamentally rely on **non-linear activation functions** (like Sigmoid, ReLU) to learn complex patterns. If every neuron in a neural network used only the **linear activation function** ($g(z) = z$), the entire network would collapse into a simple linear model (equivalent to linear or logistic regression), defeating the purpose of using a complex multi-layered structure.
+Recall the housing price prediction example with a single feature $x$:
 
-### The Problem with All Linear Activations
+* **High Bias (Underfitting):** (e.g., fitting a straight line, $d=1$)
+    * The model is too simple; it doesn't capture the underlying pattern.
+    * **Characteristic:** Both training error ($J_{\text{train}}$) and cross-validation error ($J_{\text{cv}}$) will be **high**. The model doesn't even fit the data it trained on very well.
 
-Let's illustrate with a simple 2-layer network:
-* **Input:** $x$
-* **Layer 1:** 1 hidden unit ($a_1 = g(w_1x + b_1)$)
-* **Layer 2 (Output):** 1 output unit ($a_2 = g(w_2a_1 + b_2)$)
+* **High Variance (Overfitting):** (e.g., fitting a 4th-order polynomial, $d=4$)
+    * The model is too complex; it fits the training data (including noise) too perfectly but fails to generalize.
+    * **Characteristic:** Training error ($J_{\text{train}}$) will be **low** (model performs great on seen data), but cross-validation error ($J_{\text{cv}}$) will be **much higher than** $J_{\text{train}}$.
 
-If $g(z) = z$ for all activations:
-1.  $a_1 = (w_1x + b_1)$
-2.  $a_2 = w_2(a_1) + b_2 = w_2(w_1x + b_1) + b_2$
-3.  Expanding: $a_2 = (w_2w_1)x + (w_2b_1 + b_2)$
+* **Just Right:** (e.g., fitting a quadratic polynomial, $d=2$)
+    * The model fits the underlying pattern well without overfitting.
+    * **Characteristic:** Both $J_{\text{train}}$ and $J_{\text{cv}}$ will be **low** and relatively close to each other.
 
-If we set $W_{new} = w_2w_1$ and $B_{new} = w_2b_1 + b_2$, then $a_2 = W_{new}x + B_{new}$.
+### Diagnosing Bias and Variance Systematically
 
-This shows that a neural network with two linear layers (or any number of linear layers) simply computes an output that is a **linear function of the input**, just like a single linear regression model. Adding more linear layers achieves nothing more than what a single linear layer could do. This is a consequence of the fact that a linear function of a linear function is itself a linear function.
+For models with many features that are hard to visualize:
 
-### Generalization
+* **High Bias Indicator:** $J_{\text{train}}$ is high. (This means the model can't even fit the training data adequately).
+* **High Variance Indicator:** $J_{\text{cv}}$ is much greater than $J_{\text{train}}$. (This means the model fits the training data well but struggles with unseen data).
 
-* **All linear hidden layers + linear output layer:** The entire network becomes equivalent to a single **linear regression** model.
-* **All linear hidden layers + logistic output layer:** The entire network becomes equivalent to a single **logistic regression** model.
+### Bias-Variance Trade-off Curve (as a function of polynomial degree $d$)
 
-### Conclusion: Rule of Thumb
+<img src="/metadata/bias_variance.png" width="500" />
 
-* **Never use linear activation functions in the hidden layers of a neural network.**
-* **Always use non-linear activation functions (like ReLU)** in hidden layers to enable the network to learn complex, non-linear relationships in the data.
-* Linear activation functions are typically reserved for the **output layer of regression problems** (where the target value can be any real number).
+When plotting $J_{\text{train}}$ and $J_{\text{cv}}$ against the polynomial degree $d$ (or model complexity):
 
-This understanding is crucial for building powerful neural networks that can model complex real-world data. The next video will extend classification to handle multiple categories (multi-class classification).
+* **$J_{\text{train}}$:** As $d$ increases (model complexity increases), $J_{\text{train}}$ generally **decreases**, approaching zero for very high degrees, as the model becomes capable of perfectly fitting the training data.
+* **$J_{\text{cv}}$:**
+    * For **low $d$ (simple models)**, $J_{\text{cv}}$ is high (high bias).
+    * As $d$ increases, $J_{\text{cv}}$ first **decreases** to a minimum (the "just right" spot).
+    * For **high $d$ (complex models)**, $J_{\text{cv}}$ then **increases** again (high variance) because the model overfits.
 
-## Multiclass Classification
+### High Bias and High Variance Simultaneously (Rare but Possible)
 
-**Multiclass classification** refers to classification problems where the output variable `y` can take on **more than two discrete categories** (not just 0 or 1).
+In some complex scenarios (especially with neural networks), a model can exhibit both high bias and high variance.
 
-### Examples of Multiclass Classification:
+* **Indicator:** $J_{\text{train}}$ is high, AND $J_{\text{cv}}$ is much greater than $J_{\text{train}}$.
+* **Intuition:** The model might underfit some parts of the input space while overfitting others, resulting in overall poor performance on both training and cross-validation sets, with a significant gap between them.
 
-* **Handwritten Digit Recognition:** Classifying an image into one of 10 digits (0-9).
-* **Disease Diagnosis:** Classifying a patient's condition into one of several possible diseases.
-* **Visual Defect Inspection:** Classifying a manufactured product as having a scratch, discoloration, or chip defect.
+Knowing how to diagnose high bias vs. high variance (or both) provides crucial guidance on what actions to take to improve your model's performance. Next, we'll see how regularization affects bias and variance.
 
-### Data Representation for Multiclass Classification:
+## Regularization, Bias, and Variance
 
-* For binary classification, we typically estimated $P(y=1 | x)$.
-* For multiclass classification, with, say, K classes, we want to estimate:
-    * $P(y=1 | x)$ (probability of being class 1)
-    * $P(y=2 | x)$ (probability of being class 2)
-    * ...
-    * $P(y=K | x)$ (probability of being class K)
+This video explains how the **regularization parameter $\lambda$ (lambda)** affects the bias and variance of a learning algorithm, guiding its optimal selection. We'll use a 4th-order polynomial model with regularization as an example.
 
-### Decision Boundaries in Multiclass Classification:
+### Impact of $\lambda$ on Model Fit:
 
-<img src="/metadata/multiclass.png" width="400" />
+* **Large $\lambda$ (e.g., $\lambda = 10000$): High Bias (Underfitting)**
+    * The regularization term heavily penalizes large parameters, forcing most $w_j$ values to be very close to zero.
+    * The model approximates $f(x) \approx b$ (a constant horizontal line).
+    * **Result:** The model significantly underfits the data. Both $J_{\text{train}}$ and $J_{\text{cv}}$ will be **high**.
 
-Unlike binary classification, which learns a single decision boundary to separate two classes, multiclass classification algorithms learn **multiple decision boundaries** that divide the input space into several regions, one for each class.
+* **Small $\lambda$ (e.g., $\lambda = 0$): High Variance (Overfitting)**
+    * No regularization is applied. The model fits the training data almost perfectly, potentially capturing noise.
+    * **Result:** The model overfits. $J_{\text{train}}$ will be **low**, but $J_{\text{cv}}$ will be **much higher than** $J_{\text{train}}$.
 
-The next video will introduce the **Softmax Regression algorithm**, a generalization of logistic regression, which is designed to handle multiclass classification problems. Following that, we'll see how to integrate Softmax Regression into a neural network for multiclass classification.
+* **"Just Right" $\lambda$ (Intermediate Value): Optimal Fit**
+    * A balanced $\lambda$ allows the model to fit the underlying patterns well without overfitting the noise.
+    * **Result:** Both $J_{\text{train}}$ and $J_{\text{cv}}$ will be **low** and relatively close to each other.
 
-## Softmax Regression: Multiclass Classification
+### Choosing Optimal $\lambda$ using Cross-Validation
 
-Softmax regression is a generalization of logistic regression, extending binary classification to **multiclass classification** (where $y$ can take on more than two discrete values).
+The procedure for choosing $\lambda$ is similar to selecting the polynomial degree:
 
-### From Logistic to Softmax Regression
+1.  **Define a set of candidate $\lambda$ values:** Try a wide range, often increasing by factors (e.g., $0, 0.01, 0.02, 0.04, \dots, 10$).
+2.  **For each $\lambda$ value:**
+    * Train the model's parameters ($w, b$) by minimizing the regularized cost function on the **training set**.
+    * Compute the **cross-validation error ($J_{\text{cv}}$)** for this trained model.
+3.  **Select the best $\lambda$:** Choose the $\lambda$ value that results in the **lowest $J_{\text{cv}}$**.
+4.  **Report generalization error:** Evaluate the final chosen model (with its $w, b$ trained using the optimal $\lambda$) on the untouched **test set** ($J_{\text{test}}$) to get an unbiased estimate of its true performance.
 
-Recall logistic regression calculates $z = \vec{w} \cdot \vec{x} + b$, then $a = g(z) = \frac{1}{1 + e^{-z}}$, interpreted as $P(y=1 | x)$. We implicitly knew $P(y=0 | x) = 1 - P(y=1 | x)$.
+### $\lambda$ vs. Model Complexity ($d$) Curve Comparison
 
-To generalize, imagine logistic regression as computing two "activations":
-* $a_1 = P(y=1 | x)$
-* $a_0 = P(y=0 | x) = 1 - a_1$
-where $a_1 + a_0 = 1$.
+* **Plot $J_{\text{train}}$ vs. $\lambda$:** As $\lambda$ increases, the penalty for large $w_j$ increases. This forces $w_j$ to be smaller, making it harder for the model to fit the training data perfectly. Thus, $J_{\text{train}}$ will generally **increase** as $\lambda$ increases.
+* **Plot $J_{\text{cv}}$ vs. $\lambda$:**
+    * For very small $\lambda$ (left side), $J_{\text{cv}}$ is high due to **overfitting (high variance)**.
+    * As $\lambda$ increases, $J_{\text{cv}}$ decreases to a minimum.
+    * For very large $\lambda$ (right side), $J_{\text{cv}}$ is high due to **underfitting (high bias)**.
+    * This curve typically has a "U" or "V" shape, with the minimum indicating the "just right" $\lambda$.
 
-### Softmax Regression Model
+This diagram is somewhat a "mirror image" of the $J_{\text{train}}$ and $J_{\text{cv}}$ versus polynomial degree $d$ plot, but both illustrate how cross-validation helps find the optimal model complexity parameter.
 
-For $K$ possible output classes ($y \in \{1, 2, \dots, K\}$):
+The next video will discuss how to interpret whether $J_{\text{train}}$ and $J_{\text{cv}}$ values are "high" or "low" by establishing a baseline performance.
 
-1.  **Linear Scores (z_j):** For each class $j$, compute a linear score:
-    $z_j = \vec{w}_j \cdot \vec{x} + b_j$
-    (Here, $\vec{w}_j$ and $b_j$ are the parameters for class $j$).
-2.  **Softmax Activation (a_j):** Convert these scores into probabilities using the softmax function:
-    $a_j = \frac{e^{z_j}}{\sum_{k=1}^{K} e^{z_k}}$
+## Diagnosing Bias and Variance with Baseline Performance
 
-* **Interpretation:** $a_j$ is the model's estimate of the probability that $y$ is equal to class $j$, given input $x$.
-* **Property:** By construction, $\sum_{j=1}^{K} a_j = 1$. The sum of probabilities for all classes always equals 1.
-* **Generalization:** If $K=2$, softmax regression reduces to (a slightly re-parameterized version of) logistic regression.
+When training a machine learning model, it's rare for it to work perfectly on the first try. Diagnosing whether the problem is **high bias (underfitting)** or **high variance (overfitting)** is crucial for deciding the next steps. This often involves comparing training error ($J_{\text{train}}$) and cross-validation error ($J_{\text{cv}}$) against a **baseline level of performance**.
 
-### Cost Function for Softmax Regression
+### Establishing a Baseline Level of Performance
 
-The loss function for a single training example with true label $y$ and predicted probabilities $a_1, \dots, a_K$ is based on **negative log-likelihood**:
+* This is the error level you can **reasonably hope** your learning algorithm can achieve.
+* **Common Baselines:**
+    * **Human-level performance:** Especially useful for unstructured data (audio, images, text) where humans excel. For example, if even humans make 10.6% error in transcribing noisy speech, expecting an algorithm to do much better than that is unrealistic.
+    * **Performance of competing algorithms:** A previous implementation or a competitor's system.
+    * **Prior experience/Guesswork:** Based on similar problems.
 
-* **Loss $L(\vec{a}, y)$:** If the true label for an example is $y=j$, the loss is $-\log(a_j)$.
-    * **Intuition:**
-        * If $a_j$ (the predicted probability for the *correct* class) is close to 1, then $-\log(a_j)$ is close to 0 (low loss).
-        * If $a_j$ is small (meaning the model was not confident about the correct class), then $-\log(a_j)$ is large (high loss). This penalizes the model for being uncertain or wrong about the true class.
-* **Overall Cost Function $J(\vec{W}, \vec{B})$:** This is the average of the loss function over all $m$ training examples:
-    $J(\vec{W}, \vec{B}) = \frac{1}{m} \sum_{i=1}^{m} L(\vec{a}^{(i)}, y^{(i)})$
-    (where $\vec{W}$ and $\vec{B}$ denote all parameters across all classes).
+### Diagnosing High Bias vs. High Variance with a Baseline:
 
-By minimizing this cost function, softmax regression learns parameters to accurately predict probabilities for each class. The next step is to integrate this into a neural network for multi-class classification.
+Let's use a speech recognition example:
+* **Baseline (Human-level performance):** 10.6% error.
 
-## Multi-class Classification with Softmax Output Layer
+1.  **Example 1: High Variance Problem**
+    * $J_{\text{train}} = 10.8\%$
+    * $J_{\text{cv}} = 14.8\%$
+    * **Analysis:**
+        * **Baseline vs. Training Error Gap:** $10.8\% - 10.6\% = 0.2\%$. This small gap indicates the model is doing quite well on the training set, close to human performance. So, **bias is low**.
+        * **Training vs. Cross-Validation Error Gap:** $14.8\% - 10.8\% = 4.0\%$. This is a significant gap, meaning the model performs much worse on unseen data.
+        * **Conclusion:** This is primarily a **high variance (overfitting)** problem.
 
-To build a neural network for **multi-class classification**, we integrate the Softmax regression model into the network's **output layer**.
+2.  **Example 2: High Bias Problem**
+    * $J_{\text{train}} = 15.0\%$
+    * $J_{\text{cv}} = 15.5\%$
+    * **Analysis:**
+        * **Baseline vs. Training Error Gap:** $15.0\% - 10.6\% = 4.4\%$. This large gap indicates the model is struggling even with the training data, performing significantly worse than what's achievable.
+        * **Training vs. Cross-Validation Error Gap:** $15.5\% - 15.0\% = 0.5\%$. This small gap suggests it's not overfitting significantly.
+        * **Conclusion:** This is primarily a **high bias (underfitting)** problem.
 
-### Network Architecture for Multi-class
+3.  **Example 3: Both High Bias and High Variance (Possible but Less Common)**
+    * $J_{\text{train}} = 15.0\%$
+    * $J_{\text{cv}} = 19.7\%$
+    * **Analysis:**
+        * **Baseline vs. Training Error Gap:** $15.0\% - 10.6\% = 4.4\%$. High bias.
+        * **Training vs. Cross-Validation Error Gap:** $19.7\% - 15.0\% = 4.7\%$. High variance.
+        * **Conclusion:** The algorithm suffers from **both high bias and high variance**.
 
-For handwritten digit recognition (0-9, 10 classes):
-* Input (X): Image pixels.
-* Hidden Layer 1: 25 units (ReLU activation).
-* Hidden Layer 2: 15 units (ReLU activation).
-* **Output Layer:** 10 units (for classes 0-9), using **Softmax activation function**.
+### Summary of Diagnostic Logic:
 
-### Forward Propagation with Softmax Output
+* **High Bias:** Indicated by a large gap between **Baseline Performance** and **$J_{\text{train}}$**.
+* **High Variance:** Indicated by a large gap between **$J_{\text{train}}$** and **$J_{\text{cv}}$**.
 
-1.  **Hidden Layers (A1, A2):** Computations in hidden layers 1 and 2 proceed exactly as before (e.g., $a_j^{[l]} = g(w_j^{[l]} \cdot a^{[l-1]} + b_j^{[l]})$ with ReLU).
-2.  **Output Layer (A3):**
-    * For each of the 10 output units, compute a linear score $z_j^{[3]}$:
-        $z_j^{[3]} = \vec{w}_j^{[3]} \cdot \vec{a}^{[2]} + b_j^{[3]}$ (where $\vec{a}^{[2]}$ is the activation vector from the previous hidden layer).
-    * Then, apply the **Softmax activation function** to all $z_j^{[3]}$ values simultaneously to get the probabilities $a_j^{[3]}$:
-        $a_j^{[3]} = \frac{e^{z_j^{[3]}}}{\sum_{k=1}^{10} e^{z_k^{[3]}}}$
-    * The vector $\vec{a}^{[3]} = [a_1^{[3]}, \dots, a_{10}^{[3]}]$ represents the estimated probabilities for each of the 10 classes.
+This systematic approach provides a more accurate diagnosis of your model's issues, especially for complex tasks where perfect performance (0% error) is unrealistic. This diagnosis then guides your next steps in improving the model. The next video will introduce another useful diagnostic tool: the **learning curve**.
 
-### Key Characteristic of Softmax Activation:
+## Learning Curves: Diagnosing Bias and Variance with Data Size
 
-* Unlike Sigmoid, ReLU, or Linear functions (which operate element-wise on their input $z$), the **Softmax activation function operates on *all* $z$ values simultaneously**. Each output probability $a_j$ depends on *all* input scores $z_1, \dots, z_K$.
+Learning curves plot the performance of a learning algorithm (training error $J_{\text{train}}$ and cross-validation error $J_{\text{cv}}$) as a function of the **training set size ($m_{\text{train}}$)**. They are a powerful diagnostic tool.
 
-### TensorFlow Implementation (High-Level):
+### General Learning Curve Behavior
 
-```python
-import tensorflow as tf
+<img src="/metadata/learn_curvess.png" width="500" />
 
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(units=25, activation='relu'),
-    tf.keras.layers.Dense(units=15, activation='relu'),
-    tf.keras.layers.Dense(units=10, activation='softmax') # 10 units for 10 classes
-])
+* **$J_{\text{cv}}$ (Cross-Validation Error):** As $m_{\text{train}}$ increases, $J_{\text{cv}}$ generally **decreases**. More data typically leads to a better, more generalizable model, thus lower error on unseen data.
+* **$J_{\text{train}}$ (Training Error):** As $m_{\text{train}}$ increases, $J_{\text{train}}$ generally **increases**. With very little data, a model (especially a complex one) can easily fit all points perfectly (or nearly perfectly), resulting in low training error. As more examples are added, it becomes harder for the model to fit every single training example perfectly, so the average training error increases.
+* **Relationship:** $J_{\text{cv}}$ will typically be higher than $J_{\text{train}}$ because the parameters are optimized on the training set.
 
-model.compile(
-    loss=tf.keras.losses.SparseCategoricalCrossentropy() # For integer labels (0, 1, ..., 9)
-)
+### Learning Curves for High Bias (Underfitting)
 
-model.fit(X_train, Y_train, epochs=...)
-```
+<img src="/metadata/lc_1.png" width="500" />
 
-* **`units=10` in last Dense layer:** Specifies 10 output neurons, one for each class.
-* **`activation='softmax'`:** Applies the Softmax function to convert raw outputs into probabilities.
-* **`loss=tf.keras.losses.SparseCategoricalCrossentropy()`:** This is the appropriate loss function for multi-class classification where true labels (Y) are integers (e.g., 0, 1, 2...9). "Sparse" indicates that each example belongs to exactly one category.
+* **Scenario:** The model is too simple (e.g., fitting a linear function to non-linear data).
+* **Learning Curve Shape:**
+    * $J_{\text{train}}$ starts low (for very small $m_{\text{train}}$) but quickly **flattens out at a high error value**.
+    * $J_{\text{cv}}$ starts high (for small $m_{\text{train}}$) and also **flattens out at a high error value**, typically close to $J_{\text{train}}$.
+    * Both $J_{\text{train}}$ and $J_{\text{cv}}$ remain high and close to each other.
+    * There will be a significant gap between these flattened curves and the **baseline performance** (e.g., human-level error).
+* **Key Insight:** If a learning algorithm has **high bias**, **getting more training data will NOT significantly help** improve its performance. The model is fundamentally too simple to learn the underlying patterns, regardless of how much data it sees.
 
-### Important Caveat: Recommended TensorFlow Usage
+### Learning Curves for High Variance (Overfitting)
 
-While the code above works, there's a more numerically stable and recommended way to implement the Softmax output layer in TensorFlow, which will be covered in the next video. You should **not use the `activation='softmax'` directly in the last layer** when using `SparseCategoricalCrossentropy` loss, as it handles the Softmax computation internally for better numerical precision.
+<img src="/metadata/lc_2.png" width="500" />
 
-## Improved Softmax Implementation: Numerical Stability
+* **Scenario:** The model is too complex (e.g., fitting a 4th-order polynomial to limited data).
+* **Learning Curve Shape:**
+    * $J_{\text{train}}$ starts very low (often near zero for small $m_{\text{train}}$) and slowly **increases** as $m_{\text{train}}$ grows.
+    * $J_{\text{cv}}$ starts very high (for small $m_{\text{train}}$) and **decreases** as $m_{\text{train}}$ grows.
+    * There is a **large gap between $J_{\text{train}}$ and $J_{\text{cv}}$**. This large gap is the signature of high variance.
+    * The model might perform unrealistically well on the training set, potentially even better than human-level performance.
+* **Key Insight:** If a learning algorithm suffers from **high variance**, **getting more training data is very likely to help**. As $m_{\text{train}}$ increases, $J_{\text{cv}}$ should continue to decrease and approach $J_{\text{train}}$, leading to better generalization.
 
-The previous Softmax implementation, while conceptually correct, can suffer from **numerical round-off errors** in computers due to floating-point precision limitations. This video explains a more robust way to implement Softmax in TensorFlow.
+### Practical Considerations for Plotting Learning Curves:
 
-### The Problem: Numerical Instability
+* **Method:** Train models on increasing subsets of your available training data (e.g., 100, 200, 300, ..., 1000 examples if you have 1000 total). Plot $J_{\text{train}}$ and $J_{\text{cv}}$ for each subset size.
+* **Computational Cost:** Training multiple models can be computationally expensive, so this diagnostic isn't always performed.
+* **Mental Model:** Even without plotting, having a mental picture of these learning curves can help you diagnose whether your algorithm has high bias or high variance.
 
-Calculations involving very small or very large numbers (e.g., `exp(z)` where `z` is very large or very small) can lead to precision loss.
-* **Example:** Calculating `2/10000` directly is more accurate than `(1 + 1/10000) - (1 - 1/10000)`, where intermediate terms are calculated before subtraction.
-
-Similarly, in Softmax, `e^z_j` can be very large, or the sum in the denominator can be very small/large, leading to `a_j` values that are slightly off.
-
-### Solution: `from_logits=True`
-
-TensorFlow provides a more numerically stable way to compute the Softmax probabilities and the cross-entropy loss together, by avoiding the explicit intermediate calculation of `a_j`.
-
-1.  **Modify Model Architecture:**
-    * The **final `Dense` layer** should now use a **`linear` activation function** (or no activation function specified, as linear is the default). This means the output of the last layer will be the raw `z` values (often called **logits**).
-    * Example:
-        ```python
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(units=25, activation='relu'),
-            tf.keras.layers.Dense(units=15, activation='relu'),
-            tf.keras.layers.Dense(units=10, activation='linear') # Output layer: 10 units, linear activation
-        ])
-        ```
-
-2.  **Modify Compile Step:**
-    * When compiling the model, specify the loss function (e.g., `SparseCategoricalCrossentropy`) with the argument **`from_logits=True`**.
-    * Example:
-        ```python
-        model.compile(
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        )
-        ```
-
-3.  **Actually getting the result:**
-    * Example:
-        ```python
-        # Train
-        model.fit(X, Y, epoch=100)
-        
-        # Have to do extra step to actually get a1, a2, ...
-        logits = model(x_input)         # this actually outputs z1, z2, ... 
-        f_x = tf.nn.softmax(logits)     # thats how we then get a1, a2, ...
-        ```
-
-**How it works:**
-* By setting `from_logits=True`, you tell TensorFlow that the output of your last layer is the raw `z` values (logits), *before* the Softmax activation.
-* TensorFlow then **internally and simultaneously computes the Softmax probabilities and the cross-entropy loss** in a single, numerically optimized step. This avoids potential precision issues that arise from calculating $a_j$ explicitly and then passing those potentially rounded $a_j$ values to the loss function.
-* Effectively, rather than calculating $a_j$ explicitly and passing it to loss function, we just calculate the `z` and let tensorflow rearrange all the values in cost function (so that probably some terms cancel out OR/AND there is less numerical precision errors)
-
-**Important Note for Binary Classification (Logistic Regression):**
-The same principle applies to binary classification. For a logistic regression output layer, you would also use `activation='linear'` in the `Dense` layer and `tf.keras.losses.BinaryCrossentropy(from_logits=True)` in `model.compile()`.
-
-```python
-# Train
-model.fit(X, Y, epoch=100)
-
-# Have to do extra step to actually get a1, a2
-logits = model(x_input)         # this actually outputs z1, z2
-f_x = tf.nn.sigmoid(logits)     # thats how we then get a1, a2
-```
-This recommended implementation is more robust and accurate, though it might make the conceptual flow (z -> a -> loss) slightly less explicit in the code.
-
-The next video will introduce another type of classification problem: **multi-label classification**.
-
-## Multi-label Classification
-
-**Multi-label classification** is a type of classification problem where a single input can have **multiple associated labels (outputs)** simultaneously. This is distinct from multi-class classification, where the input belongs to only one of many possible categories.
-
-### Examples of Multi-label Classification:
-
-* **Self-Driving Cars / Driver Assistance:** Given an image, identify if it contains:
-    * A car (Yes/No)
-    * A bus (Yes/No)
-    * A pedestrian (Yes/No)
-    For a single image, the output is a vector of binary labels, e.g., `[1, 0, 1]` (Car present, Bus absent, Pedestrian present).
-* **Image Tagging:** Tagging an image with multiple concepts like "beach," "sunset," "people."
-
-### Building a Neural Network for Multi-label Classification:
-
-There are two main approaches:
-
-1.  **Separate Networks:** You could train a completely separate binary classification neural network for each label (e.g., one network for "car present," one for "bus present," etc.). This is a valid, though potentially less efficient, approach.
-
-2.  **Single Neural Network with Multiple Output Units:**
-    * **Architecture:** The neural network typically has an input layer, one or more hidden layers, and an **output layer with multiple units**, where each unit corresponds to one possible label.
-    * **Output Layer:** For a problem with $K$ labels, the output layer will have $K$ neurons. Each of these $K$ output neurons will use a **Sigmoid activation function**.
-    * **Prediction:** The output `a` will be a vector of $K$ probabilities, e.g., `a = [P(car), P(bus), P(pedestrian)]`. Each element represents the probability of that specific label being true, independently of the others.
-    * Example: For the car/bus/pedestrian problem, the output layer would have 3 neurons, each with Sigmoid activation.
-
-This unified approach allows the network to learn shared features in its hidden layers that are useful for predicting all labels simultaneously.
-
-The next video will introduce advanced optimization algorithms that can train neural networks faster than basic gradient descent.
-
-## Optimizing Neural Network Training: The Adam Algorithm
-
-Gradient descent is a foundational optimization algorithm, but modern neural networks benefit from more advanced optimizers that can train models much faster. The **Adam algorithm (Adaptive Moment Estimation)** is a popular choice that automatically adjusts learning rates.
-
-### Limitations of Basic Gradient Descent
-
-* **Slow Convergence (Small Alpha):** If the learning rate ($\alpha$) is too small, gradient descent takes tiny steps, leading to very slow convergence, especially in elongated cost function landscapes. You might wish $\alpha$ would automatically increase.
-* **Oscillation/Divergence (Large Alpha):** If $\alpha$ is too large, gradient descent might overshoot the minimum, oscillating back and forth or even diverging, causing the cost to increase. You'd wish $\alpha$ would automatically decrease.
-
-### How Adam Algorithm Helps
-
-The Adam algorithm intelligently adapts the learning rate for each parameter automatically:
-
-* **Per-Parameter Learning Rates:** Unlike basic gradient descent which uses a single global $\alpha$, Adam maintains a **separate learning rate for every single parameter** ($w_j$ and $b$) in the model.
-* **Adaptive Adjustment:**
-    * If a parameter's updates consistently move in roughly the same direction (like in the "too small $\alpha$" scenario), Adam **increases its specific learning rate**, accelerating convergence in that dimension.
-    * If a parameter's updates oscillate back and forth (like in the "too large $\alpha$" scenario), Adam **decreases its specific learning rate**, dampening oscillations and promoting smoother convergence.
-
-### Implementing Adam in TensorFlow
-
-Using Adam is straightforward in TensorFlow:
-
-```python
-import tensorflow as tf
-
-# ... (model definition using Sequential API) ...
-
-model.compile(
-    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), # or other loss
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001) # Specify Adam optimizer
-)
-
-model.fit(X_train, Y_train, epochs=...)
-```
-
-* You pass an `optimizer` argument to `model.compile()`.
-* `tf.keras.optimizers.Adam()` is the Adam optimizer.
-* It takes a `learning_rate` parameter (e.g., `0.001`), which serves as an initial/default global learning rate. Although Adam adapts, it's still worth experimenting with this initial value (e.g., trying factors of 10 like 0.01, 0.001, 0.0001) to find the best performance.
-
-### Benefits of Adam:
-
-* **Faster Convergence:** Typically converges much faster than basic gradient descent.
-* **Robustness:** More robust to the initial choice of learning rate compared to traditional gradient descent, as it adapts automatically.
-* **Industry Standard:** Adam is a de facto standard and widely used by practitioners for training neural networks today.
-
-The next videos will explore other advanced neural network concepts, starting with alternative layer types.
-
-You are absolutely correct! My apologies. I got caught up in the general explanation of convolutional layers and completely missed mentioning the digit classification example that was central to the start of the transcript.
-
-Thank you for catching that oversight. I will now provide a corrected and concise summary that includes the digit classification example within the context of convolutional layers, while maintaining all previous formatting constraints.
-
-Here is the corrected summary for the video:
-
-## Beyond Dense Layers: Convolutional Layers
-
-While **dense layers** (where every neuron connects to every activation in the previous layer) are powerful, neural networks can be even more effective using other layer types. One important example is the **convolutional layer**.
-
-**Note**: There are many architectures in ML
-* Feedforward architectures
-  * Linear models (Linear regression, Logistic regression(
-  * Multilayer Perceptrons / Deep Neural Network (DNN)
-* Spatial / structured input architectures
-  * Convolutional Neural Network (CNN) -- predominantly used for images, spatial data, video frames.
-* Sequence architectures
-  * Long Short-Term Memory (LSTM)
-  * Transformers
-* Special architectures
-  * Diffusion models  
-  
-### Introduction to Convolutional Layers:
-
-* **Concept:** In a convolutional layer, each neuron looks at only a **limited, local region (or "window") of the input** from the previous layer, rather than the entire input.
-
-* **Benefits:**
-    1.  **Speeds up Computation:** Fewer connections mean fewer calculations.
-    2.  **Less Training Data Needed:** The local receptive fields and parameter sharing (discussed in advanced courses) reduce the number of parameters, making the network **less prone to overfitting** and able to learn effectively with less data.
-    3.  **Better at Generalizing:** By focusing on local patterns, they are particularly good at recognizing patterns that might appear anywhere in the input.
-
-* **Originator:** Yann LeCun is credited with much of the foundational work on convolutional layers. A neural network using convolutional layers is often called a **Convolutional Neural Network (CNN)**.
-
-### Example: Handwritten Digit Classification
-
-Consider a handwritten digit image (e.g., a "9") as the input $X$.
-
-1.  **Input Layer ($X$):** The image is represented as a grid of pixels.
-2.  **First Hidden Layer (Convolutional):**
-    * Instead of each neuron looking at all pixels in the image, individual neurons are designed to look only at **small, specific rectangular regions** of the input image.
-    * Example: One neuron might only look at pixels in the top-left corner, another at a different small region.
-    * This is done to detect localized features like edges or corners.
-
-### Example: EKG Signal Classification (1D Convolution)
-
-Let's use a 1D input (like an EKG signal, a sequence of 100 numbers representing voltage over time) to classify heart conditions.
-
-1.  **Input Layer ($X$):** A 1D sequence of 100 numbers ($x_1, \dots, x_{100}$).
-2.  **First Hidden Layer (Convolutional):**
-    * Each neuron looks at a **small, defined "window"** of the input sequence.
-    * Example: Neuron 1: looks at $x_1$ through $x_{20}$. Neuron 2: looks at $x_{11}$ through $x_{30}$ (a shifted window), and so on.
-    * This is useful for detecting localized patterns in sequential data.
-3.  **Subsequent Layers:** Can also be convolutional, looking at windows of activations from previous layers.
-4.  **Output Layer:** Finally, these activations are fed into a standard sigmoid unit (for binary classification, like heart disease present/absent).
-
-### Architectural Choices and Importance:
-
-With convolutional layers, you choose:
-* **Window size (or "filter size"):** How large a region each neuron looks at.
-* **Stride:** How much the window shifts for the next neuron.
-* **Number of neurons/filters:** How many distinct feature detectors are in each layer.
-
-These choices, often leading to **Convolutional Neural Networks (CNNs)**, are particularly effective for data with spatial or temporal relationships (like images and time series). Research constantly explores new layer types (e.g., **Transformer models**, **LSTMs**) as fundamental building blocks for increasingly complex and powerful neural networks.
-
-## Backpropagation: Understanding Derivatives (Optional)
-
-Backpropagation is a key algorithm for training neural networks by computing the derivatives of the cost function with respect to its parameters. This optional video provides an intuitive understanding of derivatives.
-
-### Informal Definition of a Derivative
-
-If a parameter $w$ changes by a tiny amount $\epsilon$ (epsilon), and the cost function $J(w)$ changes by $k$ times $\epsilon$, then we say the derivative of $J(w)$ with respect to $w$ is $k$.
-* **Notation:** $\frac{d}{dw} J(w) = k$ (or $\frac{\partial}{\partial w} J(w)$ for multiple variables).
-
-### Example: $J(w) = w^2$
-
-Let $J(w) = w^2$.
-
-* **At $w=3$:**
-    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $3.001$.
-    * $J(3.001) = 3.001^2 = 9.006001$.
-    * Change in $J = 9.006001 - 9 = 0.006001$.
-    * This is approximately $6 \times 0.001 = 6 \times \epsilon$.
-    * Therefore, the derivative $\frac{d}{dw} J(w)$ at $w=3$ is $6$.
-* **At $w=2$:**
-    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $2.001$.
-    * $J(2.001) = 2.001^2 = 4.004001$.
-    * Change in $J \approx 4 \times \epsilon$.
-    * Derivative at $w=2$ is $4$.
-* **At $w=-3$:**
-    * If $w$ increases by $\epsilon = 0.001$, $w$ becomes $-2.999$.
-    * $J(-2.999) = (-2.999)^2 = 8.994001$.
-    * Change in $J = 8.994001 - 9 = -0.005999$.
-    * This is approximately $-6 \times \epsilon$.
-    * Derivative at $w=-3$ is $-6$.
-
-### Key Observations:
-
-1.  **Derivative depends on $w$:** Even for the same function $J(w)=w^2$, the derivative changes depending on the value of $w$.
-2.  **Calculus Rule:** For $J(w) = w^2$, the derivative is $\frac{d}{dw} J(w) = 2w$. (This matches our examples: $2 \times 3 = 6$, $2 \times 2 = 4$, $2 \times (-3) = -6$).
-3.  **Gradient Descent Link:** In gradient descent, $w_j = w_j - \alpha \frac{\partial}{\partial w_j} J(\vec{w})$. A large derivative indicates a steep slope, leading to a larger step in $w_j$ to reduce $J$ more efficiently.
-
-### Using SymPy to Compute Derivatives:
-
-SymPy is a Python library for symbolic mathematics, allowing you to compute derivatives:
-
-```python
-import sympy
-J, w = sympy.symbols('J w')
-J = w**2
-dJ_dw = sympy.diff(J, w) # dJ_dw will be 2*w
-dJ_dw.subs(w, 2) # Evaluates to 4
-```
-
-### Notational Convention:
-
-* For a function $J(w)$ of a **single variable** $w$, the derivative is written as $\frac{d}{dw} J(w)$. This uses the lowercase letter 'd'.
-* For a function $J(w_1, \dots, w_n)$ of **multiple variables**, the derivative with respect to one variable, say $w_i$, is called a **partial derivative** and is written as $\frac{\partial}{\partial w_i} J(w_1, \dots, w_n)$. This uses the squiggly $\partial$ symbol.
-* In this class, for conciseness and clarity, we often use the notation $\frac{d}{dw_i} J$ (or just $dJ/dw_i$) even when $J$ is a function of multiple variables. This simplifies the presentation, as $J$ typically depends on many parameters ($w_1, \dots, w_n, b$).
-
-Understanding derivatives as the "rate of change" is fundamental to backpropagation. The next video will introduce the concept of a computation graph to help compute derivatives in a neural network.
-
-## Backpropagation: The Computation Graph (Optional)
-
-The **computation graph** is a fundamental concept in deep learning and is how frameworks like TensorFlow automatically compute derivatives for neural networks. It visualizes the step-by-step calculation of the cost function.
-
-### Building a Computation Graph
-
-Consider a simple neural network for linear regression: $a = wx + b$. The cost function is $J = \frac{1}{2}(a - y)^2$.
-Let $x = -2$, $y = 2$, $w = 2$, $b = 8$.
-
-We can break down the computation of $J$ into individual nodes:
-
-1.  **Node `c`:** $c = w \times x$
-    * Input: $w=2, x=-2$
-    * Output: $c = -4$
-2.  **Node `a`:** $a = c + b$
-    * Input: $c=-4, b=8$
-    * Output: $a = 4$
-3.  **Node `d`:** $d = a - y$
-    * Input: $a=4, y=2$
-    * Output: $d = 2$
-4.  **Node `J`:** $J = \frac{1}{2} d^2$
-    * Input: $d=2$
-    * Output: $J = 2$
-
-This graph shows the **forward propagation** (left-to-right) to compute the cost $J$.
-
-### Backpropagation: Computing Derivatives (Right-to-Left)
-
-Backpropagation calculates the derivatives of $J$ with respect to parameters ($w, b$) by performing a **right-to-left** (backward) pass through the computation graph.
-
-The general idea is to compute $\frac{\partial J}{\partial \text{input_to_node}}$ for each node, using the derivatives already computed for subsequent nodes (chain rule).
-
-1.  **Derivative $\frac{\partial J}{\partial d}$:**
-    * Node: $J = \frac{1}{2} d^2$
-    * If $d$ changes by $\epsilon$, $J$ changes by approximately $d \times \epsilon$. (For $d=2$, $J$ changes by $2\epsilon$).
-    * So, $\frac{\partial J}{\partial d} = d = 2$.
-    (This is the first step of backprop, usually $\frac{\partial J}{\partial J} = 1$ is the start, but here simplified to $\frac{\partial J}{\partial d}$)
-
-2.  **Derivative $\frac{\partial J}{\partial a}$:**
-    * Node: $d = a - y$. (Change in $a$ by $\epsilon$ causes change in $d$ by $\epsilon$).
-    * From previous step, change in $d$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
-    * Therefore, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
-    * So, $\frac{\partial J}{\partial a} = 2$.
-
-3.  **Derivative $\frac{\partial J}{\partial c}$:**
-    * Node: $a = c + b$. (Change in $c$ by $\epsilon$ causes change in $a$ by $\epsilon$).
-    * From previous step, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
-    * So, $\frac{\partial J}{\partial c} = 2$.
-
-4.  **Derivative $\frac{\partial J}{\partial b}$:**
-    * Node: $a = c + b$. (Change in $b$ by $\epsilon$ causes change in $a$ by $\epsilon$).
-    * From previous step, change in $a$ by $\epsilon$ causes change in $J$ by $2\epsilon$.
-    * So, $\frac{\partial J}{\partial b} = 2$. (This is one of our target derivatives).
-
-5.  **Derivative $\frac{\partial J}{\partial w}$:**
-    * Node: $c = w \times x$. (Change in $w$ by $\epsilon$ causes change in $c$ by $x \times \epsilon$).
-    * For $x = -2$, change in $w$ by $\epsilon$ causes change in $c$ by $-2\epsilon$.
-    * From previous step, change in $c$ by amount $\Delta c$ causes change in $J$ by $2 \times \Delta c$.
-    * So, change in $J$ is $2 \times (-2\epsilon) = -4\epsilon$.
-    * Therefore, $\frac{\partial J}{\partial w} = -4$. (This is our other target derivative).
-
-### Efficiency of Backpropagation
-
-* Backprop efficiently computes all derivatives by reusing intermediate derivative calculations. For instance, $\frac{\partial J}{\partial a}$ is calculated once and then used to compute $\frac{\partial J}{\partial c}$ and $\frac{\partial J}{\partial b}$.
-* This efficiency is crucial: for a graph with $N$ nodes and $P$ parameters, backprop computes all derivatives in roughly $O(N+P)$ steps, rather than $O(N \times P)$ which would be required if each derivative was computed independently. This enables training very large neural networks with millions of parameters.
-
-The next video will apply these concepts to a larger neural network.
+This understanding of learning curves complements the previous diagnosis methods by showing how performance scales with data. The next video will apply these diagnostic insights to common machine learning problems.
