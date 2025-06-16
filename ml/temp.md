@@ -435,3 +435,35 @@ Imagine a bag with four colored tokens (red, yellow, green, blue).
 
 The next video will demonstrate how this technique is used to build the ensemble of trees.
 
+## Tree Ensembles: Random Forest Algorithm
+
+Single decision trees are highly sensitive to small data changes. **Tree ensembles** build multiple trees to create a more robust and accurate model. The **Random Forest algorithm** is a powerful example of a tree ensemble.
+
+### 1. Bagging (Bagged Decision Trees)
+
+The first step to building an ensemble is using **Bagging**, which stands for Bootstrap Aggregating, a technique that leverages **sampling with replacement**.
+
+* **Process:**
+    * Given an original training set of size $M$ (e.g., 10 examples).
+    * **Repeat $B$ times** (e.g., $B=100$ times, typical range 64-128):
+        1.  Create a new training set of size $M$ by **sampling with replacement** from the original training set. This new set will have some original examples repeated and some omitted.
+        2.  Train a full decision tree on this newly sampled training set.
+    * This generates $B$ different, plausible (but slightly varied) decision trees.
+* **Prediction:** For a new test example, pass it through all $B$ trees.
+    * For classification: The final prediction is determined by a **majority vote** among the $B$ trees.
+    * For regression: The final prediction is the average of all $B$ tree predictions.
+* **Benefit:** Averaging (or voting) across multiple trees makes the overall algorithm less sensitive to the peculiarities of any single tree and more robust to small changes in the original training data. Increasing $B$ (number of trees) generally improves performance initially, but eventually leads to diminishing returns in accuracy (while increasing computation time).
+
+### 2. Random Forest: Improving on Bagged Trees
+
+Bagged decision trees can sometimes still create very similar trees, especially near the root, if a single feature is overwhelmingly the best split. Random Forest adds a modification to further diversify the trees:
+
+* **Key Idea:** At *every node* during the decision tree training process:
+    * Instead of considering *all* $N$ available features for the best split, randomly select a **subset of $K$ features** (where $K < N$).
+    * The algorithm then chooses the best split *only from this random subset of $K$ features*.
+* **Typical $K$ Choice:** When $N$ is large (dozens to hundreds of features), a common choice for $K$ is $\sqrt{N}$.
+* **Benefit:** This additional randomization forces the individual trees to be even more diverse. If the absolute best feature is not in the random subset, the tree is forced to explore other, potentially good, splits. When these more diverse trees are combined via voting, the ensemble's overall accuracy and robustness are further improved.
+
+### Why Random Forest is Robust:
+
+The combination of sampling with replacement (bagging) and random feature subsets at each split (random forest) makes the algorithm highly robust. It averages over many slightly different trees, each trained on slightly different data and exploring different feature combinations, making the final prediction much less sensitive to specific data points or choices.
