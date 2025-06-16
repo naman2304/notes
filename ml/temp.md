@@ -325,3 +325,57 @@ In essence, for continuous features, the range of available thresholds narrows i
 * If a continuous feature (with its optimal threshold) provides the best Information Gain compared to all other discrete features, then split the node using that continuous feature and its optimal threshold.
 
 This mechanism allows decision trees to effectively leverage numerical features for improved classification. The next (optional) video will generalize decision trees to **regression trees** for predicting numerical values.
+
+## Regression Trees: Decision Trees for Predicting Numbers (Optional)
+
+This video generalizes decision trees to solve **regression problems**, where the goal is to predict a continuous numerical output (Y), such as an animal's weight.
+
+### Structure of a Regression Tree
+
+* **Decision Nodes:** Same as classification trees, they split data based on features.
+* **Leaf Nodes:** Unlike classification trees which predict a category, leaf nodes in a regression tree predict a **numerical value**. This value is typically the **average (mean)** of the target variable (Y) for all training examples that fall into that leaf node during training.
+    * Example: If a leaf node has animals with weights `[7.2, 7.6, 8.3, 10.2]`, it will predict `8.35` (the average) for any new animal reaching this node.
+
+<img src="/metadata/dt_reg.png" width="600" />
+
+### How to Build a Regression Tree: Splitting Criteria
+
+When building a regression tree, instead of maximizing reduction in entropy, we aim to maximize reduction in variance.
+
+* **Variance:** A statistical measure of how widely a set of numbers varies from their mean. A lower variance means the numbers are more tightly clustered, indicating higher "purity" for regression.
+
+**Process for Choosing a Split (e.g., at the Root Node):**
+
+<img src="/metadata/dt_reg_split.png" width="700" />
+
+1.  **Calculate Initial Variance:** Compute the variance of Y for all examples at the current node (e.g., variance of all 10 animal weights = 20.51). This is $V_{\text{root}}$.
+
+2.  **For each candidate feature to split on (e.g., Ear Shape, Face Shape, Whiskers):**
+
+    *  **Hypothetically split the data** based on that feature, creating child nodes (subsets).
+    *  For each child node:
+        * Calculate the variance of the Y values (weights) within that specific child node. (e.g., for "pointy ears" subset: variance $\approx 1.47$; for "floppy ears" subset: variance $\approx 21.87$).
+        * Calculate $w^{\text{left}}$ and $w^{\text{right}}$ (the fraction of examples going to the left/right child nodes).
+    *   **Calculate the Weighted Average Variance of the Split:** This is similar to weighted average entropy.
+        * $$Variance_{split} = w^{left} \times Variance_{left} + w^{right} \times Variance_{right}$$
+        * Example (Ear Shape): $(5/10 \times 1.47) + (5/10 \times 21.87) = 11.67$.
+        * Example (Face Shape): (weights for split) * (variance values) $\approx 19.87$.
+        * Example (Whiskers): (weights for split) * (variance values) $\approx 14.29$.
+
+3.  **Calculate Reduction in Variance:** Instead of just comparing weighted variances, we calculate the reduction:
+    $$\text{Reduction in Variance} = V_{\text{root}} - V_{\text{split}}$$
+    * Example (Ear Shape): $20.51 - 11.67 = 8.84$.
+    * Example (Face Shape): $20.51 - 20.51 = 0.64$.
+    * Example (Whiskers): $20.51 - 14.29 = 6.22$.
+
+### Choosing the Best Split:
+
+* The feature that gives the **largest Reduction in Variance** is chosen. In the example, "Ear Shape" (8.84) provides the largest reduction.
+
+### Recursive Process:
+
+* Once a split is chosen, the process recursively continues on the resulting subsets of data until stopping criteria are met (similar to classification trees, e.g., max depth, min examples per node).
+
+This adaptation allows decision trees to effectively solve regression problems by finding splits that reduce the spread of the target variable's values. The next video will discuss **ensemble methods** of decision trees.
+
+
