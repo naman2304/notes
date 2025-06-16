@@ -168,8 +168,60 @@ Let's illustrate with our cat classification example:
 * In this example, "Ear Shape" has the highest information gain (0.28), so it would be chosen as the root node feature.
 * **Why Information Gain?** It directly quantifies how much a split reduces the overall impurity of the dataset, leading to purer child nodes.
 
+$$\text{Information gain} = H(p_1^{\text{root}}) - \left( w^{\text{left}} H(p_1^{\text{left}}) + w^{\text{right}} H(p_1^{\text{right}}) \right)$$
+
 ### Role in Stopping Criteria:
 
 * Information gain is also used in stopping criteria: If the information gain from any potential split is below a certain threshold, the algorithm might decide not to split further, creating a leaf node instead. This helps control tree size and prevent overfitting.
 
 The next video will integrate this information gain calculation into the overall decision tree building algorithm.
+
+## Building a Decision Tree: The Overall Process
+
+Building a decision tree involves a recursive process of splitting nodes based on features that provide the most information gain, until predefined stopping criteria are met.
+
+### Overall Algorithm:
+
+1.  **Start at Root Node:** Begin with all training examples at the root node.
+2.  **Select Best Split Feature:**
+    * Calculate the **information gain** for every possible feature (e.g., "Ear Shape," "Face Shape," "Whiskers").
+    * Choose the feature that yields the **highest information gain**.
+3.  **Perform Split:**
+    * Divide the dataset into subsets based on the values of the chosen feature.
+    * Create corresponding child branches (e.g., "pointy ears" branch, "floppy ears" branch).
+    * Send the relevant training examples down each branch.
+4.  **Recursively Build Sub-trees:**
+    * **Repeat the splitting process** for each new branch (child node) created. The process is the same as building the main tree, but applied to a subset of data.
+5.  **Stop Splitting (Stopping Criteria):** Stop the recursive splitting process for a branch when any of the following criteria are met:
+    * **Node Purity:** All examples in the node belong to a single class (entropy is 0). This becomes a leaf node with a clear prediction.
+    * **Maximum Depth:** The tree (or current branch) reaches a pre-defined `maximum depth`. This prevents overly complex trees and reduces overfitting.
+    * **Minimum Information Gain:** The information gain from any potential further split is below a specified `threshold`. This avoids trivial splits.
+    * **Minimum Examples per Node:** The number of training examples in the current node falls below a certain `threshold`. This also prevents overfitting to tiny subsets.
+
+### Illustration of the Process:
+
+* **Root Node:** All 10 examples. "Ear Shape" is chosen (highest info gain).
+    * Splits into "Pointy Ears" (5 examples) and "Floppy Ears" (5 examples) branches.
+* **Left Branch ("Pointy Ears"):** Focus on these 5 examples.
+    * **Check stopping criteria:** Not pure yet (mix of cats and dogs).
+    * **Select Best Split Feature:** (e.g., "Face Shape" is chosen after calculating information gain within this subset).
+    * Splits into "Round Face" (4 examples) and "Not Round Face" (1 example) sub-branches.
+    * **"Round Face" sub-branch:** All 4 examples are cats. **Stopping criteria met (purity).** Create a "Cat" leaf node.
+    * **"Not Round Face" sub-branch:** All 1 example is a dog. **Stopping criteria met (purity).** Create a "Not Cat" leaf node.
+* **Right Branch ("Floppy Ears"):** Similarly, recursively build this branch.
+    * (e.g., "Whiskers" is chosen).
+    * Splits into "Whiskers Present" and "Whiskers Absent" sub-branches, which then become pure leaf nodes.
+
+### Recursive Algorithm:
+
+Decision tree building is a classic example of a **recursive algorithm** in computer science. The main function to build a tree calls itself to build sub-trees on smaller subsets of the data.
+
+### Key Parameters:
+
+* **Maximum Depth:** Controls tree size and complexity. Larger depth increases risk of overfitting. Can be tuned via cross-validation, but open-source libraries often have good defaults.
+* **Information Gain Threshold:** Controls when to stop splitting.
+* **Minimum Examples per Node:** Controls when to stop splitting.
+
+Understanding these parameters and their impact on tree size and overfitting is crucial for effective decision tree usage. After building, predictions are made by traversing the tree from root to leaf based on a new example's features.
+
+The next videos will explore handling features with more than two categorical values and continuous-valued features.
