@@ -4,11 +4,6 @@
 * [Advanced Learning Algorithms](https://www.coursera.org/learn/advanced-learning-algorithms?specialization=machine-learning-introduction)
 * [Unsupervised Learning, Recommenders, Reinforcement Learning](https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning?specialization=machine-learning-introduction)
 
-Table of Contents
-* [Supervised Machine Learning: Regression and Classification](#supervised-machine-learning-regression-and-classification)
-* [Advanced Learning Algorithms](#advanced-learning-algorithms)
-* [Unsupervised Learning, Recommenders, Reinforcement Learning](#unsupervised-learning-recommenders-reinforcement-learning)
-
 ---
 
 # Supervised Machine Learning: Regression and Classification
