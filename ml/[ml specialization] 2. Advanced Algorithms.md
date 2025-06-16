@@ -1,7 +1,7 @@
 
 # Advanced Learning Algorithms
 
-## Neural Networks, Decision Trees, and Practical ML Advice
+## [Week 1] Neural Networks, Decision Trees, and Practical ML Advice
 
 Welcome to Course 2! This course will equip you with knowledge and practical skills in **neural networks (deep learning)** and **decision trees**, two powerful and widely used machine learning algorithms. A unique aspect of this course is its focus on **practical advice for building effective ML systems**, helping you make better decisions and avoid common pitfalls in development.
 
@@ -803,9 +803,9 @@ Given `A_in = [[200, 17]]`, and specific `W` (2x3) and `B` (1x3) matrices for a 
 
 This vectorized approach is fundamental to building and scaling neural networks efficiently. The next week will focus on how to train these networks.
 
-## Training Neural Networks: An Overview
+## [Week 2] Training Neural Networks: An Overview
 
-Welcome to Week 2! This week focuses on **training neural networks**, building on last week's understanding of inference.
+This week focuses on **training neural networks**, building on last week's understanding of inference.
 
 ### Training Process in TensorFlow
 
@@ -1510,7 +1510,7 @@ Backpropagation computes derivatives of $J$ with respect to all parameters ($w_1
 * Modern frameworks like TensorFlow and PyTorch use **autodiff** (automatic differentiation), which is based on computation graphs, to automatically compute derivatives.
 * This eliminates the need for researchers to manually derive complex derivatives using calculus, significantly lowering the barrier to entry for training sophisticated neural networks.
 
-## Welcome to Week 3: Practical Advice for Building ML Systems
+## [Week 3] Practical Advice for Building ML Systems
 
 This week focuses on **practical strategies for building effective machine learning systems**. While you've learned powerful algorithms like linear/logistic regression and neural networks, efficient development hinges on making good decisions about where to invest your time. I've seen teams spend months on approaches that a more skilled team could have done in weeks.
 
