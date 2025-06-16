@@ -257,3 +257,71 @@ One-hot encoding transforms a single categorical feature with $K$ possible value
     * By converting `Ear Shape`, `Face Shape`, and `Whiskers` into a list of binary features (e.g., `[Pointy_Ears, Floppy_Ears, Oval_Ears, Is_Face_Round, Whiskers_Present]`), the data becomes suitable for input into models that require numerical features.
 
 One-hot encoding allows decision trees (and other algorithms) to process categorical features with multiple values efficiently. The next video will address how decision trees handle **continuous-valued features** (numerical features that can take on any value).
+
+## Handling Continuous-Valued Features in Decision Trees
+
+This video explains how to adapt decision trees to work with features that are **continuous values** (i.e., numbers that can take on any value within a range), such as an animal's weight.
+
+### The Problem: Continuous Features
+
+* Our previous examples used categorical features with a limited number of discrete values (e.g., "pointy" or "floppy").
+* For a continuous feature like `Weight` (in pounds), we can't create a branch for every possible weight.
+
+### Solution: Threshold-Based Splitting
+
+When considering a continuous-valued feature for a split:
+
+1.  **Identify Candidate Thresholds:**
+    * Sort all training examples by the value of that continuous feature.
+    * Consider the **midpoints** between consecutive unique feature values as candidate thresholds for splitting.
+    * Example: If weights are [7, 8, 9, 13, 14, ...], candidate thresholds could be 7.5, 8.5, 11, 13.5, etc.
+    * For $m$ training examples, there will be at most $m-1$ unique candidate thresholds.
+
+2.  **Evaluate Each Candidate Threshold:**
+    * For each candidate threshold `T` (e.g., `weight <= T`):
+        * **Split the data:** Divide the examples at the current node into two subsets: those where `feature <= T` (left branch) and those where `feature > T` (right branch).
+        * **Calculate Information Gain:** Compute the Information Gain for this specific split, using the entropy formula for the left and right subsets, weighted by the proportion of examples in each.
+            * Example: For `Weight <= 7.5`: Information Gain $\approx 0.24$.
+            * Example: For `Weight <= 8.5`: Information Gain $\approx 0.61$.
+            * Example: For `Weight <= 11`: Information Gain $\approx 0.40$.
+            * Example: For `Weight <= 13.5`: Information Gain $\approx 0.32$.
+
+3.  **Select the Best Continuous Split:**
+    * Choose the threshold that yields the **highest Information Gain** for that continuous feature.
+
+4.  **Overall Feature Selection:**
+    * Compare this maximum Information Gain from the continuous feature (e.g., `Weight`) to the maximum Information Gain from all other discrete/categorical features (e.g., `Ear Shape`, `Face Shape`, `Whiskers`).
+    * The feature (whether categorical or a specific threshold for a continuous feature) that gives the **overall highest Information Gain** is chosen to split that node.
+
+### Another Example
+
+Consider a node in a decision tree with three features:
+* $f1$: A continuous feature with sorted thresholds $t_1, t_2, t_3, \dots, t_n$.
+* $f2$: A discrete feature.
+* $f3$: A discrete feature.
+
+At this node, we determined that splitting on $f1$ at threshold $t_3$ ($f1 <= t_3$ vs. $f1 > t_3$) yields the highest Information Gain.
+
+After the split, the data from this node is partitioned into two subsets, forming two new subtrees:
+
+1.  **For the Left Subtree (where $f1 \le t_3$):**
+    * **Feature choices available for the *next* split:**
+        * **$f1$:** Only the thresholds $t_1, t_2$ are now relevant for $f1$. All examples in this subtree already satisfy $f1 \le t_3$.
+        * **$f2$:** This discrete feature is still available.
+        * **$f3$:** This discrete feature is still available.
+
+2.  **For the Right Subtree (where $f1 > t_3$):**
+    * **Feature choices available for the *next* split:**
+        * **$f1$:** Only the thresholds $t_4, t_5, \dots, t_n$ are now relevant for $f1$. All examples in this subtree already satisfy $f1 > t_3$.
+        * **$f2$:** This discrete feature is still available.
+        * **$f3$:** This discrete feature is still available.
+
+In essence, for continuous features, the range of available thresholds narrows in descendant nodes based on the split made by their parent. Discrete features remain fully available for all subsequent splits.
+
+### Summary for Continuous Features:
+
+* At every node, when considering a continuous feature, iterate through different possible thresholds.
+* For each threshold, perform the standard Information Gain calculation.
+* If a continuous feature (with its optimal threshold) provides the best Information Gain compared to all other discrete features, then split the node using that continuous feature and its optimal threshold.
+
+This mechanism allows decision trees to effectively leverage numerical features for improved classification. The next (optional) video will generalize decision trees to **regression trees** for predicting numerical values.
