@@ -76,3 +76,44 @@ Two crucial decisions are made at various steps:
     * **Minimum Number of Examples:** Stop splitting if the number of training examples at a node falls below a certain threshold. This also helps keep the tree smaller and prevent overfitting to tiny subsets of data.
 
 Decision tree algorithms can feel complicated due to these various refinements developed over time. However, these pieces work together to create effective learning algorithms. The next video will formally define **entropy** as a measure of impurity, a core concept for choosing optimal splits.
+
+## Entropy: Measuring Purity (or Impurity)
+
+In decision tree learning, we need a way to quantify how "pure" a set of examples is at a given node. **Entropy** is a common measure of **impurity**.
+
+### Definition of Entropy
+
+Given a set of examples:
+* Let $p_1$ be the **fraction of positive examples** (e.g., cats, label $y=1$).
+* Let $p_0 = 1 - p_1$ be the **fraction of negative examples** (e.g., dogs, label $y=0$).
+
+The **entropy** $H(p_1)$ is defined as:
+$$H(p_1) = -p_1 \log_2(p_1) - p_0 \log_2(p_0)$$or equivalently:$$H(p_1) = -p_1 \log_2(p_1) - (1 - p_1) \log_2(1 - p_1)$$
+
+* **Logarithm Base:** $\log_2$ (logarithm to base 2) is conventionally used, making the maximum entropy value 1.
+* **Convention for $0 \log_2(0)$:** By convention, $0 \log_2(0)$ is taken to be $0$.
+
+### Intuition and Examples:
+
+* **Completely Pure Set (All one class):**
+    * If all examples are cats ($p_1 = 1$, $p_0 = 0$): $H(1) = -1 \log_2(1) - 0 \log_2(0) = -1 \times 0 - 0 = 0$.
+    * If all examples are dogs ($p_1 = 0$, $p_0 = 1$): $H(0) = -0 \log_2(0) - 1 \log_2(1) = 0 - 1 \times 0 = 0$.
+    * **Result:** Entropy is **0** when the set is perfectly pure (contains only one class). This signifies zero impurity.
+
+* **Maximally Impure Set (50-50 Mix):**
+    * If there's an equal mix of cats and dogs ($p_1 = 0.5$, $p_0 = 0.5$): $H(0.5) = -0.5 \log_2(0.5) - 0.5 \log_2(0.5) = -0.5(-1) - 0.5(-1) = 0.5 + 0.5 = 1$.
+    * **Result:** Entropy is **1** (its maximum value) when the set is maximally impure (a 50-50 mix of classes).
+
+* **Intermediate Impurity:**
+    * If $p_1 = 5/6 \approx 0.83$ (5 cats, 1 dog): $H(0.83) \approx 0.65$. (Less impure than 50-50, more impure than all one class).
+    * If $p_1 = 2/6 \approx 0.33$ (2 cats, 4 dogs): $H(0.33) \approx 0.92$. (More impure than 5 cats/1 dog, closer to 50-50).
+
+### Entropy Curve:
+
+The entropy function $H(p_1)$ forms a curve that starts at 0 (for $p_1=0$), rises to a peak of 1 (for $p_1=0.5$), and then falls back to 0 (for $p_1=1$).
+
+### Other Impurity Measures:
+
+While entropy is common, other functions like the **Gini criteria (or Gini impurity)** also measure impurity similarly (from 0 to 1) and are used in decision trees. For simplicity, this course focuses on entropy.
+
+Now that we have a way to measure impurity (entropy), the next video will show how to use it to decide which feature to split on at each node of a decision tree.
