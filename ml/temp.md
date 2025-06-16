@@ -225,3 +225,35 @@ Decision tree building is a classic example of a **recursive algorithm** in comp
 Understanding these parameters and their impact on tree size and overfitting is crucial for effective decision tree usage. After building, predictions are made by traversing the tree from root to leaf based on a new example's features.
 
 The next videos will explore handling features with more than two categorical values and continuous-valued features.
+
+## Handling Categorical Features with Many Values: One-Hot Encoding
+
+So far, our decision tree examples have used features with only two discrete values (e.g., pointy/floppy, round/not round). This video introduces **one-hot encoding** as a method to handle categorical features that can take on *more than two* discrete values.
+
+### The Problem: Categorical Features with $>2$ Values
+
+Consider the `Ear Shape` feature, which can be `pointy`, `floppy`, or `oval`. If we directly use this feature, a decision tree would create three branches from a single node. While decision trees can technically handle this, one-hot encoding offers an alternative, especially useful for other algorithms.
+
+### Solution: One-Hot Encoding
+
+One-hot encoding transforms a single categorical feature with $K$ possible values into $K$ new **binary (0 or 1) features**.
+
+* **Process:**
+    1.  Identify all unique values (categories) a feature can take.
+    2.  Create a new binary feature for each unique value.
+    3.  For any given example, set the binary feature corresponding to its category to `1` ("hot"), and all other new binary features for that original categorical feature to `0`.
+
+* **Example: Ear Shape (Pointy, Floppy, Oval) -> 3 New Features:**
+    * **Original:** `Ear Shape: pointy`
+    * **One-Hot Encoded:** `Pointy_Ears: 1, Floppy_Ears: 0, Oval_Ears: 0`
+    * **Original:** `Ear Shape: oval`
+    * **One-Hot Encoded:** `Pointy_Ears: 0, Floppy_Ears: 0, Oval_Ears: 1`
+
+* **Benefit:** Each new feature is binary (0 or 1), making it directly compatible with the decision tree learning algorithm we've already discussed, without further modification.
+
+### Applicability Beyond Decision Trees:
+
+* One-hot encoding is a **general technique** for handling categorical features and is **also crucial for neural networks, linear regression, and logistic regression**. These algorithms typically expect numerical inputs.
+    * By converting `Ear Shape`, `Face Shape`, and `Whiskers` into a list of binary features (e.g., `[Pointy_Ears, Floppy_Ears, Oval_Ears, Is_Face_Round, Whiskers_Present]`), the data becomes suitable for input into models that require numerical features.
+
+One-hot encoding allows decision trees (and other algorithms) to process categorical features with multiple values efficiently. The next video will address how decision trees handle **continuous-valued features** (numerical features that can take on any value).
