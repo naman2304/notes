@@ -88,7 +88,7 @@ Given a set of examples:
 * Let $p_0 = 1 - p_1$ be the **fraction of negative examples** (e.g., dogs, label $y=0$).
 
 The **entropy** $H(p_1)$ is defined as:
-$$H(p_1) = -p_1 \log_2(p_1) - p_0 \log_2(p_0)$$or equivalently:$$H(p_1) = -p_1 \log_2(p_1) - (1 - p_1) \log_2(1 - p_1)$$
+$$H(p_1) = -p_1 \log_2(p_1) - p_0 \log_2(p_0)$$ or equivalently: $$H(p_1) = -p_1 \log_2(p_1) - (1 - p_1) \log_2(1 - p_1)$$
 
 * **Logarithm Base:** $\log_2$ (logarithm to base 2) is conventionally used, making the maximum entropy value 1.
 * **Convention for $0 \log_2(0)$:** By convention, $0 \log_2(0)$ is taken to be $0$.
@@ -110,6 +110,8 @@ $$H(p_1) = -p_1 \log_2(p_1) - p_0 \log_2(p_0)$$or equivalently:$$H(p_1) = -p_1 \
 
 ### Entropy Curve:
 
+<img src="/metadata/entropy_curve.png" width="300" />
+
 The entropy function $H(p_1)$ forms a curve that starts at 0 (for $p_1=0$), rises to a peak of 1 (for $p_1=0.5$), and then falls back to 0 (for $p_1=1$).
 
 ### Other Impurity Measures:
@@ -117,3 +119,57 @@ The entropy function $H(p_1)$ forms a curve that starts at 0 (for $p_1=0$), rise
 While entropy is common, other functions like the **Gini criteria (or Gini impurity)** also measure impurity similarly (from 0 to 1) and are used in decision trees. For simplicity, this course focuses on entropy.
 
 Now that we have a way to measure impurity (entropy), the next video will show how to use it to decide which feature to split on at each node of a decision tree.
+
+## Information Gain: Choosing the Best Split
+
+When building a decision tree, the primary criterion for deciding which feature to split on at a given node is to choose the feature that leads to the **greatest reduction in entropy (impurity)**. This reduction is called **information gain**.
+
+### How to Calculate Information Gain:
+
+Let's illustrate with our cat classification example:
+
+1.  **Calculate Entropy at the Root Node (before any split):**
+    * For the initial set of examples at the node (e.g., the root node with all 10 examples: 5 cats, 5 dogs).
+    * $p_{1}^{\text{root}} = \text{Fraction of cats at root} = 5/10 = 0.5$.
+    * $H(\text{root}) = \text{Entropy}(p_{1}^{\text{root}}) = \text{Entropy}(0.5) = 1$. (Maximum impurity).
+
+2.  **For each candidate feature to split on (e.g., Ear Shape, Face Shape, Whiskers):**
+    *  **Hypothetically split the data** based on that feature. This creates left and right sub-branches.
+    *  **Calculate $p_1$ and Entropy for each sub-branch:**
+        * **Ear Shape Split (Pointy vs. Floppy):**
+            * Left (Pointy): 5 examples total, 4 cats. $p_{1}^{\text{left}} = 4/5 = 0.8$. $\text{Entropy}(0.8) \approx 0.72$.
+            * Right (Floppy): 5 examples total, 1 cat. $p_{1}^{\text{right}} = 1/5 = 0.2$. $\text{Entropy}(0.2) \approx 0.72$.
+        * **Face Shape Split (Round vs. Not Round):**
+            * Left (Round): 7 examples total, 4 cats. $p_{1}^{\text{left}} = 4/7 \approx 0.57$. $\text{Entropy}(0.57) \approx 0.99$.
+            * Right (Not Round): 3 examples total, 1 cat. $p_{1}^{\text{right}} = 1/3 \approx 0.33$. $\text{Entropy}(0.33) \approx 0.92$.
+        * **Whiskers Split (Present vs. Absent):**
+            * Left (Present): 4 examples total, 3 cats. $p_{1}^{\text{left}} = 3/4 = 0.75$. $\text{Entropy}(0.75) \approx 0.81$.
+            * Right (Absent): 6 examples total, 2 cats. $p_{1}^{\text{right}} = 2/6 \approx 0.33$. $\text{Entropy}(0.33) \approx 0.92$.
+
+    *  **Calculate Weighted Average Entropy of the Split:** This accounts for the proportion of examples going into each sub-branch.
+        * **For Ear Shape:**
+            * $w^{\text{left}} = 5/10 = 0.5$ (proportion of examples with pointy ears)
+            * $w^{\text{right}} = 5/10 = 0.5$ (proportion of examples with floppy ears)
+            * Weighted Entropy = $(0.5 \times \text{Entropy}(0.8)) + (0.5 \times \text{Entropy}(0.2)) = (0.5 \times 0.72) + (0.5 \times 0.72) = 0.72$.
+        * **For Face Shape:**
+            * Weighted Entropy = $(7/10 \times \text{Entropy}(4/7)) + (3/10 \times \text{Entropy}(1/3)) = (0.7 \times 0.99) + (0.3 \times 0.92) = 0.97$.
+        * **For Whiskers:**
+            * Weighted Entropy = $(4/10 \times \text{Entropy}(3/4)) + (6/10 \times \text{Entropy}(2/6)) = (0.4 \times 0.81) + (0.6 \times 0.92) = 0.88$.
+
+    *  **Calculate Information Gain:**
+        $$\text{Information Gain} = \text{Entropy}(\text{root}) - \text{Weighted Average Entropy of Split}$$
+        * **For Ear Shape:** $1 - 0.72 = 0.28$.
+        * **For Face Shape:** $1 - 0.97 = 0.03$.
+        * **For Whiskers:** $1 - 0.88 = 0.12$.
+
+### Choosing the Best Split:
+
+* The feature with the **highest information gain** is chosen for the split.
+* In this example, "Ear Shape" has the highest information gain (0.28), so it would be chosen as the root node feature.
+* **Why Information Gain?** It directly quantifies how much a split reduces the overall impurity of the dataset, leading to purer child nodes.
+
+### Role in Stopping Criteria:
+
+* Information gain is also used in stopping criteria: If the information gain from any potential split is below a certain threshold, the algorithm might decide not to split further, creating a leaf node instead. This helps control tree size and prevent overfitting.
+
+The next video will integrate this information gain calculation into the overall decision tree building algorithm.
