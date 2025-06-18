@@ -296,3 +296,211 @@ Just like modeling, deployment is an iterative process.
 * **Key Trigger:** Monitoring is the trigger. It alerts you to problems that necessitate deeper error analysis, data collection, or model updates to maintain/improve system performance.
 
 In essence, monitoring allows you to spot problems (like concept drift or data drift) that then require investigation and intervention (e.g., updating the model or fixing software) to keep your ML system valuable in production. The next video will discuss common deployment patterns in more detail.
+
+## Monitoring Machine Learning Pipelines
+
+Many AI systems are not a single ML model, but a **pipeline** of multiple components, some of which may be ML-based and others not. Monitoring such pipelines is crucial due to **cascading effects** where changes in one component can impact downstream ones.
+
+### Example: Speech Recognition Pipeline
+
+* **Pipeline:** Audio Input $\rightarrow$ **VAD (Voice Activity Detection) Module** $\rightarrow$ Audio Segment $\rightarrow$ **Speech Recognition System** $\rightarrow$ Text Transcript.
+* **VAD Module:** Often an ML algorithm, its job is to detect speech and filter out silence, sending only relevant audio to the main speech recognition system (e.g., to save cloud bandwidth).
+* **Cascading Effect:** If the VAD module's output changes (e.g., it clips audio differently due to a new phone microphone), the input to the speech recognition system changes, potentially degrading its performance.
+
+### Example: User Profile and Recommender System Pipeline
+
+* **Pipeline:** Clickstream Data $\rightarrow$ **User Profiling Module** $\rightarrow$ User Attributes (e.g., "owns a car") $\rightarrow$ **Recommender System** $\rightarrow$ Product Recommendations.
+* **Cascading Effect:** If the input clickstream data changes, the user profiling module might start outputting more "unknown" attributes. This changes the input to the recommender system, which could then degrade recommendation quality.
+
+### Monitoring Strategy for Pipelines:
+
+The principle is the same as for single models: brainstorm all things that could go wrong and design metrics to track them. However, for pipelines, this applies to **multiple stages and components**:
+
+* **Brainstorm Metrics for Each Component:** Include software metrics (latency, throughput, etc.) and statistical metrics (input/output distributions) for *each individual module* in the pipeline.
+* **Input Metrics for Intermediate Stages:** Monitor the output of upstream components as they become the input for downstream components. This helps pinpoint where a problem originates (e.g., VAD output length, percentage of "unknown" user attributes).
+* **Overall Pipeline Metrics:** Also track end-to-end performance.
+
+### Rate of Data Change (Concept/Data Drift):
+
+The speed at which data changes varies significantly by application type:
+
+* **Slow Changes (Months/Years):**
+    * **User Data (Massive Scale):** For consumer-facing businesses with millions of users, collective user behavior generally changes slowly. Large groups of users don't typically change behavior simultaneously (exceptions like major social shocks, e.g., COVID-19).
+    * **Face Recognition:** People's appearances change gradually (hair, clothing, aging).
+* **Sudden/Rapid Changes (Minutes/Hours/Days):**
+    * **B2B / Enterprise Data:** Business data can shift very quickly.
+        * **Example:** A factory receives a new batch of raw material, subtly changing the appearance of all manufactured products.
+        * **Example:** A company's CEO decides to alter business operations, causing immediate shifts in internal data.
+    * **Security Applications:** Hackers constantly find new ways to attack systems, leading to rapid changes in anomalous patterns.
+
+Understanding the typical rate of data change for your specific application is crucial for designing appropriate monitoring frequencies and response mechanisms. This concludes Week 1's focus on deployment. Next week, the course will delve into the **modeling phase** of the ML lifecycle.
+
+## Week 2: Building Production-Ready Machine Learning Models
+
+This week focuses on the **modeling phase** of the machine learning project lifecycle, offering best practices for building production-worthy models. The goal is to efficiently improve models to meet deployment requirements.
+
+### Key Challenges in Model Building:
+
+This week will address crucial challenges faced when developing ML models for production:
+
+* **Handling New Datasets:** How to adapt models when data characteristics change in the real world.
+* **Bridging the Performance Gap:** What to do when a model performs well on the test set but still isn't good enough for the actual application's needs.
+
+### Data-Centric AI Development:
+
+A central theme will be the shift from **model-centric AI** to **data-centric AI**:
+
+* **Model-centric AI (Traditional Focus):** Emphasizes choosing and optimizing the right model architecture (e.g., neural network architecture), often holding the data fixed.
+* **Data-centric AI (Practical Focus):** Prioritizes improving the **quality and consistency of the data** being fed to the algorithm. This approach often leads to more efficient improvements in system performance.
+* **Efficient Data Improvement:** The focus is not just on collecting more data (which can be time-consuming) but on using specific tools and techniques to improve data in the most efficient way possible.
+
+By understanding these challenges and embracing a data-centric approach, you'll be better equipped to efficiently build high-performing machine learning models ready for production deployment. The next video will delve into these key challenges in more detail.
+
+## Challenges in Model Development
+
+Developing a machine learning model for production involves an iterative process, where the interplay between code, data, and hyperparameters is crucial. Model development is hard due to specific challenges in meeting performance milestones beyond just test set accuracy.
+
+### AI Systems: Code + Data
+
+* AI systems are fundamentally comprised of **code (the algorithm/model)** and **data**.
+* While much traditional AI research has focused on improving code/models (assuming fixed datasets), for many practical applications, **optimizing data is often more efficient**. This is because data is typically more customized to the specific problem.
+
+### The Iterative Model Development Process:
+
+1.  **Start:** Begin with an initial model, hyperparameters, and data.
+2.  **Train Model:** Execute the training process.
+3.  **Error Analysis:** Analyze where the model fails (e.g., specific types of errors, bias/variance).
+4.  **Improvement Loop:** Use insights from error analysis to make informed choices about:
+    * **Modifying the Model:** Adjusting architecture, algorithms.
+    * **Modifying Hyperparameters:** Tuning learning rates, regularization.
+    * **Modifying Data:** Improving data quality, collecting targeted data.
+5.  **Audit:** After achieving a good model, perform a final audit to confirm sufficient performance and reliability before deployment.
+
+### Three Key Milestones in Model Development:
+
+Model development is hard because there are multiple levels of "doing well":
+
+1.  **Doing Well on the Training Set:**
+    * **Goal:** The model should at least be able to learn the training data effectively. If it can't, it has high bias (underfitting).
+    * **Importance:** This is a foundational step. If a model doesn't perform well on training data, it's unlikely to perform well elsewhere.
+
+2.  **Doing Well on the Development (Dev) Set / Cross-Validation Set / Test Set:**
+    * **Goal:** The model should generalize well to unseen data. This indicates low variance (not overfitting).
+    * **Importance:** A low average error on a held-out dev/test set is a primary indicator of a generalizable model.
+
+3.  **Doing Well on Business Metrics / Project Goals:**
+    * **Problem:** Achieving low average test set error is often **not sufficient** for a project's success.
+    * **Challenges:** Many practical issues can prevent high test set accuracy from translating into desired business impact. This frequently leads to friction between ML teams (focused on test error) and business teams (focused on business goals).
+
+The next video will explore common patterns where low average test set error is insufficient for project success, helping to anticipate and address these issues more efficiently.
+
+## Going Beyond Average Test Set Error: Additional Challenges in ML Deployment
+
+Achieving low average test set error is a crucial milestone, but it's often **not sufficient** for a successful production machine learning project. Several other challenges need to be addressed.
+
+### 1. Disproportionately Important Examples
+
+* **Problem:** Not all examples are equally important. Average test set accuracy weights all examples equally.
+* **Example: Web Search Queries**
+    * **Informational/Transactional Queries** (e.g., "Apple pie recipe"): Users are somewhat forgiving if the top result isn't perfectly ranked.
+    * **Navigational Queries** (e.g., "Stanford", "YouTube"): Users have a very specific intent to reach a particular website. If the search engine doesn't return the exact intended site (especially as the #1 result), users quickly lose trust.
+    * **Challenge:** A model might improve average accuracy by performing well on common informational queries but fail on a small number of critical navigational queries, making it unacceptable for deployment.
+* **Response:** Metrics need to account for the differential importance of examples (e.g., by weighting or by dedicated evaluation on critical subsets).
+
+### 2. Performance on Key Slices of Data (Fairness & Discrimination)
+
+* **Problem:** Low average error doesn't guarantee fair performance across all subgroups. Bias and discrimination can be present even with high overall accuracy.
+* **Example: Loan Approval Systems**
+    * Systems must not unfairly discriminate against applicants based on **protected attributes** like ethnicity, gender, location, or language, as mandated by law in many countries.
+    * **Challenge:** An algorithm might have high average accuracy but show an unacceptable level of bias (e.g., lower approval rates for a specific demographic group).
+* **Example: E-commerce Recommender Systems**
+    * Systems should treat all major user, retailer, and product categories fairly.
+    * **Challenge:** High average recommendation relevance might hide biases like:
+        * Irrelevant recommendations for users of a specific ethnicity.
+        * Always recommending products from large retailers while ignoring smaller brands (unfair to small businesses).
+        * Never recommending certain product categories (e.g., electronics), which could upset retailers and harm business.
+* **Response:** Conduct specific **analysis on key data slices** (e.g., performance per gender, per product category) to identify and address bias or performance disparities.
+
+### 3. Rare Classes / Skewed Data Distributions
+
+* **Problem:** In datasets where one class is extremely rare (e.g., 99% negative, 1% positive), a "dumb" algorithm that *always predicts the majority class* can achieve very high accuracy, but is utterly useless.
+* **Example: Rare Disease Diagnosis**
+    * If only 1% of patients have a disease, an algorithm predicting "no disease" for everyone achieves 99% accuracy. This is not a helpful diagnostic tool.
+* **Example: Chest X-ray Diagnosis (Rare Conditions)**
+    * Common conditions (e.g., effusion) might have 10,000 images, allowing high performance.
+    * Rare conditions (e.g., hernia) might have only 100 images. A model might miss all hernia cases, causing only a tiny drop in *average* accuracy (because hernia cases are rare), but this is medically unacceptable.
+* **Response:** Use specialized metrics like **Precision and Recall (or F1-score)** instead of accuracy for skewed datasets, as these metrics highlight the model's ability to correctly identify the rare class.
+
+### Conclusion: Beyond Test Set Accuracy
+
+* The conversation is often: ML Engineer says "I did well on the test set!" while Product Owner says "But this doesn't work for my application."
+* **ML Engineers' Role:** Our job is not just to optimize test set metrics, but to build systems that **solve actual business or application needs**.
+* **Solution:** Use techniques like **error analysis on specific data slices** to uncover these deeper issues that go beyond average test set performance, providing tools to tackle these broader challenges.
+
+## Establishing a Baseline for ML Projects
+
+When starting an ML project, establishing a baseline level of performance is a crucial first step. It provides a point of comparison that helps you efficiently improve the system.
+
+### Why Establish a Baseline?
+
+* **Prioritization:** Helps decide where to focus efforts. Example: For speech recognition categories (Clear, Car Noise, People Noise, Low Bandwidth), initial accuracies might tempt you to work on "Low Bandwidth" (70% accuracy).
+    * However, if human performance on "Low Bandwidth" is also 70%, then that category has zero room for improvement.
+    * If human performance on "Car Noise" is 93% (versus your 89% accuracy), there's a 4% gap, indicating more potential for improvement there.
+* **Realistic Expectations:** Provides a sense of what's realistically achievable (e.g., if even humans struggle, don't expect 100% accuracy). This can set appropriate project goals and manage expectations from stakeholders.
+* **Irreducible Error (Bayes Error):** For some tasks, especially with noisy unstructured data, a baseline (like human-level performance) can give a rough estimate of the irreducible error or Bayes error – the theoretical best possible performance.
+
+### Best Practices for Establishing a Baseline:
+
+The best practices vary depending on whether you're working with unstructured or structured data.
+
+1.  **For Unstructured Data (Images, Audio, Text):**
+    * **Human-Level Performance (HLP):** Often the best baseline. Humans are very good at interpreting this type of data.
+    * **Process:** Have human annotators perform the task on a subset of your data and measure their error rate.
+
+2.  **For Structured Data (Tabular data, Spreadsheets, Databases):**
+    * Humans are generally not as good at interpreting large spreadsheets to make predictions. HLP is usually *less* useful here.
+    * **Alternative Baseline Methods:**
+        * **Literature Search for State-of-the-Art (SOTA):** Look for published research papers or benchmarks on similar problems.
+        * **Open-Source Results:** Check publicly available models or results for comparable tasks.
+        * **Quick-and-Dirty Implementation:** Build a very simple, fast, and basic ML model (e.g., a simple logistic regression or even a heuristic-based rule) to get an initial performance number. This isn't for deployment but for gauging feasibility.
+        * **Previous System Performance:** If an older version of the system exists (even if it's not ML-based), its performance can serve as a baseline to improve upon.
+
+### Why It Matters:
+
+* Establishing a baseline helps prioritize efforts by showing where there's significant room for improvement (large gap between current performance and baseline).
+* It also helps manage expectations and avoids promising unrealistic accuracy levels before understanding the inherent difficulty of the problem. If a business team pushes for a very high accuracy guarantee, you can use the baseline to provide a more realistic estimate.
+
+The next video will provide additional tips for quickly getting started on an ML project, complementing the idea of baseline establishment.
+
+## Tips for Getting Started on an ML Project
+
+Getting started quickly and efficiently is key to the iterative ML development process.
+
+### 1. Model Selection and Baseline Establishment
+
+* **Quick Literature Search:** Before starting, spend half a day (or a few days) researching online courses, blogs, and open-source projects.
+* **Don't Obsess Over SOTA:** If the goal is a practical production system (not research), don't get hung up on finding the absolute latest, greatest algorithm. A **reasonable algorithm with good data often outperforms a great algorithm with poor data.**
+* **Leverage Open-Source:** Find a good open-source implementation of a suitable algorithm. This can help establish a baseline more efficiently.
+
+### 2. Considering Deployment Constraints (Compute, etc.)
+
+* **If Baseline NOT Yet Established / Project Feasibility Unsure:**
+    * It's often okay to **initially ignore deployment constraints** (e.g., computational intensity).
+    * Focus on establishing a baseline and proving what's possible first, even if the initial model is too slow for production. This avoids premature optimization.
+* **If Baseline IS Established / Project Confidence High:**
+    * **Yes, you should definitely take deployment constraints into account.** Design your model and system with compute, memory, latency, and throughput limitations in mind.
+
+### 3. Quick Sanity Checks Before Full Training
+
+Before spending hours or days training on a large dataset, perform quick checks:
+
+* **Overfit a Small Dataset:**
+    * **Try to overfit a *very small* training set (e.g., 1-10 examples) or even a *single* training example.**
+    * **Purpose:** This is a quick way to check if your code and algorithm have fundamental bugs. If the model can't even perfectly fit a tiny amount of data, it won't do well on a large dataset.
+    * **Example (Speech Recognition):** If training on one audio clip results in an empty transcript, the system has a bug.
+    * **Example (Image Segmentation):** If training on one image, the model can't segment the object perfectly, there's a problem.
+* **Train on a Small Subset:**
+    * For large datasets (e.g., 10,000 to 1 million images), quickly train on a very small subset (e.g., 10-100 images).
+    * **Purpose:** If the algorithm can't perform well even on 100 images, it's unlikely to perform well on the full dataset. This helps catch issues quickly.
+
+These sanity checks are fast (minutes or seconds) and can help you identify bugs and fundamental issues much more quickly, enabling more efficient iteration. The next video will cover error analysis and performance auditing.
