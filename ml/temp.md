@@ -691,15 +691,12 @@ Even when a machine learning model performs well on standard metrics, a final **
 ### Example: Speech Recognition System Audit
 
 1.  **Brainstorm Potential Problems:**
-    * Accuracy on different genders.
-    * Accuracy on different ethnicities.
-    * Accuracy based on perceived accent of the speaker.
+    * Accuracy on different genders and perceived accents
     * Accuracy on different recording devices/phone models.
     * Prevalence of rude or offensive mis-transcriptions. (e.g., "GANs" mis-transcribed as "guns" or "gangs," or any speech mis-transcribed as a swear word).
 
 2.  **Establish Metrics on Slices:**
-    * Measure mean accuracy for different gender subgroups.
-    * Measure mean accuracy for different accent subgroups.
+    * Measure mean accuracy for different gender or accent subgroups.
     * Check accuracy for specific device models.
     * Count occurrences of offensive/rude words in outputs to ensure they are rare unless actually spoken.
 
