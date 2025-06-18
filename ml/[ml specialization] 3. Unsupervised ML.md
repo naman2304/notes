@@ -358,3 +358,38 @@ Even though anomaly detection is an unsupervised learning technique, having a **
 If there are extremely few anomalous examples (e.g., only 2-3), you might combine the cross-validation and test sets into a single evaluation set. This provides more data for tuning but means you lack a truly unbiased final evaluation.
 
 This evaluation framework makes the iterative process of improving an anomaly detection system much more efficient. The next video will compare anomaly detection with supervised learning and discuss when to choose one over the other.
+
+## Anomaly Detection vs. Supervised Learning: Choosing the Right Tool
+
+When faced with a highly skewed dataset (very few positive examples, many negative examples), deciding between anomaly detection and supervised learning can be subtle. The choice depends on the nature of the "positive" class.
+
+### Anomaly Detection (Recommended when):
+
+* **Very Small Number of Positive Examples:** Often 0-20 known positive (anomalous) examples. The model for $p(x)$ is primarily learned from the large number of negative (normal) examples. Positive examples are used mainly for cross-validation and evaluation.
+* **Many Different Types of Anomalies:** You believe there are numerous ways for something to be anomalous, and future anomalies are likely to be *different* from the few you've seen so far.
+    * **Intuition:** The algorithm models what "normal" looks like, and anything deviating significantly from this norm is flagged. It can detect "new" types of anomalies it has never seen.
+    * **Example:** Detecting **financial fraud** (new fraud schemes emerge constantly).
+    * **Example:** Detecting **previously unseen defects** in manufacturing (e.g., a brand new way an aircraft engine could fail).
+    * **Example:** Monitoring **hacked machines** in a data center (hackers find novel ways to compromise systems). This applies to many **security-related applications**.
+
+### Supervised Learning (Recommended when):
+
+* **Sufficient Number of Positive Examples:** You have enough positive examples to enable the algorithm to learn *what the positive examples look like*. This implies that future positive examples will be *similar* to the ones seen in the training set.
+    * **"Enough" is relative:** Even 20 positive examples might be sufficient in some simple cases, but generally more are better.
+* **Predicting Known Categories:** You want to classify into categories that you have extensively observed and have representative data for.
+    * **Example:** **Email spam detection.** While spam evolves, new spam is often similar enough to past spam for a supervised model to generalize effectively.
+    * **Example:** Detecting **known and previously seen manufacturing defects** (e.g., common scratches on smartphones where you have many examples of scratched phones).
+    * **Example:** **Weather prediction** (you constantly observe and label weather types).
+    * **Example:** **Diagnosing specific, known diseases** based on symptoms (where you have a dataset of confirmed cases).
+
+### Summary of Comparison:
+
+| Feature/Condition             | Anomaly Detection               | Supervised Learning               |
+| :---------------------------- | :------------------------------ | :-------------------------------- |
+| **Number of Positive Examples** | Very small (0-20)               | Larger number (enough to learn from) |
+| **Nature of Positive Class** | Many diverse types; future ones unknown | Similar to past examples; patterns stable |
+| **What it Learns** | "What normal looks like"        | "What positive looks like"        |
+| **Best for** | Novel anomalies, rare events    | Known classes, common occurrences |
+| **Example Use Cases** | Fraud (new types), new defects, hacked systems | Spam, known defects, weather, specific diseases |
+
+The choice between these two approaches hinges on your assumptions about the nature of the "anomalies" or "positive" class you're trying to detect. The next video will discuss practical tips for selecting features in anomaly detection.
