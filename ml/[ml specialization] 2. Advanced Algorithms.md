@@ -1411,7 +1411,7 @@ This graph shows the **forward propagation** (left-to-right) to compute the cost
 
 Backpropagation calculates the derivatives of $J$ with respect to parameters ($w, b$) by performing a **right-to-left** (backward) pass through the computation graph.
 
-The general idea is to compute $\frac{\partial J}{\partial \text{input_to_node}}$ for each node, using the derivatives already computed for subsequent nodes (chain rule).
+The general idea is to compute $\frac{\partial J}{\partial \text{inputToNode}}$ for each node, using the derivatives already computed for subsequent nodes (chain rule).
 
 1.  **Derivative $\frac{\partial J}{\partial d}$:**
     * Node: $J = \frac{1}{2} d^2$
