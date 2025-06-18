@@ -437,3 +437,39 @@ After training your anomaly detection model $p(x)$, if it's not performing well 
 * Repeat the process.
 
 This systematic approach of inspecting errors and engineering new features is crucial for improving anomaly detection performance, especially for handling novel types of anomalies that might not be well-represented in initial feature sets.
+
+## Recommender Systems: Introduction
+
+Recommender systems are a commercially impactful machine learning application, driving significant sales and engagement on online platforms like e-commerce, streaming services, and food delivery apps.
+
+### What is a Recommender System?
+
+* **Goal:** To suggest items (movies, products, articles, restaurants) to users that they are likely to be interested in or rate highly.
+* **Core Data:** A dataset showing user ratings or interactions with various items.
+
+### Running Example: Movie Rating Prediction
+
+Consider a movie streaming website with users rating movies 0-5 stars.
+
+* **Users:** Alice (1), Bob (2), Carol (3), Dave (4). Let $N_u$ be the number of users ($N_u = 4$).
+* **Items (Movies):** "Love at last", "Romance forever", "Cute puppies of love", "Nonstop car chases", "Sword versus karate". Let $N_m$ be the number of movies ($N_m = 5$).
+* **Ratings Data:**
+    * Alice (User 1): Rated Movies 1, 2, 4, 5. Missing Movie 3.
+    * Bob (User 2): Rated Movies 1, 3, 4, 5. Missing Movie 2.
+    * Carol (User 3): Rated Movies 1, 3, 4, 5. Missing Movie 2.
+    * Dave (User 4): Rated Movies 1, 2, 3, 4, 5. (All rated).
+
+### Notation for Recommender Systems:
+
+* $N_u$: Number of users.
+* $N_m$: Number of items (movies).
+* $r(i,j) = 1$: If user $j$ has rated movie $i$. ($r(i,j) = 0$ otherwise).
+    * Example: $r(1,1)=1$ (Alice rated Movie 1), but $r(3,1)=0$ (Alice did not rate Movie 3).
+* $y(i,j)$: The rating given by user $j$ to movie $i$.
+    * Example: $y(3,2)=4$ (Bob rated Movie 3 as 4 stars).
+
+### The Recommendation Problem:
+
+The primary goal is to predict how users would rate movies they *have not yet rated* (the question marks in the table). Once these predictions are made, the system can recommend items with the highest predicted ratings to users.
+
+The next video will begin developing an algorithm for this, initially assuming we have explicit features for the movies (e.g., whether they are romance or action movies). Later, we'll explore how to work without such explicit features.
