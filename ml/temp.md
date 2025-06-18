@@ -211,11 +211,8 @@ Deploying a machine learning model requires careful planning beyond just turning
 ### Common Deployment Use Cases:
 
 1.  **New Product/Capability:** Offering an ML-powered service for the first time (e.g., a new speech recognition service).
-    * **Pattern:** Typically starts with a **small traffic rollout** and **gradual ramp-up with monitoring**.
 2.  **Automating/Assisting a Human Task:** Replacing or aiding human effort with ML (e.g., AI inspecting phones for scratches, previously done by humans).
-    * **Pattern:** Often uses **shadow mode deployment** initially.
 3.  **Updating an Existing ML System:** Replacing an older ML model with a newer, hopefully better, one.
-    * **Pattern:** Often involves **gradual ramp-up with monitoring** and strong **rollback** capabilities.
 
 ### Recurring Themes in Deployment:
 
@@ -246,10 +243,56 @@ ML deployment is not binary (fully automated or not at all); it exists on a spec
 1.  **No Automation (Human Only System):** All decisions made by humans.
 2.  **Shadow Mode:** AI predicts, but human makes all decisions. AI output is only for monitoring/evaluation.
 3.  **AI Assistance:** AI influences the human's decision-making process (e.g., highlights areas of interest in a UI) but the human still makes the final decision. UI design is critical here.
-4.  **Partial Automation:** AI makes decisions if it's highly confident. If confidence is low, it defers to a human. (e.g., If AI is sure a phone is fine/defective, it decides. If unsure, it sends to human reviewer). Human judgment in these edge cases can also be valuable feedback for future training.
+4.  **Partial Automation:** AI makes decisions if it's highly confident. If confidence is low, it defers to a human. (e.g., If AI is sure a phone is fine/defective, it decides. If unsure, it sends to human reviewer). Human judgment in these edge cases can also be valuable feedback for future training. This is a really really good technique.
 5.  **Full Automation:** AI makes every single decision without human intervention. (Common in large-scale consumer internet applications like web search where human intervention is infeasible per query).
 
 * **Common Path:** Many applications start with lower degrees of automation (human in the loop) and gradually move towards higher automation as AI performance and confidence improve.
 * **Human-in-the-Loop Deployments:** AI Assistance and Partial Automation are examples of "human-in-the-loop" systems, which are often the optimal design point, especially outside large-scale consumer internet services.
 
 The next video will delve into the critical aspect of **monitoring** ML systems in production.
+
+## Monitoring Machine Learning Systems in Production
+
+Monitoring a deployed machine learning system is crucial to ensure it continuously meets performance expectations and to detect and address issues promptly. This primarily involves using dashboards to track key metrics over time.
+
+### What to Monitor: Brainstorming Metrics
+
+* **Approach:** Brainstorm all possible things that could go wrong with your system, then identify specific metrics that would detect those problems.
+* **Initial Monitoring:** Start by monitoring a broad set of metrics, then prune less useful ones over time.
+
+### Types of Metrics to Monitor:
+
+1.  **Software Metrics:**
+    * **Purpose:** Monitor the health of the prediction service and surrounding software.
+    * **Examples:** Memory usage, compute utilization, latency (response time), throughput (queries per second - QPS), server load.
+    * **Tools:** Many MLOps tools track these out-of-the-box.
+
+2.  **Statistical/ML Performance Metrics:** These help assess the health and performance of the learning algorithm itself.
+    * **Input Metrics (Data Drift):** Measure changes in the input data distribution ($X$).
+        * **Examples:** Average input length (e.g., audio clip duration), average input volume, percentage of missing values (for structured data), average image brightness (for computer vision).
+        * **Purpose:** Alert to shifts in input data that might degrade model performance (e.g., new user demographics, changed sensor conditions).
+    * **Output Metrics (Concept Drift/Performance Degradation):** Measure changes in the model's predictions or downstream user behavior.
+        * **Examples:**
+            * Speech recognition: Frequency of null/empty string outputs, users performing two quick, similar searches (suggests initial misrecognition), users switching from voice to typing (frustration indicator).
+            * Web search: Click-through rate (CTR) to ensure overall system health.
+        * **Purpose:** Indicate if the model's output distribution has changed, if the concept (X to Y mapping) has drifted, or if the system's utility to the user is declining.
+
+### The Iterative Nature of Deployment:
+
+Just like modeling, deployment is an iterative process.
+
+1.  **Initial Deployment & Monitoring:** Get the first version up, establish initial monitoring dashboards.
+2.  **Performance Analysis:** As real user data/traffic flows in, analyze the system's actual performance.
+3.  **Refine Metrics & Thresholds:** It often takes time to find the most useful metrics. Adjust monitored metrics and their alarm thresholds (e.g., if server load exceeds 0.9, trigger an alert) based on observed behavior.
+4.  **Problem Detection & Response:**
+    * **Software Issues:** If software metrics indicate a problem (e.g., high server load), it might require software changes.
+    * **ML Performance Issues:** If statistical metrics indicate performance degradation (e.g., accuracy drops, data drift detected), it requires addressing the ML model.
+
+### Model Maintenance and Retraining:
+
+* When the model's performance degrades (often due to concept/data drift), it needs maintenance.
+* **Manual Retraining:** An engineer manually retrains the model (e.g., with new data), performs error analysis, and vets its performance before redeploying. This is still very common.
+* **Automatic Retraining:** In some high-volume applications (e.g., consumer internet), systems are set up for automatic retraining and deployment.
+* **Key Trigger:** Monitoring is the trigger. It alerts you to problems that necessitate deeper error analysis, data collection, or model updates to maintain/improve system performance.
+
+In essence, monitoring allows you to spot problems (like concept drift or data drift) that then require investigation and intervention (e.g., updating the model or fixing software) to keep your ML system valuable in production. The next video will discuss common deployment patterns in more detail.
