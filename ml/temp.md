@@ -273,7 +273,7 @@ Monitoring a deployed machine learning system is crucial to ensure it continuous
         * **Purpose:** Alert to shifts in input data that might degrade model performance (e.g., new user demographics, changed sensor conditions).
     * **Output Metrics (Concept Drift/Performance Degradation):** Measure changes in the model's predictions or downstream user behavior.
         * **Examples:**
-            * Speech recognition: Frequency of null/empty string outputs, users performing two quick, similar searches (suggests initial misrecognition), users switching from voice to typing (frustration indicator).
+            * Speech recognition: Frequency of null/empty string outputs, users performing two quick similar searches (suggests initial misrecognition), users switching from voice to typing (frustration indicator).
             * Web search: Click-through rate (CTR) to ensure overall system health.
         * **Purpose:** Indicate if the model's output distribution has changed, if the concept (X to Y mapping) has drifted, or if the system's utility to the user is declining.
 
