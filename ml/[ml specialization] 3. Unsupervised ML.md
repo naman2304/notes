@@ -393,3 +393,47 @@ When faced with a highly skewed dataset (very few positive examples, many negati
 | **Example Use Cases** | Fraud (new types), new defects, hacked systems | Spam, known defects, weather, specific diseases |
 
 The choice between these two approaches hinges on your assumptions about the nature of the "anomalies" or "positive" class you're trying to detect. The next video will discuss practical tips for selecting features in anomaly detection.
+
+## Tuning Features for Anomaly Detection
+
+In anomaly detection, carefully choosing features is even more crucial than in supervised learning, because the algorithm learns primarily from unlabeled "normal" data and doesn't have labels to guide feature relevance.
+
+### 1. Make Features Approximately Gaussian
+
+* **Problem:** The anomaly detection algorithm models $p(x_j)$ for each feature $x_j$ using a Gaussian (normal) distribution. If a feature's actual distribution is highly non-Gaussian, this model might be a poor fit.
+* **Diagnosis:** Plot a **histogram** of each feature to visually inspect its distribution.
+* **Solution:** If a feature's histogram looks highly skewed (e.g., concentrated on one side, not bell-shaped), consider applying **transformations** to make it more Gaussian.
+    * **Common Transformations:**
+        * `log(x)` (or `log(x + C)` if $x$ can be 0 or negative, adding a small constant $C$).
+        * `sqrt(x)` (or `x` to the power of `0.5`).
+        * `x` to the power of `P` (where `P` could be `0.25`, `0.33`, etc.).
+    * **Process:** Experiment with different transformations and visually check the resulting histogram until it looks more symmetric and bell-shaped.
+* **Rule:** Apply the same transformation to your training, cross-validation, and test sets.
+
+### 2. Error Analysis for Anomaly Detection
+
+After training your anomaly detection model $p(x)$, if it's not performing well (e.g., failing to detect known anomalies in the cross-validation set), perform error analysis.
+
+* **Problem:** The algorithm fails to flag an anomaly because $p(x)$ is high for that example, meaning it looks "normal" based on existing features. This usually happens because one or more features of that anomalous example take on values similar to normal examples.
+* **Process:**
+    1.  Identify misclassified anomalies (False Negatives) in your cross-validation set.
+    2.  **Manually inspect** these examples.
+    3.  **Brainstorm and create new features** that might help distinguish these particular anomalies from normal examples. The goal is to find features where the anomalous examples exhibit unusually large or small values.
+
+* **Example (Fraud Detection):**
+    * `x1`: Number of transactions (might be normal for a fraudulent user).
+    * If you notice the anomalous user has an "insanely fast typing speed," create `x2 = typing_speed`. This new feature might make the anomaly stand out.
+* **Example (Data Center Monitoring):**
+    * Original features: `memory_use`, `disk_accesses`, `CPU_load`, `network_traffic`.
+    * If a machine has high `CPU_load` but unusually low `network_traffic` (which is rare for a video streaming server), create a new feature like `x5 = CPU_load / network_traffic`. This ratio might spike for the anomalous machine, allowing it to be flagged.
+    * Other combinations: `(CPU_load)^2 / network_traffic`.
+
+### Summary of Development Process:
+
+* Train the initial model.
+* Examine anomalies that were *missed* (False Negatives) in the cross-validation set.
+* Based on these missed anomalies, brainstorm and engineer new features that would highlight their anomalous nature.
+* Add these new features and retrain the model.
+* Repeat the process.
+
+This systematic approach of inspecting errors and engineering new features is crucial for improving anomaly detection performance, especially for handling novel types of anomalies that might not be well-represented in initial feature sets.
