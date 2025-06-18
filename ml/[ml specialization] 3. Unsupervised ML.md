@@ -449,6 +449,8 @@ Recommender systems are a commercially impactful machine learning application, d
 
 ### Running Example: Movie Rating Prediction
 
+<img src="/metadata/rec_sys.png" width="600" />
+
 Consider a movie streaming website with users rating movies 0-5 stars.
 
 * **Users:** Alice (1), Bob (2), Carol (3), Dave (4). Let $N_u$ be the number of users ($N_u = 4$).
@@ -473,3 +475,96 @@ Consider a movie streaming website with users rating movies 0-5 stars.
 The primary goal is to predict how users would rate movies they *have not yet rated* (the question marks in the table). Once these predictions are made, the system can recommend items with the highest predicted ratings to users.
 
 The next video will begin developing an algorithm for this, initially assuming we have explicit features for the movies (e.g., whether they are romance or action movies). Later, we'll explore how to work without such explicit features.
+
+## Recommender Systems: Collaborative Filtering (Feature-based)
+
+This video introduces a method for building recommender systems by predicting user ratings, assuming we have pre-defined features for each item.
+
+### Problem Setup: Movie Rating Prediction
+
+* **Users:** $N_u$ users (e.g., Alice, Bob, Carol, Dave; $N_u=4$).
+* **Items (Movies):** $N_m$ movies (e.g., "Love at Last", "Nonstop Car Chases"; $N_m=5$).
+* **Ratings:** $y(i,j)$ is the rating given by user $j$ to movie $i$. Ratings are sparse (many movies are unrated, denoted by '?').
+* **Notation:**
+    * $r(i,j) = 1$ if user $j$ has rated movie $i$, $0$ otherwise.
+    * $m(j)$: Number of movies rated by user $j$.
+
+### Assuming Item Features
+
+* We assume each movie $i$ has a feature vector $X^{(i)} = [X_1^{(i)}, X_2^{(i)}, \dots, X_n^{(i)}]$, where $n$ is the number of features (e.g., $n=2$ for "romance" and "action" levels).
+    * Example: $X^{(1)} = [0.9, 0]$ (Love at Last: 0.9 romance, 0 action).
+    * Example: $X^{(4)} = [0.1, 1.0]$ (Nonstop Car Chases: 0.1 romance, 1.0 action).
+
+### Model: User-Specific Linear Regression
+
+For each user $j$, we train a separate linear regression-like model to predict their ratings based on movie features:
+
+* **Predicted Rating for movie $i$ by user $j$:** $\hat{y}(i,j) = \vec{w}^{(j)} \cdot X^{(i)} + b^{(j)}$
+    * $\vec{w}^{(j)}$: Parameter vector (weights) specific to user $j$.
+    * $b^{(j)}$: Bias parameter specific to user $j$.
+
+### Cost Function for a Single User $j$
+
+To learn $\vec{w}^{(j)}$ and $b^{(j)}$ for a specific user $j$, we minimize a regularized squared error cost function, considering only the movies they have rated:
+
+$$J(\vec{w}^{(j)}, b^{(j)}) = \frac{1}{2} \sum_{i: r(i,j)=1} (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)} - y(i,j))^2 + \frac{\lambda}{2} \sum_{k=1}^{n} (w_k^{(j)})^2$$
+
+* The sum is only over movies $i$ that user $j$ has rated ($r(i,j)=1$).
+* The term $\frac{1}{m(j)}$ (where $m(j)$ is the number of movies rated by user $j$) is often omitted for convenience in recommender systems, as it's a constant factor and doesn't change the optimal $\vec{w}^{(j)}, b^{(j)}$.
+* The $\lambda$ term is for regularization to prevent overfitting.
+
+### Overall Cost Function (for all Users)
+
+To learn parameters for *all* users, we sum the individual user cost functions:
+
+$$J(\vec{w}^{(1)}, \dots, \vec{w}^{(N_u)}, b^{(1)}, \dots, b^{(N_u)}) = \sum_{j=1}^{N_u} \left( \frac{1}{2} \sum_{i: r(i,j)=1} (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)} - y(i,j))^2 + \frac{\lambda}{2} \sum_{k=1}^{n} (w_k^{(j)})^2 \right)$$
+
+* This global cost function is minimized with respect to all user-specific parameters ($\vec{w}^{(j)}$ and $b^{(j)}$ for all $j$).
+* This approach effectively trains $N_u$ separate linear regression models.
+
+This method works well if we have detailed features for each item. The next video will address the more common scenario where these explicit item features are *not* available in advance.
+
+## Collaborative Filtering: Learning Item Features
+
+The previous video assumed we have pre-defined features for each movie. This video explores **Collaborative Filtering**, where the system can **learn these item features ($X^{(i)}$) directly from user ratings**, without them being provided in advance.
+
+### Intuition:
+
+* **From Users to Item Features:** If we know how different users rate an item, and we know those users' preferences (their $\vec{w}^{(j)}$ and $b^{(j)}$ parameters), we can infer what characteristics that item must have to explain those ratings.
+    * Example: If Alice (who likes romance) and Bob (who likes romance) both rate Movie 1 highly, but Carol (who likes action) and Dave (who likes action) rate Movie 1 low, this suggests Movie 1 is a "romance" movie.
+
+### Step 1 (Conceptual): Learning Item Features ($X^{(i)}$) given User Parameters ($\vec{w}^{(j)}, b^{(j)}$)
+
+* **Goal:** For a specific movie $i$, learn its feature vector $X^{(i)}$.
+* **Cost Function for $X^{(i)}$:** We minimize the squared error between predicted ratings (using known user parameters) and actual ratings, summed over all users who rated movie $i$:
+    $$J(X^{(i)}) = \frac{1}{2} \sum_{j: r(i,j)=1} (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)} - y(i,j))^2 + \frac{\lambda}{2} \sum_{k=1}^{n} (X_k^{(i)})^2$$
+    * The second term is for regularization to prevent overfitting on the item features.
+* **Overall Cost for All Item Features:** Sum this over all movies $i=1, \dots, N_m$:
+    $$J(X^{(1)}, \dots, X^{(N_m)}) = \sum_{i=1}^{N_m} \left( \frac{1}{2} \sum_{j: r(i,j)=1} (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)} - y(i,j))^2 + \frac{\lambda}{2} \sum_{k=1}^{n} (X_k^{(i)})^2 \right)$$
+    * Minimizing this learns the features for all movies.
+
+### Step 2 (Conceptual): Learning User Parameters ($\vec{w}^{(j)}, b^{(j)}$) given Item Features ($X^{(i)}$)
+
+* This is what we did in the previous video. For each user $j$, we learn their preferences $\vec{w}^{(j)}, b^{(j)}$ given the movie features $X^{(i)}$.
+
+### Full Collaborative Filtering Algorithm:
+
+The core idea is that we don't know *either* the user parameters *or* the item features initially. Collaborative filtering learns both simultaneously by minimizing a single, combined cost function.
+
+* **Combined Cost Function:** This function sums over *all* user-movie pairs $(i, j)$ for which a rating exists ($r(i,j)=1$), and includes regularization for both user parameters ($\vec{w}^{(j)}$) and item features ($X^{(i)}$).
+    $$J(\vec{w}^{(1..N_u)}, b^{(1..N_u)}, X^{(1..N_m)}) = \frac{1}{2} \sum_{(i,j): r(i,j)=1} (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)} - y(i,j))^2 + \frac{\lambda}{2} \sum_{j=1}^{N_u} \sum_{k=1}^{n} (w_k^{(j)})^2 + \frac{\lambda}{2} \sum_{i=1}^{N_m} \sum_{k=1}^{n} (X_k^{(i)})^2$$
+    * The first sum is over all ratings we have observed.
+    * The second sum regularizes all user preference parameters ($\vec{w}^{(j)}$).
+    * The third sum regularizes all movie features ($X^{(i)}$).
+
+* **Minimization (Gradient Descent):**
+    * Initialize all user parameters ($\vec{w}^{(j)}, b^{(j)}$) and all movie features ($X^{(i)}$) randomly (e.g., small random numbers).
+    * Repeatedly update all these parameters simultaneously using gradient descent (or Adam):
+        * $\vec{w}^{(j)} \leftarrow \vec{w}^{(j)} - \alpha \frac{\partial}{\partial \vec{w}^{(j)}} J(\dots)$
+        * $b^{(j)} \leftarrow b^{(j)} - \alpha \frac{\partial}{\partial b^{(j)}} J(\dots)$
+        * $X^{(i)} \leftarrow X^{(i)} - \alpha \frac{\partial}{\partial X^{(i)}} J(\dots)$
+    * By doing this, the algorithm "collaborates" by iteratively guessing user preferences and item features, leading to values that best explain the observed ratings.
+
+**Why "Collaborative Filtering"?** It's called this because ratings from *multiple users* on the *same item* collaboratively help infer the item's features, and similarly, ratings from a *single user* on *multiple items* help infer that user's preferences. This collaboration between user data points helps predict ratings for other users and items.
+
+The next video will explore collaborative filtering for binary labels (e.g., user likes/favors an item) instead of star ratings.
