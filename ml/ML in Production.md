@@ -1502,3 +1502,67 @@ This video outlines a systematic process for scoping ML projects, focusing on id
 * **Maximize Impact:** Helps identify projects that can create significantly more value (e.g., 10x more) for the same amount of work, compared to less impactful projects.
 * **Structured Approach:** Moves from brainstorming many possibilities (divergent thinking) to narrowing down to the most promising ones (convergent thinking).
 * **Domain Knowledge:** While valuable, even with deep domain knowledge, it's often beneficial to run through this structured scoping process.
+
+## Project Scoping: Assessing Technical Feasibility
+
+Before committing significant resources to an ML project, it's crucial to assess its **technical feasibility**. This involves determining if the project can even be built.
+
+### Framework for Feasibility Assessment (2x2 Matrix):
+
+We categorize projects based on data type and whether it's a new or existing capability:
+
+## Machine Learning Project Lifecycle Overview (Phase-wise Approach)
+
+This course outlines the full machine learning project lifecycle, starting from deployment and working backward to modeling, data, and finally scoping. This approach emphasizes practical deployment considerations from the outset.
+
+### Phase 1: Deployment (Covered in earlier videos this week)
+
+* **Focus:** Getting the model into production and ensuring its operational health.
+* **Key Aspects:**
+    * **Real-time vs. Batch Prediction:** Deciding response time needs.
+    * **Deployment Environment:** Cloud, edge, or web browser.
+    * **Compute/Memory Constraints:** Optimizing model size and efficiency.
+    * **Latency/Throughput (QPS):** Meeting performance targets under load.
+    * **Logging:** Capturing input/output data for monitoring and future analysis.
+    * **Security & Privacy:** Ensuring data protection.
+    * **Monitoring & Maintenance:** Tracking performance over time, detecting data/concept drift, and ensuring model updates.
+
+### Phase 2: Modeling (Focus of this week's videos)
+
+* **Goal:** Building a production-ready machine learning model efficiently.
+* **Key Theme: Data-Centric AI Development:**
+    * Shift from a "model-centric" view (fixed data, optimize code) to a "data-centric" view (fixed code, optimize data).
+    * For many practical problems, **improving data quality and consistency** is more efficient than just tweaking model architecture.
+* **Iterative Development Loop:**
+    1.  Start with initial model, hyperparameters, and data.
+    2.  Train the model.
+    3.  Perform **error analysis**: Identify specific types of mistakes and their causes.
+    4.  Iteratively improve the model, data, or hyperparameters based on diagnostics.
+    5.  Conduct a **final audit** before deployment to ensure performance and reliability.
+
+### Phase 3: Data (Next week's focus)
+
+* **Goal:** Obtaining high-quality data that sets up modeling for success.
+* **Key Aspects:**
+    * **Data Definition:** Precisely defining inputs ($X$) and outputs ($Y$).
+    * **Label Consistency:** Addressing ambiguity in labels (e.g., standardizing conventions, merging classes, adding "unintelligible" tags).
+    * **Input Quality:** Ensuring $X$ is sufficiently informative (e.g., good lighting for images).
+    * **Data Acquisition:** Strategies for collecting or creating data (e.g., targeted collection, data augmentation, data synthesis).
+    * **Data Pipelines:** Ensuring replicability of preprocessing steps, tracking metadata, provenance, and lineage.
+    * **Balanced Splits:** Creating representative train/dev/test sets, especially for small, skewed datasets.
+    * **Human-Level Performance (HLP):** Using HLP to establish baselines, prioritize efforts, and diagnose label consistency issues. Raising HLP through consistency makes the ML algorithm more effective.
+
+### Phase 4: Scoping (Optional section in Week 3)
+
+* **Goal:** Strategically picking the right project and defining its scope to maximize business/application impact.
+* **Key Aspects:**
+    * **Problem-First Approach:** Identify business problems before brainstorming AI solutions.
+    * **Feasibility Assessment:** Evaluate technical viability (HLP, predictive features, project history).
+    * **Value Assessment:** Determine potential ROI.
+    * **Resource Planning:** Budget time, compute, and personnel.
+
+### MLOps (Machine Learning Operations):
+
+* An emerging discipline providing tools and principles to support the entire ML project lifecycle, especially for **data, modeling, and deployment**. It aims to systematically manage and streamline the development and maintenance of ML systems.
+
+This course structure, by starting with deployment, provides a practical lens through which to understand the entire ML project lifecycle, emphasizing the real-world challenges and best practices needed for successful AI applications.
