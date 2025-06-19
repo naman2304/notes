@@ -1455,3 +1455,50 @@ The scoping process aims to answer crucial questions about these ideas:
 * Choosing the most valuable project significantly increases the overall impact of your work, making efficient use of limited resources.
 
 The next video will delve deeper into the scoping process.
+
+## Scoping Machine Learning Projects: Problem vs. Solution
+
+This video outlines a systematic process for scoping ML projects, focusing on identifying business problems before brainstorming AI solutions, assessing feasibility and value, and planning resources. This approach aims to maximize the impact of your work.
+
+### The Scoping Process:
+
+1.  **Identify Business/Application Problems (Divergent Thinking - Problem First):**
+    * **Collaborate:** Get together with a business or product owner (non-AI expert) who understands the business domain.
+    * **Goal:** Brainstorm "what do you wish was working better?" or "what are your top 3 pain points?"
+    * **Focus:** Identify **business problems**, *not* AI problems. (e.g., "increase conversions," "reduce inventory," "increase margin").
+    * **Avoid Premature Solutions:** Resist the urge to immediately suggest AI solutions.
+
+2.  **Brainstorm Possible AI Solutions (Divergent Thinking - Solution Second):**
+    * Only *after* clearly articulating business problems, brainstorm potential AI solutions.
+    * **Example: Business Problem: "Increase Conversion"**
+        * Possible AI Solutions:
+            * Improve website search results (ML for ranking).
+            * Offer better product recommendations (ML recommender systems).
+            * Redesign product display (ML for A/B testing/optimization).
+            * Surface most relevant product reviews (ML for review ranking/summarization).
+    * **Example: Business Problem: "Reduce Inventory"**
+        * Possible AI Solutions:
+            * Build a demand prediction model (ML for forecasting sales).
+            * Develop marketing campaigns for overstocked products (ML for targeted marketing).
+    * **Example: Business Problem: "Increase Margin"**
+        * Possible AI Solutions:
+            * Optimize merchandising (ML to decide what products to sell/promote).
+            * Recommend product bundles (ML for cross-selling).
+
+3.  **Assess Feasibility and Value (Convergent Thinking - Diligence):**
+    * For each potential AI solution, rigorously evaluate its:
+        * **Technical Feasibility:** Can this actually be built with current ML capabilities and available data?
+        * **Value / ROI (Return on Investment):** What is the potential monetary, social, or other positive impact if this project succeeds? Is it worth the effort? (This phase is sometimes called "diligence").
+
+4.  **Flesh out Milestones and Budget Resources:**
+    * For the most promising projects that pass the feasibility and value assessment:
+        * Define clear project milestones.
+        * Budget necessary resources (data, time, people, compute).
+
+### Importance of the Process:
+
+* **Separation of Problem and Solution:** Clearly articulating the problem first (a "design thinking" principle) often leads to more effective and impactful solutions.
+* **Avoid Jumping to Conclusions:** Prevents teams from immediately starting the first exciting project without considering alternatives.
+* **Maximize Impact:** Helps identify projects that can create significantly more value (e.g., 10x more) for the same amount of work, compared to less impactful projects.
+* **Structured Approach:** Moves from brainstorming many possibilities (divergent thinking) to narrowing down to the most promising ones (convergent thinking).
+* **Domain Knowledge:** While valuable, even with deep domain knowledge, it's often beneficial to run through this structured scoping process.
