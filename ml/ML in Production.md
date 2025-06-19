@@ -1196,3 +1196,39 @@ Human-Level Performance (HLP) is a valuable benchmark in machine learning, but i
 * **Focus on Improving HLP Itself:** A more productive approach is to **raise HLP by improving label consistency**. This creates clearer ground truth, which ultimately leads to better performance for the learning algorithm.
 
 The next video will delve deeper into how to raise HLP by improving label consistency.
+
+## Human-Level Performance (HLP) and Label Consistency
+
+This video discusses the nuances of Human-Level Performance (HLP), particularly when the "ground truth" label is itself defined by humans and can be ambiguous. HLP is a useful baseline, but its interpretation must be careful, and improving HLP by ensuring label consistency can directly lead to better model performance.
+
+### HLP: When Ground Truth is Externally Defined
+
+* **Scenario:** The true label is determined by an objective, external process, not human judgment (e.g., a medical diagnosis confirmed by a biopsy).
+* **Usefulness:** In this case, HLP (e.g., a doctor's accuracy in predicting biopsy results) is a very useful estimate of **Bayes error (irreducible error)**. It truly indicates the best possible performance for predicting that objective outcome.
+
+### HLP: When Ground Truth is Human-Defined (Ambiguous)
+
+* **Scenario:** The "ground truth" label is derived from a human annotator's judgment (e.g., one doctor labeling an X-ray, one inspector labeling a defect).
+* **Problem:** HLP in this context measures how well *one human agrees with another human's label* (or how one ML model agrees with one human's label). If labeling instructions are ambiguous, HLP will be significantly less than 100%.
+* **Example (Visual Inspection - Scratch Length):**
+    * Initial HLP: 66.7% due to inconsistent labeling by different inspectors on ambiguous scratch lengths (e.g., 0.2mm vs. 0.4mm).
+    * **Action:** Standardize the definition (e.g., "defect if scratch > 0.3mm").
+    * **Result:** HLP on the *newly defined consistent labels* becomes 100% (at least on those examples), because now both the "ground truth" labeler and the "HLP" labeler agree perfectly based on the clear rule.
+* **The Deception:** Raising HLP to 100% makes it "impossible" for the ML algorithm to "beat HLP" by its prior method (consistently guessing one way in an ambiguous case). However, the crucial benefit is **cleaner, more consistent data**, which ultimately allows the ML algorithm to make genuinely more accurate predictions that generalize better.
+
+### Why Improve HLP (by improving consistency)?:
+
+* When HLP is significantly less than 100% for a human-labeled task, it often signals **ambiguous labeling instructions or conventions**.
+* **Improving label consistency directly raises HLP.**
+* **Even though it makes "beating HLP" harder, more consistent labels lead to a better-performing ML algorithm.** The system learns from a clear signal, not noise from inconsistent human judgment. This benefits the actual application.
+
+### HLP for Structured Data:
+
+* HLP is less frequently used for structured data problems, as humans are not typically experts at interpreting large datasets to make predictions.
+* However, there are exceptions (e.g., User ID merge, predicting fraud, IT security, transportation mode from GPS) where human experts provide the labels. In these cases, the same issues of label ambiguity and the benefit of improving HLP through consistency apply.
+
+### Key Takeaway on HLP:
+
+* **HLP is a useful baseline** for understanding what's possible and driving error analysis/prioritization, especially when humans perform well on the task.
+* **If HLP is far from 100%, investigate label consistency.** This gap might indicate ambiguous labeling instructions.
+* **Improving label consistency (raising HLP) is beneficial:** It provides cleaner data, which improves the ML algorithm's performance, even if it removes a "fake" advantage the algorithm might have had in "beating" inconsistent HLP.
