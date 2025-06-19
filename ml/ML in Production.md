@@ -1289,7 +1289,7 @@ Once data is acquired, how do you get it labeled?
 * **Who Qualifies to Label?** (Application-dependent)
     * **General Tasks (e.g., Speech Recognition):** Almost any fluent speaker can transcribe audio. Large pool of labelers.
     * **Specialized Tasks (e.g., Factory Inspection, Medical Image Diagnosis):** Requires Subject Matter Experts (SMEs). Smaller pool, higher cost.
-* **Implicit Labels:** For some tasks (e.g., product recommendations), direct human labeling is hard. You might rely on implicit labels like user purchase data.
+    * **Implicit Labels:** For some tasks (e.g., product recommendations), direct human labeling is hard. You might rely on implicit labels like user purchase data.
 
 ### 4. How Much More Data? (Scaling Up)
 
