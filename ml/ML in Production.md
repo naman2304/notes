@@ -1299,3 +1299,45 @@ Once data is acquired, how do you get it labeled?
     * **Purpose:** Avoids over-investing in data collection that might not yield predictable returns.
 
 These guidelines help teams make more efficient and informed decisions about data acquisition, a critical component for building successful ML systems. The next video will discuss building data pipelines.
+
+## Data Pipelines: Ensuring Replicability
+
+Data pipelines, or data cascades, involve multiple steps of data processing before the final data is fed to a machine learning algorithm. Managing the replicability of these pipelines is crucial for production systems.
+
+### Example: Job Search Prediction Pipeline
+
+* **Raw Data:** User information.
+* **Preprocessing/Data Cleaning:**
+    * Spam cleanup (remove spam accounts).
+    * User ID merge (identify and combine records for the same user).
+    * *(These steps might be simple scripts or even ML models themselves, adding complexity.)*
+* **Processed Data:** Cleaned, merged user data.
+* **Learning Algorithm:** Predicts if user is looking for a job ($Y$).
+
+### The Replicability Challenge:
+
+* **Development Phase (POC):** During initial development, preprocessing might be messy, involving manual steps, ad-hoc scripts on different machines, and file transfers.
+* **Production Deployment:** When deploying, new incoming raw data must go through the *exact same* preprocessing steps to ensure the input distribution to the ML algorithm remains consistent.
+* **Problem:** If the preprocessing scripts are not highly replicable, the data fed to the production ML model might differ from the data used for development, leading to unexpected performance degradation.
+
+### Investment in Replicability based on Project Phase:
+
+The level of effort put into making preprocessing scripts highly replicable should depend on the project's phase:
+
+1.  **Proof of Concept (POC) Phase:**
+    * **Goal:** Primarily to determine if the application is workable and worth pursuing.
+    * **Recommendation:** Focus on getting the prototype to work quickly. It's okay if some preprocessing is manual or less formal.
+    * **Mitigation:** Take extensive notes and write detailed comments to increase the chances of replicating manual/ad-hoc steps later.
+    * **Avoid:** Don't get bogged down in heavy, formal processes for replicability at this early stage if it delays getting into the iterative loop.
+
+2.  **Production Phase:**
+    * **Goal:** Build and deploy a robust, working system.
+    * **Recommendation:** Replicability becomes extremely important. This is when to invest in more sophisticated tools and practices.
+    * **Tools:** Use dedicated data pipeline tools for ensuring replicability:
+        * TensorFlow Transform (for preprocessing data for TensorFlow models)
+        * Apache Beam (for batch and stream data processing)
+        * Apache Airflow (for scheduling and monitoring workflows)
+
+### Conclusion:
+
+Data pipelines introduce complexity due to preprocessing steps. Ensuring their replicability is vital for consistent model performance from development to production. The level of investment in replicability should align with the project's maturity, being more lenient in the POC phase and becoming rigorous in the production phase. The next video will discuss metadata, data provenance, and lineage in more complex data pipelines.
