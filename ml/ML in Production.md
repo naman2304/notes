@@ -1189,6 +1189,24 @@ Human-Level Performance (HLP) is a valuable benchmark in machine learning, but i
         * **The Deception:** This "12% improvement" is an artifact of the ambiguity, not a true performance gain in a way users would care about. The ML system is just consistently guessing one way in an ambiguous situation, not actually understanding speech better.
         * **Masking Real Errors:** This fake improvement can "mask" or hide real performance problems on other, genuinely difficult, non-ambiguous parts of the data. The model might look good on average but perform worse than humans on critical queries.
 
+#### Scenario 1: Objective Ground Truth
+
+* **Definition:** The true label ($Y_{true}$) is objectively and unambiguously defined by a non-human process (e.g., a medical biopsy, a physics simulation, a verifiable fact).
+* **HLP Role:** HLP ($Y_{human}$ vs. $Y_{true}$) accurately estimates the **Bayes error** (irreducible error), representing the best possible performance.
+* **Algorithm Performance:** If `Algorithm >= HLP`, this is a **significant achievement** because the algorithm is performing at or surpassing the objective human expert level against a clear standard.
+
+#### Scenario 2: Human-Defined Ground Truth
+
+* **Definition:** The "ground truth" label ($Y_{true}$) is established by human judgment, and there may be inherent ambiguity or inconsistency in human interpretations.
+* **HLP Role:** HLP ($Y_{human}$ vs. $Y_{true}$) in this context primarily measures **human-human agreement** or consistency, rather than a true objective performance upper bound. It is **not reliable as an estimate of irreducible error** because the "truth" itself is subject to human variability.
+* **Algorithm Performance:** If `Algorithm >= HLP`, this is **not necessarily a significant achievement** ("Not so WOW").
+    * The algorithm might achieve higher "accuracy" by consistently picking one (arbitrary but acceptable) interpretation in ambiguous cases, which human labelers might vary on. This creates a fake advantage, not genuine superior understanding.
+    * This can also mask or hide true performance problems on other, genuinely difficult, non-ambiguous parts of the data.
+* **Recommended Strategy:**
+    * **Focus on raising HLP** by improving **label consistency**.
+    * Achieve this by having labelers (human annotators and subject matter experts) discuss, agree on, and consistently apply clear labeling conventions for all types of examples, including ambiguous ones.
+    * This process results in **cleaner, more consistent data**, which ultimately allows the ML algorithm to learn better and become more useful in practice, even if it removes the "fake" advantage over the original, inconsistent HLP.
+
 ### Conclusion on HLP Usage:
 
 * **Use HLP for Baseline and Error Analysis Guidance:** It's excellent for estimating what's possible and guiding development priorities.
@@ -1232,3 +1250,52 @@ This video discusses the nuances of Human-Level Performance (HLP), particularly 
 * **HLP is a useful baseline** for understanding what's possible and driving error analysis/prioritization, especially when humans perform well on the task.
 * **If HLP is far from 100%, investigate label consistency.** This gap might indicate ambiguous labeling instructions.
 * **Improving label consistency (raising HLP) is beneficial:** It provides cleaner data, which improves the ML algorithm's performance, even if it removes a "fake" advantage the algorithm might have had in "beating" inconsistent HLP.
+
+## Best Practices for Obtaining Data
+
+Obtaining data is a critical step in the ML project lifecycle. This video offers practical tips on how much time to spend, where to source data, and best practices for labeling.
+
+### 1. Time Investment in Initial Data Collection
+
+* **Guideline:** Get into the iterative ML loop (model training $\rightarrow$ error analysis $\rightarrow$ improvement) as **quickly as possible**.
+* **Avoid Over-Investment Upfront:** Don't spend a disproportionately long time (e.g., 30 days) on initial data collection if training/error analysis only takes a few days. This delays getting crucial feedback.
+* **Recommended:** Aim for a quick initial data collection (e.g., 2-7 days). This encourages creative, "scrappy" ways to get data while maintaining privacy/regulatory compliance.
+* **Exception:** If you have prior experience with the specific problem and *know* a certain minimum dataset size is required, then it's okay to invest more upfront. Otherwise, start small, get feedback, and *then* decide if more data is needed.
+
+### 2. Inventory of Data Sources
+
+* **Brainstorm:** List all potential data sources and evaluate their trade-offs.
+* **Factors to Consider:**
+    * **Cost (Financial):**
+        * Owned/Pre-existing Data (Cost = 0)
+        * Crowdsourcing (e.g., paying people to read text): Often cheaper per hour for simple tasks.
+        * Paying for Labels (e.g., transcribing existing audio): More expensive per hour but yields more natural data.
+        * Commercial Data Vendors: Can sell pre-collected datasets.
+    * **Time Cost:** How long will it take to acquire/prepare the data from each source?
+    * **Data Quality:** (Application-dependent) E.g., naturally spoken audio vs. read text.
+    * **Privacy & Regulatory Constraints:** Crucial for all data sources.
+
+### 3. Options for Data Labeling
+
+Once data is acquired, how do you get it labeled?
+
+* **In-house Labeling:** Your own team labels data.
+    * **Pros:** ML engineers labeling data for a few days can build crucial intuition about the data.
+    * **Cons:** Expensive for large-scale labeling.
+* **Outsourcing:** Hire a specialized company to label data.
+    * **Pros:** Can be efficient for specific data types.
+* **Crowdsourcing:** Use platforms to get a large group of individuals to label data.
+    * **Pros:** Scalable for simple, large-volume tasks.
+* **Who Qualifies to Label?** (Application-dependent)
+    * **General Tasks (e.g., Speech Recognition):** Almost any fluent speaker can transcribe audio. Large pool of labelers.
+    * **Specialized Tasks (e.g., Factory Inspection, Medical Image Diagnosis):** Requires Subject Matter Experts (SMEs). Smaller pool, higher cost.
+* **Implicit Labels:** For some tasks (e.g., product recommendations), direct human labeling is hard. You might rely on implicit labels like user purchase data.
+
+### 4. How Much More Data? (Scaling Up)
+
+* **Guideline:** When you decide to increase dataset size, aim for **not more than a 10x increase at a time**.
+    * If you have 1,000 examples, try scaling to 3,000 or 10,000 first.
+    * **Why?** Too many variables change with very large jumps, making it hard to predict outcomes and debug. Smaller, incremental increases (e.g., 2x, 50%) are also fine.
+    * **Purpose:** Avoids over-investing in data collection that might not yield predictable returns.
+
+These guidelines help teams make more efficient and informed decisions about data acquisition, a critical component for building successful ML systems. The next video will discuss building data pipelines.
