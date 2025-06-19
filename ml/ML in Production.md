@@ -991,3 +991,89 @@ This week will cover best practices for the **data stage** of the ML project lif
 While many ML practitioners start by downloading pre-prepared benchmark datasets, for real-world applications, **the way you prepare your data has a huge impact on project success.** If data is messy or inconsistent, even the best models will struggle.
 
 The next video will delve into more examples of how data can be ambiguous, setting the stage for learning techniques to improve data quality.
+
+## Label Ambiguity and Data Definition Challenges
+
+This video explores further examples of label ambiguity in both unstructured and structured data, and highlights key questions in defining data ($X$ and $Y$) for machine learning projects.
+
+### Label Ambiguity Examples:
+
+1.  **Speech Recognition (Unstructured Data):**
+    * **Audio Example:** Someone asking "Um, nearest gas station" with a car driving past.
+    * **Ambiguities:**
+        * **Filler Words:** "Um" (single 'm' vs. double 'm').
+        * **Punctuation:** Comma vs. ellipsis (`...`).
+        * **Noise/Unintelligible Speech:** Should noise be transcribed as "[noise]" or "[unintelligible]"? Or omitted?
+        * **End of Utterance:** How much trailing noise/silence to include or exclude?
+    * **Problem:** If different human transcribers use different conventions, the labels become inconsistent, confusing the learning algorithm. **Standardizing on one convention is critical.**
+
+2.  **User ID Merge (Structured Data):**
+    * **Problem:** Given two user data records (e.g., from different company databases), determine if they belong to the same physical person ($Y=1$) or not ($Y=0$).
+    * **Ambiguity:** Records might have similar names but different addresses, or slightly different emails for the same person. It's often genuinely ambiguous, and human labelers can be inconsistent.
+    * **Importance:** Consistent labeling, even for ambiguous cases, helps the algorithm learn better.
+    * **Privacy Note:** This must always be done respecting user privacy and consent.
+
+3.  **Other Structured Data Ambiguities:**
+    * **Bot/Spam Accounts:** Is a user account a bot or spam? Sometimes hard to definitively label.
+    * **Fraudulent Transactions:** Is an online purchase fraudulent? Can be ambiguous in edge cases.
+    * **User Intent:** Is a user currently looking for a new job based on website behavior? Often inferable but not 100% certain.
+
+### Key Questions When Defining Data:
+
+To ensure data quality, ask these questions:
+
+1.  **What is the Input $X$? (Input Quality)**
+    * **Sensor/Image/Audio Quality:** Is the quality of the raw input sufficient even for a human to interpret?
+        * **Example:** If defect detection images are too dark to see scratches, the solution might be to improve factory lighting (improve the sensor/input quality) rather than just labeling poor images. If humans can't tell, an algorithm likely can't either.
+    * **Feature Completeness (Structured Data):** For structured problems, are all critical features included?
+        * **Example:** For user ID merge, user location (with consent) can be a very powerful feature to link accounts.
+
+2.  **What is the Target Label $Y$? (Label Consistency)**
+    * **Ambiguity:** As seen in examples, the "true" label can be ambiguous.
+    * **Solution:** Provide **clear, precise, and consistent labeling instructions** to human labelers to minimize noise and randomness in the labels. Even for ambiguous cases, having a consistent rule improves algorithm performance.
+
+The previous videos highlighted ambiguous labels and insufficient input quality. The next video will discuss a systematic framework for addressing these data issues.
+
+## Major Types of Machine Learning Projects: A 2x2 Grid
+
+Machine learning project best practices vary significantly depending on two main axes: **data type (unstructured vs. structured)** and **dataset size (small vs. large)**. Understanding this 2x2 grid helps in organizing data and planning effectively.
+
+### Axis 1: Unstructured Data vs. Structured Data
+
+  * **Unstructured Data:** Images, video, audio, text.
+      * **Characteristics:** Not easily stored in spreadsheets. Humans are exceptionally good at interpreting these.
+      * **Data Augmentation:** Often highly effective (e.g., generating more images or audio variants).
+      * **Example:** Manufacturing visual inspection (image data), Speech recognition (audio data).
+  * **Structured Data:** Tabular data (databases, spreadsheets).
+      * **Characteristics:** Numerical or categorical data organized in rows and columns. Humans are generally *not* as good at processing these directly to make predictions.
+      * **Data Augmentation:** Generally harder to apply (e.g., synthesizing new users or houses is difficult).
+      * **Example:** Housing price prediction, Product recommendations (user/item databases).
+
+### Axis 2: Small Dataset vs. Large Dataset
+
+  * **Threshold:** Roughly 10,000 examples (this is a fuzzy boundary, but beyond 10,000, manual inspection of every example becomes impractical).
+  * **Small Dataset (\< 10,000 examples):**
+      * **Characteristics:** You or a small team can reasonably examine every example.
+      * **Emphasis:** **Clean labels are critical.** A single mislabeled example can represent 1% of a 100-example dataset.
+      * **Labeling Team:** Usually smaller (e.g., 1-2 people). Easier to agree on consistent labeling standards by direct communication.
+  * **Large Dataset (\> 10,000 examples):**
+      * **Characteristics:** Manual examination of every example is infeasible.
+      * **Emphasis:** **Data processes are paramount.** Focus on how data is collected, stored, and labeled by large teams (e.g., crowdsourcing).
+      * **Labeling Team:** Often very large (e.g., 100+ labelers). Establishing consistent labeling definitions and sharing them effectively is crucial as direct real-time agreement might be difficult. Changing labeling conventions becomes much harder after data is collected.
+
+### Summary by Quadrant and Data Acquisition Strategies:
+
+| Quadrant                    | Data Acquisition/Labeling Strategy                                                              |
+| :-------------------------- | :-------------------------------------------------------------------------------------------- |
+| **Unstructured + Small Data** | - Humans can label well. \<br\> - **Data Augmentation** highly effective (e.g., synthesizing images/audio). |
+| **Unstructured + Large Data** | - Humans can label large amounts of unlabeled data efficiently. \<br\> - **Data Augmentation** still very effective. \<br\> - Example: Self-driving car companies with vast amounts of unlabeled video. |
+| **Structured + Small Data** | - Harder to obtain more data (fixed pool of users/items). \<br\> - Human labeling often harder/more ambiguous. \<br\> - Focus shifts to **adding features** to existing examples (as seen in restaurant recommender example). |
+| **Structured + Large Data** | - Hard to obtain truly *new* data. \<br\> - Human labeling can be difficult. \<br\> - Emphasis on robust **data pipelines and processes** for collecting, storing, and labeling existing large datasets. |
+
+### General Principles & Insights:
+
+  * **Quadrant-Specific Advice:** Advice from ML engineers working in the same quadrant is generally more useful than advice from those in different quadrants.
+  * **Hiring:** Candidates with experience in the relevant quadrant often adapt more quickly.
+  * **No One-Size-Fits-All Advice:** Avoid blanket statements like "always get 1,000 labeled examples" for computer vision, as context (data size, problem type) matters. Systems can be built successfully with vastly different data scales.
+
+The next video will delve into why having **clean data is especially important for small data problems**.
