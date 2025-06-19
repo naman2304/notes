@@ -953,3 +953,41 @@ The concept of "good data" ties into various phases of the ML project lifecycle:
 * **Data Definition Phase (Next Week):** Will delve into defining data consistently and unambiguously.
 
 By understanding and implementing practices to achieve "good data" throughout the scoping, data, modeling, and deployment phases, you equip your learning algorithms with the quality inputs needed for effective and reliable production systems.
+
+## Week 3: Data Stage - Defining and Labeling Data
+
+Welcome to the final week, focusing on the **data stage** of the ML project lifecycle. This week delves into how to acquire and prepare data to set your model training up for success.
+
+### Why is Data Definition Hard? (The Challenge of Ambiguity and Inconsistency)
+
+Even with clear instructions, human labelers can interpret them differently, leading to inconsistent labels. This inconsistency is problematic for machine learning algorithms.
+
+* **Example 1: Iguana Detection (Bounding Boxes)**
+    * **Task:** Draw bounding boxes around iguanas in forest pictures.
+    * **Ambiguity:** Different diligent labelers might:
+        * Draw tight boxes around the body.
+        * Draw boxes that include the entire tail, even if it extends far.
+        * Draw very loose, large boxes around the general area.
+    * **Problem:** While any single convention might be fine if consistently applied, a mix of these conventions (e.g., 1/3 of labelers using each method) leads to inconsistent labels, confusing the learning algorithm. An algorithm struggles to learn if the "ground truth" for the same type of object varies wildly.
+
+* **Example 2: Phone Defect Detection (Scratch/Pit Mark)**
+    * **Task:** Use bounding boxes to indicate "significant defects" on a phone.
+    * **Ambiguity:**
+        * Labeler 1: Only marks a large scratch (most obvious).
+        * Labeler 2: Marks both the large scratch AND a smaller "pit mark" (more comprehensive).
+        * Labeler 3: Draws a very large, loose box around both defects.
+    * **Problem:** Similar to the iguana example, inconsistent labeling makes it hard for the model to learn what a "significant defect" truly means. The goal is to establish and enforce *one consistent labeling convention* (e.g., always label all visible defects, use tightest possible bounding boxes).
+
+### Structure of the Week:
+
+This week will cover best practices for the **data stage** of the ML project lifecycle, specifically:
+
+1.  **Define Data:** How to precisely define inputs ($X$) and outputs ($Y$).
+2.  **Establish Baseline:** Setting realistic performance expectations.
+3.  **Label & Organize Data:** Techniques for consistent and high-quality data annotation.
+
+### Importance of Data Quality:
+
+While many ML practitioners start by downloading pre-prepared benchmark datasets, for real-world applications, **the way you prepare your data has a huge impact on project success.** If data is messy or inconsistent, even the best models will struggle.
+
+The next video will delve into more examples of how data can be ambiguous, setting the stage for learning techniques to improve data quality.
