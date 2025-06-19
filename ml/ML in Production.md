@@ -1063,12 +1063,10 @@ Machine learning project best practices vary significantly depending on two main
 
 ### Summary by Quadrant and Data Acquisition Strategies:
 
-| Quadrant                    | Data Acquisition/Labeling Strategy                                                              |
-| :-------------------------- | :-------------------------------------------------------------------------------------------- |
-| **Unstructured + Small Data** | - Humans can label well. \<br\> - **Data Augmentation** highly effective (e.g., synthesizing images/audio). |
-| **Unstructured + Large Data** | - Humans can label large amounts of unlabeled data efficiently. \<br\> - **Data Augmentation** still very effective. \<br\> - Example: Self-driving car companies with vast amounts of unlabeled video. |
-| **Structured + Small Data** | - Harder to obtain more data (fixed pool of users/items). \<br\> - Human labeling often harder/more ambiguous. \<br\> - Focus shifts to **adding features** to existing examples (as seen in restaurant recommender example). |
-| **Structured + Large Data** | - Hard to obtain truly *new* data. \<br\> - Human labeling can be difficult. \<br\> - Emphasis on robust **data pipelines and processes** for collecting, storing, and labeling existing large datasets. |
+| Dataset Size \\ Data Type | **Unstructured Data** (Images, Audio, Text)                                                                                                              | **Structured Data** (Tabular: Databases, Spreadsheets)                                                                                                                  |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Small Dataset** (\< 10k examples) | - Humans label well. \<br\> - **Clean labels critical** (each mislabel is significant % of data). \<br\> - Small labeling team. \<br\> - **Data Augmentation** highly effective (e.g., synthesizing image/audio variants). | - Harder to obtain more data (fixed pool of items/users). \<br\> - **Clean labels critical** (each mislabel is significant % of data). \<br\> - Small labeling team. \<br\> - Human labeling can be harder/more ambiguous. \<br\> - Focus shifts to **adding features** to existing examples. |
+| **Large Dataset** (\> 10k examples) | - Humans label efficiently (can handle tons of unlabeled data). \<br\> - **Data processes paramount** (how data is collected, labeled by large teams). \<br\> - Large labeling teams. \<br\> - **Data Augmentation** still very effective. | - Hard to obtain truly *new* data. \<br\> - **Data processes paramount** (for collecting, storing, labeling). \<br\> - Human labeling can be difficult/ambiguous. \<br\> - Emphasis on robust **data pipelines**. |
 
 ### General Principles & Insights:
 
@@ -1077,3 +1075,36 @@ Machine learning project best practices vary significantly depending on two main
   * **No One-Size-Fits-All Advice:** Avoid blanket statements like "always get 1,000 labeled examples" for computer vision, as context (data size, problem type) matters. Systems can be built successfully with vastly different data scales.
 
 The next video will delve into why having **clean data is especially important for small data problems**.
+
+## Importance of Clean and Consistent Labels for Small Datasets
+
+For small datasets, having **clean and consistent labels** is paramount. Inconsistent labels, even if each individually is a plausible interpretation, act as noise, making it extremely difficult for a learning algorithm to confidently learn the underlying function.
+
+### Example 1: Helicopter Rotor Speed Prediction (Regression)
+
+* **Problem:** Given voltage, predict rotor speed.
+* **Scenario:** A very small dataset (e.g., 5 examples) with noisy or ambiguous labels.
+    * With just 5 points and significant noise, it's very hard to confidently fit a function (e.g., is it linear, flat, or curved?). The algorithm struggles to identify a clear pattern.
+* **Contrast (Large, Noisy Dataset):** If you have a *large* dataset, even with the same level of noise, the algorithm can average over the noise and confidently fit a clear function.
+* **Contrast (Small, Clean Dataset):** If you have a *small* dataset (e.g., 5 examples) but the labels are **clean and consistent** (low noise), you can often fit a function quite confidently and build a good model, even with limited examples.
+    * **Key Takeaway:** For small datasets, label clarity and consistency are more important than sheer volume.
+
+### Example 2: Phone Defect Inspection (Classification)
+
+* **Problem:** Detect defects (e.g., scratches) on smartphones from images.
+* **Ambiguity:** What constitutes a "defect"?
+    * Inspectors might disagree on whether tiny dings are defects, or at what scratch length (e.g., 0.2mm vs 0.4mm) a scratch becomes "significant." This leads to inconsistent labeling in an ambiguous region.
+* **Solution:** Instead of just collecting more data (which is expensive and may perpetuate the inconsistency), **standardize the label definition**.
+    * **Example:** Labelers agree on a clear threshold (e.g., "draw bounding boxes around defects > 0.3mm in length").
+    * **Benefit:** This significantly improves label consistency, making it much easier for the learning algorithm to learn what is and isn't a defect, even with a relatively small dataset.
+
+### Big Data Problems Can Have Small Data Challenges
+
+Even very large datasets often have "small data challenges" in specific areas:
+
+* **Long Tail of Rare Events:**
+    * **Web Search:** While companies have billions of queries, many rare queries (the "long tail") have very little associated data. Ensuring label consistency for these rare queries is crucial.
+    * **Self-Driving Cars:** Datasets are massive (millions of driving hours), but critical rare occurrences (e.g., a child running into the highway, a truck stalled across all lanes) have very few examples. Labeling these rare, high-stakes events consistently is vital for safety.
+    * **Product Recommender Systems:** Large online catalogs have thousands or millions of items, but many "long tail" items have very few sales or user interactions. Consistent data/labels for these rare items are important.
+
+**Conclusion:** Label consistency is paramount for small datasets, as every data point carries more weight. While harder to achieve for very large datasets, it remains highly important for improving performance on rare or "long-tail" phenomena, where even "big data" problems exhibit "small data" characteristics. The next video will discuss best practices for improving label consistency.
