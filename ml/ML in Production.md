@@ -1108,3 +1108,51 @@ Even very large datasets often have "small data challenges" in specific areas:
     * **Product Recommender Systems:** Large online catalogs have thousands or millions of items, but many "long tail" items have very few sales or user interactions. Consistent data/labels for these rare items are important.
 
 **Conclusion:** Label consistency is paramount for small datasets, as every data point carries more weight. While harder to achieve for very large datasets, it remains highly important for improving performance on rare or "long-tail" phenomena, where even "big data" problems exhibit "small data" characteristics. The next video will discuss best practices for improving label consistency.
+
+## Improving Label Consistency
+
+Inconsistent labels confuse learning algorithms, especially for small datasets. This video outlines a general process and specific techniques to improve label consistency.
+
+### General Process to Improve Consistency:
+
+1.  **Detect Disagreements:**
+    * Have **multiple labelers** label the same set of examples.
+    * For critical cases, have the **same labeler re-label** examples after a "washout" period (enough time to forget their previous label).
+2.  **Drive to Agreement:**
+    * Facilitate discussions among labelers, ML engineers, and subject matter experts (SMEs).
+    * **Goal:** Reach a consensus on a more consistent definition of the label ($Y$).
+    * **Document:** Write down the agreed-upon, updated labeling instructions.
+3.  **Address Insufficient Input ($X$):**
+    * If labelers agree that the input $X$ doesn't provide enough information to make a consistent label (e.g., image is too dark), consider improving the input data collection (e.g., better lighting, higher-resolution sensors).
+4.  **Iterate:**
+    * Apply the updated instructions to label more data (or relabel old data).
+    * If inconsistencies persist, repeat the process.
+
+### Specific Techniques to Enhance Label Consistency:
+
+1.  **Standardize Label Definitions:**
+    * **Problem:** Ambiguity in interpretation (e.g., "umm" vs. "um", comma vs. ellipsis in speech transcription).
+    * **Solution:** Explicitly choose and enforce a single, clear convention for such ambiguities in labeling guidelines.
+
+2.  **Merge Classes:**
+    * **Problem:** Overly fine-grained distinctions are hard to consistently label (e.g., "deep scratch" vs. "shallow scratch" on a phone).
+    * **Solution:** If the distinction isn't strictly necessary for the application, merge ambiguous classes into a single broader class (e.g., both become "scratch"). This simplifies the task for labelers and the algorithm. (Not always applicable if the distinction is crucial for downstream processes).
+
+3.  **Create a New Class for Uncertainty/Ambiguity:**
+    * **Problem:** Some examples are genuinely ambiguous even for humans (e.g., a scratch of borderline length; unintelligible speech). Forcing a label leads to inconsistent guesses.
+    * **Solution:** Create a **new "borderline" or "unintelligible" class** (e.g., "clearly not a defect," "clearly a defect," "borderline defect"). This allows labelers to consistently mark truly ambiguous examples, leading to higher overall consistency.
+
+### Working with Dataset Size for Consistency:
+
+* **Small Datasets (few labelers):**
+    * Easier to achieve consistency through direct discussion and agreement among the small labeling team.
+* **Big Datasets (many labelers):**
+    * Harder to get all labelers in a room.
+    * Strategy: A small, core group defines the consistent labeling standard, then propagates detailed instructions to the larger labeling team.
+    * **Consensus Labeling (Voting):** Having multiple labelers label every example and then taking a vote (e.g., majority vote) can increase accuracy and consistency *after* the fact. However, this is often overused. Prioritize making individual labels less noisy through clear definitions *before* relying heavily on voting.
+
+### MLOps and Label Quality:
+
+There's a growing need for MLOps tools to help teams systematically detect and address label inconsistencies and improve data quality throughout the ML lifecycle.
+
+Improving label consistency is critical for getting better data. The next video will discuss Human Level Performance (HLP) as an important concept in evaluating label quality.
