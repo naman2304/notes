@@ -1507,62 +1507,48 @@ This video outlines a systematic process for scoping ML projects, focusing on id
 
 Before committing significant resources to an ML project, it's crucial to assess its **technical feasibility**. This involves determining if the project can even be built.
 
-### Framework for Feasibility Assessment (2x2 Matrix):
+### External Benchmarks
 
-We categorize projects based on data type and whether it's a new or existing capability:
+One quick way to gauge feasibility is to look at **external benchmarks** from research literature, publications, or similar systems built by other companies/competitors. If something similar has been achieved (e.g., an online search, recommendation, or inventory management system), it increases confidence in feasibility.
 
-## Machine Learning Project Lifecycle Overview (Phase-wise Approach)
+### Feasibility Matrix (New vs. Existing Capability and Unstructured vs. Structured Data):
 
-This course outlines the full machine learning project lifecycle, starting from deployment and working backward to modeling, data, and finally scoping. This approach emphasizes practical deployment considerations from the outset.
+This framework helps organize the assessment based on the project's nature:
 
-### Phase 1: Deployment (Covered in earlier videos this week)
+* **New Project:** Building a system for a task for the first time.
+* **Existing Project:** Improving an existing system (which may or may not use ML).
+* **Unstructured Data:** Data like speech or images.
+* **Structured Data:** Data like transaction records.
 
-* **Focus:** Getting the model into production and ensuring its operational health.
-* **Key Aspects:**
-    * **Real-time vs. Batch Prediction:** Deciding response time needs.
-    * **Deployment Environment:** Cloud, edge, or web browser.
-    * **Compute/Memory Constraints:** Optimizing model size and efficiency.
-    * **Latency/Throughput (QPS):** Meeting performance targets under load.
-    * **Logging:** Capturing input/output data for monitoring and future analysis.
-    * **Security & Privacy:** Ensuring data protection.
-    * **Monitoring & Maintenance:** Tracking performance over time, detecting data/concept drift, and ensuring model updates.
+#### Unstructured Data (Images, Audio):
 
-### Phase 2: Modeling (Focus of this week's videos)
+* **New Projects (Unstructured Data):**
+    * **Human-Level Performance (HLP) is very useful.** Give a human the *exact same data* that the learning algorithm would receive and ask if they can perform the task reliably.
+        * **Example:** For a self-driving car classifying traffic lights, show a human only the camera image. If a human can't tell which lamp is illuminated from a blurry image, an algorithm likely can't either with the current camera setup. This indicates a need to improve data quality (e.g., better camera or lighting) rather than just the ML algorithm.
+        * If a human can do it, there's hope an ML algorithm can.
+* **Existing Projects (Unstructured Data):**
+    * Use HLP as a reference: If you hope to reach a certain performance level, check if humans can achieve it.
+    * **Project History:** The previous rate of progress on an existing project can predict future progress.
 
-* **Goal:** Building a production-ready machine learning model efficiently.
-* **Key Theme: Data-Centric AI Development:**
-    * Shift from a "model-centric" view (fixed data, optimize code) to a "data-centric" view (fixed code, optimize data).
-    * For many practical problems, **improving data quality and consistency** is more efficient than just tweaking model architecture.
-* **Iterative Development Loop:**
-    1.  Start with initial model, hyperparameters, and data.
-    2.  Train the model.
-    3.  Perform **error analysis**: Identify specific types of mistakes and their causes.
-    4.  Iteratively improve the model, data, or hyperparameters based on diagnostics.
-    5.  Conduct a **final audit** before deployment to ensure performance and reliability.
+#### Structured Data (Transaction Records, Tabular):
 
-### Phase 3: Data (Next week's focus)
+* **New Projects (Structured Data):**
+    * **Are predictive features available?** Do you have input features ($X$) that are strongly or sufficiently predictive of the target output ($Y$)?
+        * **Examples:**
+            * **E-commerce (past purchases to predict future purchases):** Plausible. Past purchases are generally predictive.
+            * **Retail (weather data to predict foot traffic):** Plausible. Rain often reduces foot traffic.
+            * **Individual DNA to predict heart disease:** Questionable feasibility. Biology suggests this mapping is very noisy.
+            * **Social media chatter to predict clothing style demand 6 months out:** Very difficult. Predictiveness is likely low.
+            * **Stock price history to predict future price:** Extremely difficult; evidence suggests not predictive alone.
+            * **Insight:** If features are not predictive, the project is unlikely to succeed beyond random guessing.
+* **Existing Projects (Structured Data):**
+    * **Identify new predictive features:** Look for features not yet used that could significantly improve prediction.
+    * **Project History:** Similar to unstructured data, the past rate of progress is a good indicator of future progress.
 
-* **Goal:** Obtaining high-quality data that sets up modeling for success.
-* **Key Aspects:**
-    * **Data Definition:** Precisely defining inputs ($X$) and outputs ($Y$).
-    * **Label Consistency:** Addressing ambiguity in labels (e.g., standardizing conventions, merging classes, adding "unintelligible" tags).
-    * **Input Quality:** Ensuring $X$ is sufficiently informative (e.g., good lighting for images).
-    * **Data Acquisition:** Strategies for collecting or creating data (e.g., targeted collection, data augmentation, data synthesis).
-    * **Data Pipelines:** Ensuring replicability of preprocessing steps, tracking metadata, provenance, and lineage.
-    * **Balanced Splits:** Creating representative train/dev/test sets, especially for small, skewed datasets.
-    * **Human-Level Performance (HLP):** Using HLP to establish baselines, prioritize efforts, and diagnose label consistency issues. Raising HLP through consistency makes the ML algorithm more effective.
+### Key Concepts for Feasibility:
 
-### Phase 4: Scoping (Optional section in Week 3)
+1.  **Human-Level Performance (HLP):** Especially crucial for unstructured data. Benchmark what humans can do with the *exact same data* the algorithm gets. This helps identify if the problem is even solvable with the current data quality/sensors.
+2.  **Predictive Features Availability:** For structured data, assess whether the available input features ($X$) are genuinely predictive of the target ($Y$).
+3.  **Project History:** For existing projects, the past rate of improvement can be a good predictor of the future rate of improvement, allowing for more realistic projections of feasibility.
 
-* **Goal:** Strategically picking the right project and defining its scope to maximize business/application impact.
-* **Key Aspects:**
-    * **Problem-First Approach:** Identify business problems before brainstorming AI solutions.
-    * **Feasibility Assessment:** Evaluate technical viability (HLP, predictive features, project history).
-    * **Value Assessment:** Determine potential ROI.
-    * **Resource Planning:** Budget time, compute, and personnel.
-
-### MLOps (Machine Learning Operations):
-
-* An emerging discipline providing tools and principles to support the entire ML project lifecycle, especially for **data, modeling, and deployment**. It aims to systematically manage and streamline the development and maintenance of ML systems.
-
-This course structure, by starting with deployment, provides a practical lens through which to understand the entire ML project lifecycle, emphasizing the real-world challenges and best practices needed for successful AI applications.
+This structured diligence process helps make informed decisions about technical feasibility before substantial resources are invested. The next video will delve into assessing the value of an ML project.
