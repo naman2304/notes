@@ -1156,3 +1156,43 @@ Inconsistent labels confuse learning algorithms, especially for small datasets. 
 There's a growing need for MLOps tools to help teams systematically detect and address label inconsistencies and improve data quality throughout the ML lifecycle.
 
 Improving label consistency is critical for getting better data. The next video will discuss Human Level Performance (HLP) as an important concept in evaluating label quality.
+
+## Human-Level Performance (HLP): Use Cases and Misuses
+
+Human-Level Performance (HLP) is a valuable benchmark in machine learning, but it also has specific use cases and common misuses, particularly when the ground truth itself is ambiguous.
+
+### Key Uses of HLP:
+
+1.  **Estimating Bayes Error (Irreducible Error):**
+    * **Purpose:** For unstructured data tasks (images, audio, text), HLP serves as an estimate of the "best possible" performance, or Bayes error. It helps understand if an error gap is due to model limitations or inherent ambiguity/noise in the data.
+    * **Example:** If a business owner demands 99% accuracy for visual inspection, but HLP on the task is 66.7% (due to inherent ambiguity in defect definition), HLP provides a realistic target and justification for why 99% is unattainable.
+    * **Impact:** Guides error analysis and prioritization by highlighting areas where improvement is genuinely possible.
+
+2.  **Academic Benchmarking:**
+    * **Purpose:** In academia, showing an algorithm can "beat HLP" has been a significant achievement for publishing research papers, demonstrating the academic significance of a new algorithm.
+
+3.  **Setting Realistic Targets:**
+    * HLP helps set more reasonable performance targets for ML projects, especially when initial expectations might be overly optimistic.
+
+### Misuses and Cautions with HLP:
+
+1.  **Proving ML Superiority over Humans (Practical Caution):**
+    * **Problem:** It's tempting to use "beating HLP" as definitive proof that an ML system is "superior" and *must* be deployed. This logic often fails in practice because:
+        * **Business Needs Go Beyond Average Accuracy:** Production systems require more than just high average accuracy (e.g., performance on critical slices, specific error types).
+        * **Ambiguous Ground Truth:** The biggest flaw when the "ground truth" label itself is determined by humans and is ambiguous.
+
+2.  **The Ambiguous Ground Truth Problem:**
+    * **Scenario:** When labeling instructions are inconsistent or the data is genuinely ambiguous, different human labelers will produce different "correct" labels.
+    * **Example (Speech Recognition):** For "Um, nearest gas station," if 70% of labelers choose "Um," and 30% choose "umm," but both are equally valid:
+        * **Human-Human Agreement:** The chance of two *random* human labelers agreeing is only $0.7^2 + 0.3^2 = 0.49 + 0.09 = 0.58$ (58%). This is what HLP would measure if derived from human-human agreement.
+        * **ML's "Unfair Advantage":** An ML algorithm, by consistently picking *one* of the valid conventions (e.g., always picking "Um," which is 70% frequent), can achieve 70% agreement with humans. This makes it seem like the ML model is 12% better ($70\% - 58\% = 12\%$) than HLP.
+        * **The Deception:** This "12% improvement" is an artifact of the ambiguity, not a true performance gain in a way users would care about. The ML system is just consistently guessing one way in an ambiguous situation, not actually understanding speech better.
+        * **Masking Real Errors:** This fake improvement can "mask" or hide real performance problems on other, genuinely difficult, non-ambiguous parts of the data. The model might look good on average but perform worse than humans on critical queries.
+
+### Conclusion on HLP Usage:
+
+* **Use HLP for Baseline and Error Analysis Guidance:** It's excellent for estimating what's possible and guiding development priorities.
+* **Be Cautious of "Beating HLP" as Sole Proof of Superiority:** When the ground truth is ambiguous, "beating HLP" might be a fake gain. Prioritize building a *useful application* over just proving mathematical superiority.
+* **Focus on Improving HLP Itself:** A more productive approach is to **raise HLP by improving label consistency**. This creates clearer ground truth, which ultimately leads to better performance for the learning algorithm.
+
+The next video will delve deeper into how to raise HLP by improving label consistency.
