@@ -1430,3 +1430,28 @@ When working with **small datasets**, especially those with **skewed class distr
 **In summary:** For small datasets, especially those with skewed classes, investing a little effort to create a balanced train/dev/test split can significantly improve the reliability of your evaluation metrics and make your model development process more efficient.
 
 This concludes the data section of the course. The final optional section will cover project scoping.
+
+## Scoping Machine Learning Projects: Picking the Right Problem
+
+Picking the right project is a rare but highly valuable skill in AI. This optional section focuses on **scoping**: how to select and plan ML projects to maximize their impact. Instead of just jumping into an exciting idea, it's worthwhile to strategically choose the most promising project before investing significant time and resources.
+
+### The Scoping Process: Key Questions
+
+Using the example of an e-commerce retailer aiming to increase sales, initial brainstorming might generate dozens of ideas:
+* Better product recommendation system.
+* Improved search functionality.
+* Enhancing catalog data quality (e.g., filling missing fields).
+* Optimizing inventory management (e.g., deciding purchase quantities, shipping locations).
+* Price optimization strategies.
+
+The scoping process aims to answer crucial questions about these ideas:
+1.  **What project(s) should we work on?** (Which ideas are most promising?)
+2.  **What are the metrics for success?** (How will we measure impact?)
+3.  **What resources are needed?** (Data, time, personnel, compute, budget?)
+
+### Importance of Strategic Project Selection:
+
+* Not all ML projects are equally valuable. Some ideas can be 2x, 5x, or even 10x more impactful than others.
+* Choosing the most valuable project significantly increases the overall impact of your work, making efficient use of limited resources.
+
+The next video will delve deeper into the scoping process.
