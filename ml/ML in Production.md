@@ -1397,3 +1397,36 @@ For large, complex ML systems that need to be maintained:
 * **Data provenance and lineage** are vital for understanding data flow and ensuring replicability when changes occur.
 * **Metadata** is a powerful tool to enable precise error analysis, identify unexpected performance patterns, and support provenance tracking.
 * Proactively collecting and organizing metadata can significantly ease system maintenance and improvement. The next video will discuss balanced train/dev/test splits.
+
+## Balanced Train/Dev/Test Splits for Small Datasets
+
+When working with **small datasets**, especially those with **skewed class distributions** (e.g., few positive examples), a simple random split into train, dev, and test sets can lead to non-representative subsets. This can make the dev/test sets unreliable indicators of your algorithm's true performance. Using **balanced splits** can significantly improve the development process.
+
+### The Problem with Random Splits on Small, Skewed Datasets:
+
+* **Example:** Manufacturing visual inspection.
+    * Total dataset: 100 images (30 positive/defective, 70 negative/non-defective).
+    * Split: 60% train (60 images), 20% dev (20 images), 20% test (20 images).
+* **Random Split Outcome:** By chance, you might get:
+    * Train: 21 positive (35% positive)
+    * Dev: 2 positive (10% positive)
+    * Test: 7 positive (35% positive)
+* **Issue:** The overall dataset is 30% positive, but the dev set is only 10% positive. This makes the dev set **non-representative** of the true data distribution. If your dev set is not representative, metrics calculated on it may not accurately reflect how your model will perform on real-world data, making it hard to make good decisions during development.
+
+### The Solution: Balanced Splits
+
+* **Concept:** Explicitly ensure that the **proportion of positive and negative examples** (or the class distribution) is **approximately the same** across the training, development, and test sets as it is in the overall dataset.
+* **Desired Outcome for Example:**
+    * Train: 18 positive (30%)
+    * Dev: 6 positive (30%)
+    * Test: 6 positive (30%)
+* **Benefit:** This makes your dev and test sets more **reliable and consistent measures** of your learning algorithm's performance, as they accurately reflect the real-world class distribution.
+
+### When to Use Balanced Splits:
+
+* **Small Datasets:** Crucial when the number of examples in your dev/test sets is small (e.g., 20 examples for a dev set, where 2 positive examples make up a large percentage difference).
+* **Large Datasets:** Less critical. With very large datasets (e.g., thousands or millions of examples in dev/test sets), a random split is highly likely to be representative by chance, so explicit balancing is usually not necessary.
+
+**In summary:** For small datasets, especially those with skewed classes, investing a little effort to create a balanced train/dev/test split can significantly improve the reliability of your evaluation metrics and make your model development process more efficient.
+
+This concludes the data section of the course. The final optional section will cover project scoping.
