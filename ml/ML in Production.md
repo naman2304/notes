@@ -1348,6 +1348,8 @@ For complex machine learning systems, particularly those with multi-step data pi
 
 ### Example: Job Search Prediction Pipeline
 
+<img src="/metadata/data_pipeline.png" width="700" />
+
 Consider a pipeline to predict if a user is looking for a job:
 1.  **Anti-Spam Model:** Trained on `Spam Dataset` (e.g., blacklisted IPs) to produce `Anti-Spam Model`.
 2.  **De-spammed User Data:** `Anti-Spam Model` applied to `Raw User Data`.
