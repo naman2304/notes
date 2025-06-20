@@ -541,13 +541,13 @@ The core idea is to turn the Bellman equation into a supervised learning problem
 
 1.  **Initialize Q-Network:** Randomly initialize the neural network's parameters. This is your initial (random) guess for the Q-function.
 2.  **Repeat (for many iterations):**
-    a.  **Explore/Act:** Take actions in the environment (e.g., Lunar Lander simulator). Initially, actions might be random. Over time, they might be chosen based on the current Q-network (exploiting).
-    b.  **Store Experience:** Save the $(S, A, R(S), S')$ tuples to the replay buffer.
-    c.  **Sample and Train:** Periodically (e.g., every few steps or epochs):
+    *  **Explore/Act:** Take actions in the environment (e.g., Lunar Lander simulator). Initially, actions might be random. Over time, they might be chosen based on the current Q-network (exploiting).
+    *  **Store Experience:** Save the $(S, A, R(S), S')$ tuples to the replay buffer.
+    *  **Sample and Train:** Periodically (e.g., every few steps or epochs):
         * Sample a batch of tuples from the replay buffer.
         * For each tuple, calculate the target $Y$ using the Bellman equation and the *current* Q-network's estimate for $Q(S', A')$.
         * Train the Q-network (using supervised learning) to predict these $(X, Y)$ pairs.
-    d.  **Update Q-Network:** The newly trained network becomes the "current" Q-network for the next iteration of experience collection and target calculation.
+    *  **Update Q-Network:** The newly trained network becomes the "current" Q-network for the next iteration of experience collection and target calculation.
 
 * **Convergence:** By iteratively improving the Q-function's estimate using the Bellman equation, the Q-network gradually converges to a good approximation of the true $Q(s,a)$, allowing the agent to learn optimal behavior.
 * **DQN (Deep Q-Network):** This algorithm is called DQN because it uses "deep learning" (neural networks) to learn the "Q-function."
