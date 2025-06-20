@@ -73,15 +73,15 @@ At every time step, the agent (rover) is in some state $S$.
 <img src="/metadata/mars_rover.png" width="500" />
 
 * **Path 1: Start $S_4$, Go Left (optimal choice)**
-    * $S_4 \xrightarrow{\text{Left, R=0}} S_3 \xrightarrow{\text{Left, R=0}} S_2 \xrightarrow{\text{Left, R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * $S_4 \xrightarrow{\text{L, R=0}} S_3 \xrightarrow{\text{L, R=0}} S_2 \xrightarrow{\text{L, R=0}} S_1 \xrightarrow{\text{T, R=100}}$
     * Rewards obtained: $0, 0, 0, 100$
 
 * **Path 2: Start $S_4$, Go Right**
-    * $S_4 \xrightarrow{\text{Right, R=0}} S_5 \xrightarrow{\text{Right, R=0}} S_6 \xrightarrow{\text{Terminal, R=40}}$
+    * $S_4 \xrightarrow{\text{R, R=0}} S_5 \xrightarrow{\text{R, R=0}} S_6 \xrightarrow{\text{T, R=40}}$
     * Rewards obtained: $0, 0, 40$
 
 * **Path 3: Start $S_4$, Go Right, then Left (suboptimal)**
-    * $S_4 \xrightarrow{\text{Right, R=0}} S_5 \xrightarrow{\text{Left, R=0}} S_4 \xrightarrow{\text{Left, R=0}} S_3 \xrightarrow{\text{Left, R=0}} S_2 \xrightarrow{\text{Left, R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * $S_4 \xrightarrow{\text{R, R=0}} S_5 \xrightarrow{\text{L, R=0}} S_4 \xrightarrow{\text{L, R=0}} S_3 \xrightarrow{\text{L, R=0}} S_2 \xrightarrow{\text{L, R=0}} S_1 \xrightarrow{\text{T, R=100}}$
     * Rewards obtained: $0, 0, 0, 0, 0, 100$ (This path wastes time, but eventually reaches the high reward).
 
 ### Reinforcement Learning Goal:
