@@ -165,3 +165,40 @@ Different rules for choosing actions based on the rover's state are different po
 * **Policy ($\pi$):** The function that dictates the agent's behavior, mapping states to actions.
 
 The next video will provide a quick review of these concepts before moving on to algorithms for finding optimal policies.
+
+## Reinforcement Learning Formalism: Review and Generalization
+
+This video reviews the core concepts of Reinforcement Learning (RL) using the Mars Rover example and generalizes them to other applications, introducing the formal term **Markov Decision Process (MDP)**.
+
+### Core RL Concepts (Review):
+
+* **State ($S$):** The complete description of the environment at a given time. (e.g., Rover's position, Helicopter's position/orientation/speed, Chess board configuration).
+* **Action ($A$):** The choice an agent makes in a given state. (e.g., Go Left/Right, Move control sticks, Legal chess move).
+* **Reward ($R(S)$):** Immediate feedback from the environment associated with a state. (e.g., 100 at State 1 for Mars Rover, +1 for winning a chess game, -1000 for a helicopter crash).
+* **Discount Factor ($\gamma$ - Gamma):** A value between 0 and 1 (e.g., 0.5, 0.99) that discounts future rewards, making the agent "impatient" for sooner rewards.
+* **Return ($G$):** The total discounted sum of future rewards received from a given state onwards: $G = R_1 + \gamma R_2 + \gamma^2 R_3 + \dots$.
+* **Policy ($\pi$):** A function that maps a state ($S$) to an action ($A$), dictating the agent's behavior ($\pi(S) = A$). The goal of RL is to find the optimal policy.
+
+### Generalization to Other Applications:
+
+| Concept         | Mars Rover Example                                | Autonomous Helicopter                               | Chess Game Playing                                 |
+| :-------------- | :------------------------------------------------ | :-------------------------------------------------- | :------------------------------------------------- |
+| **State ($S$)** | 6 discrete positions                             | Position, orientation, speed                        | Position of all pieces on the board                |
+| **Action ($A$)** | Go Left, Go Right                                | Move control sticks                                 | Possible legal moves                               |
+| **Rewards ($R(S)$)** | 100 (State 1), 40 (State 6), 0 (others)         | +1 (flying well), -1000 (crash)                   | +1 (win), -1 (lose), 0 (tie)                       |
+| **Discount Factor ($\gamma$)** | 0.5                                            | 0.99 (common)                                       | 0.99, 0.995, 0.999 (very close to 1)               |
+| **Return ($G$)** | Sum of $\gamma^t R_t$                             | Sum of $\gamma^t R_t$                               | Sum of $\gamma^t R_t$                              |
+| **Policy ($\pi$)** | $\pi(S)$ maps state to Left/Right              | $\pi(S)$ maps position to control stick movements | $\pi(S)$ maps board position to next legal move    |
+
+### Markov Decision Process (MDP):
+
+* The formalism encompassing states, actions, rewards, return, and policy is called a **Markov Decision Process (MDP)**.
+* **"Markov" Property:** The future depends *only* on the current state and *not* on the sequence of events that led to that state ("the future depends only on where you are now, not on how you got here").
+* **Agent-Environment Loop:**
+    * Agent (Robot/Controller) is in State $S$.
+    * Agent chooses Action $A$ (based on Policy $\pi$).
+    * Environment reacts: Agent transitions to new State $S'$.
+    * Agent receives Reward $R(S')$.
+    * Loop continues.
+
+The next step in developing an RL algorithm is to define and learn the **state-action value function**, a key quantity for finding optimal policies.
