@@ -490,3 +490,66 @@ The reward function incentivizes desired behaviors and penalizes undesired ones:
 * **Maximize Return:** This policy should maximize the sum of discounted rewards (return), typically using a high discount factor (e.g., $\gamma = 0.985$) to value future rewards significantly.
 
 This problem is a quintessential example of a continuous state RL application, which you will implement using deep learning in the practice lab. The next video will introduce Deep Reinforcement Learning.
+
+## Deep Reinforcement Learning: The DQN Algorithm
+
+This video introduces how to use a neural network to approximate the state-action value function, $Q(s,a)$, which is central to solving Reinforcement Learning problems like controlling the Lunar Lander. This approach is called **Deep Q-Network (DQN)**.
+
+### Approximating the Q-Function with a Neural Network:
+
+* **Input ($X$):** The neural network takes the combined **state ($s$) and action ($a$)** as input.
+    * For Lunar Lander: State ($s$) is an 8-number vector (position, velocity, angle, angular velocity, leg grounded status).
+    * Action ($a$) is a 4-number one-hot encoded vector (representing "nothing", "left", "main", "right" thruster).
+    * Thus, the input $X$ to the neural network is a 12-number vector (8 state + 4 action).
+* **Neural Network Architecture:** A typical setup might be a neural network with 64 units in the first hidden layer, 64 units in the second hidden layer, and a single output unit in the output layer.
+* **Output ($Y$):** The neural network's output is the predicted $Q(s,a)$ value for the given state-action pair.
+
+### Using the Trained Q-Network for Policy:
+
+Once the neural network (Q-network) is trained to approximate $Q(s,a)$:
+
+1.  When the Lunar Lander is in a given state $s$:
+2.  Compute $Q(s,a)$ for *all* possible actions $a$ (e.g., $Q(s, \text{nothing}), Q(s, \text{left}), Q(s, \text{main}), Q(s, \text{right})$) by feeding each $(s, \text{one-hot}(a))$ pair into the neural network.
+3.  Choose the action $a$ that yields the **highest $Q(s,a)$ value**. This action is the optimal action for that state according to the current Q-network.
+
+### Training the Q-Network (Bellman Equation as Supervised Learning):
+
+The core idea is to turn the Bellman equation into a supervised learning problem to train the neural network.
+
+* **Bellman Equation:** $Q(S,A) = R(S) + \gamma \max_{A'} Q(S', A')$
+* **Supervised Learning Setup:**
+    * **Input ($X$):** The current state-action pair $(S,A)$.
+    * **Target ($Y$):** The value on the right-hand side of the Bellman equation, which is $R(S) + \gamma \max_{A'} Q(S', A')$.
+    * **Loss Function:** Typically, **mean squared error** (MSE) is used to minimize the difference between the neural network's prediction $Q(S,A)$ and the target $Y$.
+
+### Data for Training the Q-Network:
+
+1.  **Experience Collection:**
+    * The Lunar Lander (or agent) interacts with the environment (initially by taking random actions, or actions based on a current, imperfect policy).
+    * For each step, record the tuple $(S, A, R(S), S')$, representing: (current state, action taken, reward received, next state).
+    * Store the most recent experiences in a **replay buffer** (e.g., 10,000 most recent tuples) to manage memory.
+
+2.  **Creating Training Examples (X, Y pairs):**
+    * For each tuple $(S, A, R(S), S')$ from the replay buffer:
+        * **Input $X$ for the Neural Network:** Combine $S$ and $A$ into the 12-number input vector.
+        * **Target $Y$ for Supervised Learning:** Calculate $Y = R(S) + \gamma \max_{A'} Q_{\text{current}}(S', A')$.
+            * **Crucial:** The $Q_{\text{current}}(S', A')$ value is obtained from the *current* (or a recent snapshot of the) Q-network itself. This is what makes the process iterative.
+
+3.  **Train the Neural Network:** Use these $(X, Y)$ pairs to train the neural network via supervised learning (e.g., gradient descent with MSE loss). The newly trained network, let's call it $Q_{\text{new}}$, should be a slightly better approximation of the true Q-function.
+
+### The DQN Algorithm Loop:
+
+1.  **Initialize Q-Network:** Randomly initialize the neural network's parameters. This is your initial (random) guess for the Q-function.
+2.  **Repeat (for many iterations):**
+    a.  **Explore/Act:** Take actions in the environment (e.g., Lunar Lander simulator). Initially, actions might be random. Over time, they might be chosen based on the current Q-network (exploiting).
+    b.  **Store Experience:** Save the $(S, A, R(S), S')$ tuples to the replay buffer.
+    c.  **Sample and Train:** Periodically (e.g., every few steps or epochs):
+        * Sample a batch of tuples from the replay buffer.
+        * For each tuple, calculate the target $Y$ using the Bellman equation and the *current* Q-network's estimate for $Q(S', A')$.
+        * Train the Q-network (using supervised learning) to predict these $(X, Y)$ pairs.
+    d.  **Update Q-Network:** The newly trained network becomes the "current" Q-network for the next iteration of experience collection and target calculation.
+
+* **Convergence:** By iteratively improving the Q-function's estimate using the Bellman equation, the Q-network gradually converges to a good approximation of the true $Q(s,a)$, allowing the agent to learn optimal behavior.
+* **DQN (Deep Q-Network):** This algorithm is called DQN because it uses "deep learning" (neural networks) to learn the "Q-function."
+
+While this basic DQN works, refinements are needed for better performance. The next videos will cover these refinements.
