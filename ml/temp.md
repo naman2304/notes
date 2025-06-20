@@ -65,7 +65,7 @@ At every time step, the agent (rover) is in some state $S$.
 
 1.  **Observe State ($S$):** The rover perceives its current location.
 2.  **Choose Action ($A$):** The rover selects an action (Left or Right).
-3.  **Receive Reward ($R(S)$):** The rover receives the reward associated with the state it *just left* (or sometimes, the state it *just arrived at*, but here, it's defined as the reward *at* the state $S$).
+3.  **Receive Reward** ($R(S)$): The rover receives the reward associated with the state it *just left* (or sometimes, the state it *just arrived at*, but here, it's defined as the reward *at* the state $S$).
 4.  **Transition to New State ($S'$):** As a result of the action, the rover moves to a new state $S'$.
 
 ### Example Sequences of States, Actions, and Rewards:
