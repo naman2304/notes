@@ -298,3 +298,59 @@ By playing with the reward function and the discount factor $\gamma$, you can ob
 * How the optimal policy adapts to prioritize either larger, distant rewards (higher $\gamma$) or smaller, immediate rewards (lower $\gamma$).
 
 This hands-on exploration will strengthen your intuition about the fundamental trade-offs and decision-making processes in Reinforcement Learning. After completing the lab, you will be ready to discuss the **Bellman Equation**, a central concept in RL.
+
+## Reinforcement Learning: The Bellman Equation
+
+The **Bellman Equation** is a fundamental equation in Reinforcement Learning that allows us to compute the state-action value function, $Q(s,a)$. It breaks down the total return into an immediate reward and the discounted future optimal return from the next state.
+
+### Notation:
+
+* $S$: Current state
+* $A$: Current action taken from state $S$
+* $R(S)$: Reward received for being in state $S$
+* $S'$: Next state reached after taking action $A$ from state $S$
+* $A'$: Action taken from the next state $S'$
+* $\gamma$ (Gamma): Discount factor (e.g., 0.5)
+
+### The Bellman Equation:
+
+The core Bellman equation states:
+$$Q(S,A) = R(S) + \gamma \max_{A'} Q(S', A')$$
+
+* **Intuition:**
+    * $Q(S,A)$ is the total return if you start in state $S$, take action $A$, and then act optimally thereafter.
+    * This total return can be decomposed into two parts:
+        1.  **Immediate Reward:** $R(S)$ – The reward you get right away for being in state $S$.
+        2.  **Discounted Future Optimal Return:** $\gamma \max_{A'} Q(S', A')$ – This represents the maximum possible return you can get from the *next state* ($S'$) you transition to, discounted by $\gamma$. The $\max_{A'}$ indicates that from $S'$, you will choose the action that maximizes your return from that point onward (behaving optimally).
+
+### Example: Mars Rover (Applying Bellman Equation)
+
+Let's verify the Bellman equation with our Mars Rover example ($\gamma = 0.5$).
+
+* **Case 1: $Q(S_2, \text{Right})$**
+    * Current State ($S$): $S_2$
+    * Current Action ($A$): Right
+    * Next State ($S'$): $S_3$
+    * $R(S_2) = 0$
+    * $Q(S_2, \text{Right}) = R(S_2) + \gamma \max_{A'} Q(S_3, A')$
+    * $Q(S_2, \text{Right}) = 0 + 0.5 \times \max(Q(S_3, \text{Left}), Q(S_3, \text{Right}))$
+    * Using values from the Q-table: $Q(S_2, \text{Right}) = 0 + 0.5 \times \max(25, 6.25)$
+    * $Q(S_2, \text{Right}) = 0.5 \times 25 = 12.5$. (Matches previously calculated value).
+
+* **Case 2: $Q(S_4, \text{Left})$**
+    * Current State ($S$): $S_4$
+    * Current Action ($A$): Left
+    * Next State ($S'$): $S_3$
+    * $R(S_4) = 0$
+    * $Q(S_4, \text{Left}) = R(S_4) + \gamma \max_{A'} Q(S_3, A')$
+    * $Q(S_4, \text{Left}) = 0 + 0.5 \times \max(Q(S_3, \text{Left}), Q(S_3, \text{Right}))$
+    * Using values from the Q-table: $Q(S_4, \text{Left}) = 0 + 0.5 \times \max(25, 6.25)$
+    * $Q(S_4, \text{Left}) = 0.5 \times 25 = 12.5$. (Matches previously calculated value).
+
+* **Terminal States:** For a terminal state $S_{term}$, the Bellman equation simplifies to $Q(S_{term}, A) = R(S_{term})$, as there are no future states or rewards.
+
+### Intuition of Bellman Equation:
+
+The Bellman equation provides a recursive relationship: the value of being in a state $S$ and taking action $A$ is the immediate reward plus the discounted maximum value achievable from the subsequent state $S'$. This mathematical breakdown is key to developing algorithms for RL.
+
+The next (optional) video will discuss **Stochastic Markov Decision Processes**, where actions can have random outcomes. Following that, we will develop an RL algorithm based on the Bellman equation.
