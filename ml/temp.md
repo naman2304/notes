@@ -202,3 +202,59 @@ This video reviews the core concepts of Reinforcement Learning (RL) using the Ma
     * Loop continues.
 
 The next step in developing an RL algorithm is to define and learn the **state-action value function**, a key quantity for finding optimal policies.
+
+## Reinforcement Learning: The State-Action Value Function (Q-Function)
+
+This video introduces the **state-action value function**, typically denoted as $Q(s, a)$, which is a key quantity that reinforcement learning algorithms aim to compute.
+
+### Definition of the Q-Function:
+
+* **$Q(s, a)$:** Represents the **expected cumulative return** (total discounted future rewards) if you start in state $s$, take action $a$ *once*, and then behave **optimally** thereafter (i.e., take actions that maximize future returns from that point).
+
+* **Initial "Circular" Feeling:** The definition seems circular because "optimally" implies knowing the best policy already. However, specific RL algorithms (to be discussed later) can compute $Q(s,a)$ without prior knowledge of the optimal policy.
+
+### Example: Mars Rover with Optimal Policy ($\gamma = 0.5$)
+
+Let's assume the optimal policy is: Go Left from $S_2, S_3, S_4$, and Go Right from $S_5$.
+
+* **Calculating $Q(S_2, \text{Right})$:**
+    * Start at $S_2$, take action Right.
+    * Sequence: $S_2 \xrightarrow{\text{Right, R=0}} S_3 \xrightarrow{\text{Optimal (Left), R=0}} S_2 \xrightarrow{\text{Optimal (Left), R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * Rewards: $0, 0, 0, 100$
+    * Return: $0 + (0.5 \times 0) + (0.5^2 \times 0) + (0.5^3 \times 100) = 12.5$
+    * So, $Q(S_2, \text{Right}) = 12.5$. (This value simply reports the outcome of that specific initial action followed by optimal play).
+
+* **Calculating $Q(S_2, \text{Left})$:**
+    * Start at $S_2$, take action Left.
+    * Sequence: $S_2 \xrightarrow{\text{Left, R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * Rewards: $0, 100$
+    * Return: $0 + (0.5 \times 100) = 50$
+    * So, $Q(S_2, \text{Left}) = 50$.
+
+### The Q-Function Table:
+
+By calculating $Q(s,a)$ for all states $s$ and all actions $a$, you get a table (or function) like this:
+
+| State ($s$) | Action: Left | Action: Right |
+| :---------- | :----------- | :------------ |
+| $S_1$       | 100          | 100           |
+| $S_2$       | 50           | 12.5          |
+| $S_3$       | 25           | 6.25          |
+| $S_4$       | 12.5         | 10            |
+| $S_5$       | 6.25         | 20            |
+| $S_6$       | 40           | 40            |
+
+(Note: For terminal states like $S_1$ and $S_6$, $Q(s,a)$ is simply the terminal reward, as no further actions are taken).
+
+### Using the Q-Function to Determine Optimal Policy:
+
+Once you have the $Q(s,a)$ values for all states and actions, finding the optimal policy is straightforward:
+
+* **Optimal Policy ($\pi^*(s)$):** For any given state $s$, the optimal action $a$ is the one that **maximizes $Q(s,a)$**.
+    $$\pi^*(s) = \underset{a}{\operatorname{argmax}} Q(s, a)$$
+    * **Intuition:** $Q(s,a)$ tells you the maximum return you can get by starting in $s$, taking $a$, and playing optimally afterward. To get the best overall return from state $s$, you should simply pick the action $a$ that leads to this maximum value.
+    * **Example (from table):**
+        * In $S_2$: $Q(S_2, \text{Left}) = 50$, $Q(S_2, \text{Right}) = 12.5$. Max is 50, so $\pi^*(S_2) = \text{Left}$.
+        * In $S_5$: $Q(S_5, \text{Left}) = 6.25$, $Q(S_5, \text{Right}) = 20$. Max is 20, so $\pi^*(S_5) = \text{Right}$.
+
+In summary, the Q-function provides a comprehensive "map" of the value of taking any action from any state, assuming subsequent optimal play. Once computed, it directly yields the optimal policy. The next video will likely focus on algorithms to compute this Q-function.
