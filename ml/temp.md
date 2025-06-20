@@ -354,3 +354,43 @@ Let's verify the Bellman equation with our Mars Rover example ($\gamma = 0.5$).
 The Bellman equation provides a recursive relationship: the value of being in a state $S$ and taking action $A$ is the immediate reward plus the discounted maximum value achievable from the subsequent state $S'$. This mathematical breakdown is key to developing algorithms for RL.
 
 The next (optional) video will discuss **Stochastic Markov Decision Processes**, where actions can have random outcomes. Following that, we will develop an RL algorithm based on the Bellman equation.
+
+## Stochastic Markov Decision Processes (Optional)
+
+In some real-world applications, actions do not always have deterministic outcomes. This video generalizes the RL framework to model **stochastic (random) environments**, where actions lead to a *distribution* of next states.
+
+### Stochastic Environment Example: Mars Rover
+
+* **Deterministic (Previous Assumption):** If you command "go left" from $S_4$, you *always* end up in $S_3$.
+* **Stochastic (New Model):** If you command "go left" from $S_4$:
+    * 90% chance (0.9 probability) of successfully going left to $S_3$.
+    * 10% chance (0.1 probability) of accidentally slipping and going right to $S_5$.
+* This means the next state $S'$ is now a **random variable**, not fixed.
+
+### Impact on Returns: Expected Return
+
+When the environment is stochastic, the sequence of states and rewards is also random. Therefore, the "return" ($G$) from a given state and action becomes a random variable itself.
+
+* **Goal Change:** We are no longer trying to maximize a single return. Instead, the goal of an RL algorithm in a stochastic environment is to maximize the **expected return** (or average return).
+    * **Expected Return:** The average value of the sum of discounted rewards over many (e.g., millions) hypothetical trials of following a policy from a given state.
+    * **Notation:** $E[R_1 + \gamma R_2 + \gamma^2 R_3 + \dots]$
+
+### Impact on the Bellman Equation:
+
+The Bellman equation is modified to account for the randomness of the next state:
+
+$$Q(S,A) = R(S) + \gamma E_{S' \sim P(S'|S,A)} [\max_{A'} Q(S', A')]$$
+
+* **Key Change:** The $\max_{A'} Q(S', A')$ term is now inside an **expected value operator** ($E[\dots]$).
+* **Intuition:** The total return from $(S,A)$ is the immediate reward $R(S)$ plus the discounted *average* of the maximum future returns achievable from the possible next states $S'$ (weighted by their probabilities of occurrence $P(S'|S,A)$).
+
+### Lab Exploration (Misstep Probability):
+
+The optional lab allows you to experiment with a "misstep probability" for the Mars Rover, simulating a stochastic environment.
+
+* **Misstep Probability:** This parameter (e.g., 0.1 for 10% chance of going opposite direction) quantifies the randomness.
+* **Observation:** As the misstep probability increases, the $Q(s,a)$ values (and the optimal expected return) will generally **decrease** for all states and actions. This is because your control over the robot is diminished, leading to lower expected rewards.
+
+### Transition to Continuous State Spaces:
+
+This stochastic MDP framework applies to small, discrete state spaces. However, many practical RL problems involve much larger, even **continuous, state spaces**. The next video will generalize the RL framework to handle such continuous state spaces.
