@@ -636,8 +636,9 @@ This video introduces two crucial refinements to the DQN algorithm that improve 
 * **Problem:** In the basic DQN algorithm, when a new Q-network ($Q_{\text{new}}$) is trained (based on targets computed using the *old* Q-network), the parameters of the main Q-network ($Q$) are abruptly updated to entirely match $Q_{\text{new}}$ (`Q = Q_new`). If $Q_{\text{new}}$ happens to be a worse or very noisy estimate from a particular training iteration, this abrupt update can destabilize the Q-function, leading to oscillations or divergence.
 * **Solution:** Instead of a full overwrite, use a **soft update** for the Q-network's parameters (weights $W$ and biases $B$).
     * Let $W$ and $B$ be the current parameters of the Q-network, and $W_{\text{new}}$ and $B_{\text{new}}$ be the parameters of the newly trained Q-network.
-    * **Soft Update Rule:**
-        $$W \leftarrow \tau W_{\text{new}} + (1 - \tau) W$$       $$B \leftarrow \tau B_{\text{new}} + (1 - \tau) B$$
+    * **Soft Update Rule:**  
+        $$W \leftarrow \tau W_{\text{new}} + (1 - \tau) W$$  
+        $$B \leftarrow \tau B_{\text{new}} + (1 - \tau) B$$  
         Where $\tau$ (tau) is a small hyperparameter (e.g., $0.01$).
     * **Intuition:** The current Q-network parameters only "softly" move towards the newly learned parameters. For example, if $\tau = 0.01$, the new $W$ is $1\%$ of $W_{\text{new}}$ and $99\%$ of the old $W$. This makes changes to the Q-function much more gradual.
 * **Benefit:** Soft updates cause the reinforcement learning algorithm to converge more reliably and stably, preventing oscillations or divergence that can arise from abrupt changes to the Q-function estimate.
