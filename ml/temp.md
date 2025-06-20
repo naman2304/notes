@@ -132,3 +132,36 @@ The discount factor also influences how negative rewards are handled:
 * This incentivizes the agent to **postpone negative rewards** as much as possible, which is often desirable in real-world applications (e.g., delaying a payment).
 
 The next video will formalize the goal of an RL algorithm: to maximize this return.
+
+## Reinforcement Learning: The Policy
+
+This video formalizes how a reinforcement learning (RL) algorithm chooses actions by introducing the concept of a **policy ($\pi$)**.
+
+### The Policy ($\pi$)
+
+* **Definition:** A policy, denoted as $\pi$, is a **function** that maps any given **state ($s$)** to an **action ($a$)** that the RL agent should take in that state.
+    * Think of it as the agent's strategy or behavior.
+    * Notation: $\pi(s) = a$.
+* **Goal of Reinforcement Learning:** The ultimate goal of an RL algorithm is to **find an optimal policy $\pi^*$** that tells the agent what action to take in *every possible state* to **maximize the expected cumulative return** (the total discounted sum of future rewards).
+
+### Examples of Policies in the Mars Rover Context:
+
+Different rules for choosing actions based on the rover's state are different policies:
+
+1.  **"Always go for the nearer reward":** A policy where the rover decides to go Left if State 1 is closer, or Right if State 6 is closer.
+2.  **"Always go for the larger reward":** A policy that might lead the rover to prioritize reaching State 1 (reward 100) even if it's further away, over State 6 (reward 40).
+3.  **"Go Left unless one step away from lesser reward (State 6)":**
+    * If in State 2, $\pi(S_2) = \text{Left}$.
+    * If in State 3, $\pi(S_3) = \text{Left}$.
+    * If in State 4, $\pi(S_4) = \text{Left}$.
+    * If in State 5, $\pi(S_5) = \text{Right}$.
+
+### Core Components of RL (Review):
+
+* **State ($S$):** The current situation or configuration of the agent and its environment.
+* **Action ($A$):** The choices the agent can make in a given state.
+* **Reward ($R(S)$):** Immediate feedback (positive or negative) received from the environment for being in a particular state or taking a particular action.
+* **Return ($G$):** The total discounted sum of future rewards that the agent expects to receive from a given state onwards. It captures the long-term value of a state-action sequence.
+* **Policy ($\pi$):** The function that dictates the agent's behavior, mapping states to actions.
+
+The next video will provide a quick review of these concepts before moving on to algorithms for finding optimal policies.
