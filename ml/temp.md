@@ -553,3 +553,31 @@ The core idea is to turn the Bellman equation into a supervised learning problem
 * **DQN (Deep Q-Network):** This algorithm is called DQN because it uses "deep learning" (neural networks) to learn the "Q-function."
 
 While this basic DQN works, refinements are needed for better performance. The next videos will cover these refinements.
+
+## DQN Refinement 1: Improved Neural Network Architecture for Q-Function
+
+The initial neural network architecture for DQN, which inputs `(state, action)` and outputs $Q(s,a)$, can be inefficient. A more efficient architecture is commonly used in most DQN implementations.
+
+### Original Architecture (Inefficient):
+
+* **Input:** State `s` (8 numbers) + one-hot encoded Action `a` (4 numbers) = 12 numbers.
+* **Output:** Single number ($Q(s,a)$).
+* **Problem:** To find the optimal action for a given state `s`, you'd have to run inference through the neural network **four separate times** (once for each possible action: `Q(s, nothing)`, `Q(s, left)`, `Q(s, main)`, `Q(s, right)`). This is computationally expensive.
+
+### Improved Architecture (Efficient):
+
+* **Input:** Only the **State `s`** (8 numbers).
+* **Neural Network:** Same hidden layers (e.g., two layers of 64 units each).
+* **Output Layer:** Has **four output units**, where each unit corresponds to the Q-value for one specific action.
+    * Output 1: $Q(s, \text{nothing})$
+    * Output 2: $Q(s, \text{left})$
+    * Output 3: $Q(s, \text{main})$
+    * Output 4: $Q(s, \text{right})$
+* **Benefit:** Given a state `s`, you only need to run inference through the neural network **once**. This single forward pass simultaneously computes the Q-value for all possible actions in that state. You can then quickly pick the action that corresponds to the maximum Q-value.
+
+### Efficiency for Bellman Equation Target Calculation:
+
+This architecture also makes computing the target $Y$ for the Bellman equation more efficient: $Y = R(S) + \gamma \max_{A'} Q(S', A')$.
+* When calculating $Q(S', A')$ for all $A'$ to find the maximum, the new architecture can get all those $Q(S', A')$ values in a single pass of $S'$ through the network, directly identifying the max.
+
+This architectural change significantly improves the overall efficiency of the DQN algorithm and will be used in the practice lab. The next video will introduce another important refinement: the Epsilon-Greedy policy.
