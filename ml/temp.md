@@ -73,7 +73,7 @@ At every time step, the agent (rover) is in some state $S$.
 <img src="/metadata/mars_rover.png" width="500" />
 
 * **Path 1: Start $S_4$, Go Left (optimal choice)**
-    * $S_4 \xrightarrow{\text{L, R=0}} S_3 \xrightarrow{\text{L, R=0}} S_2 \xrightarrow{\text{L, R=0}} S_1 \xrightarrow{\text{T, R=100}}$
+    * $S_4 \xrightarrow{\text{L R=0}} S_3 \xrightarrow{\text{L, R=0}} S_2 \xrightarrow{\text{L, R=0}} S_1 \xrightarrow{\text{T, R=100}}$
     * Rewards obtained: $0, 0, 0, 100$
 
 * **Path 2: Start $S_4$, Go Right**
