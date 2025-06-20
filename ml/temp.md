@@ -625,7 +625,7 @@ This video introduces two crucial refinements to the DQN algorithm that improve 
 
 * **Problem (Batch Gradient Descent):** In supervised learning, if you have a very large dataset (e.g., $m = 100$ million examples), each step of standard batch gradient descent (which computes derivatives over *all* $m$ examples) becomes extremely slow.
 * **Solution (Mini-Batch Gradient Descent):** Instead of using all $m$ examples per iteration, use a smaller subset called a "mini-batch" (e.g., $m' = 1,000$ examples).
-    * Each iteration of gradient descent uses only this mini-batch to compute gradients.
+    * Each iteration of gradient descent uses only a mini-batch to compute gradients (but at diff iteration of gradient descent, we use a diff mini batch from the total m to compute the partial derivative and compute gradients).
     * This makes each step much faster, leading to a more efficient algorithm overall.
 * **Behavior:** Mini-batch gradient descent is noisier (the parameters may oscillate more and sometimes even temporarily move away from the minimum), but on average, it still converges to the minimum much faster due to the increased speed of each iteration.
 * **Applicability:** Mini-batching is standard practice for speeding up supervised learning algorithms (like neural networks, linear/logistic regression) when dealing with large datasets.
