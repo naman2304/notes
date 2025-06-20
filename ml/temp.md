@@ -436,6 +436,8 @@ The upcoming practice lab will involve implementing an RL algorithm for a **simu
 
 The Lunar Lander is a classic continuous state Reinforcement Learning (RL) problem where the goal is to safely land a simulated vehicle on a landing pad on the moon. This application is a fun video game scenario used by many RL researchers.
 
+<img src="/metadata/lunar_lander.png" width="300" />
+
 ### The Task:
 
 * Command a lunar lander to fire its thrusters to achieve a soft landing within a designated landing pad (between two yellow flags).
