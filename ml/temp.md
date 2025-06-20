@@ -616,3 +616,30 @@ A common and effective trick is to **start with a high $\epsilon$** (e.g., $\eps
 * A slightly suboptimal choice of parameters in RL can lead to significantly worse performance (e.g., 10-100x slower learning or complete failure to learn), making tuning more challenging. However, good default values are often provided in practical labs.
 
 The next (optional) video will discuss further refinements to the DQN algorithm, including mini-batching and soft updates, to improve training speed and stability.
+
+## DQN Refinements: Mini-Batching and Soft Updates
+
+This video introduces two crucial refinements to the DQN algorithm that improve its efficiency and stability: **mini-batching** and **soft updates**.
+
+### 1. Mini-Batching
+
+* **Problem (Batch Gradient Descent):** In supervised learning, if you have a very large dataset (e.g., $m = 100$ million examples), each step of standard batch gradient descent (which computes derivatives over *all* $m$ examples) becomes extremely slow.
+* **Solution (Mini-Batch Gradient Descent):** Instead of using all $m$ examples per iteration, use a smaller subset called a "mini-batch" (e.g., $m' = 1,000$ examples).
+    * Each iteration of gradient descent uses only this mini-batch to compute gradients.
+    * This makes each step much faster, leading to a more efficient algorithm overall.
+* **Behavior:** Mini-batch gradient descent is noisier (the parameters may oscillate more and sometimes even temporarily move away from the minimum), but on average, it still converges to the minimum much faster due to the increased speed of each iteration.
+* **Applicability:** Mini-batching is standard practice for speeding up supervised learning algorithms (like neural networks, linear/logistic regression) when dealing with large datasets.
+* **In DQN:** Instead of using all 10,000 recent experience tuples from the replay buffer to train the Q-network in one go, you sample a mini-batch (e.g., 1,000 tuples) to create the training examples ($X, Y$) for each gradient update. This makes the neural network training step much faster.
+
+### 2. Soft Updates
+
+* **Problem:** In the basic DQN algorithm, when a new Q-network ($Q_{\text{new}}$) is trained (based on targets computed using the *old* Q-network), the parameters of the main Q-network ($Q$) are abruptly updated to entirely match $Q_{\text{new}}$ (`Q = Q_new`). If $Q_{\text{new}}$ happens to be a worse or very noisy estimate from a particular training iteration, this abrupt update can destabilize the Q-function, leading to oscillations or divergence.
+* **Solution:** Instead of a full overwrite, use a **soft update** for the Q-network's parameters (weights $W$ and biases $B$).
+    * Let $W$ and $B$ be the current parameters of the Q-network, and $W_{\text{new}}$ and $B_{\text{new}}$ be the parameters of the newly trained Q-network.
+    * **Soft Update Rule:**
+        $$W \leftarrow \tau W_{\text{new}} + (1 - \tau) W$$       $$B \leftarrow \tau B_{\text{new}} + (1 - \tau) B$$
+        Where $\tau$ (tau) is a small hyperparameter (e.g., $0.01$).
+    * **Intuition:** The current Q-network parameters only "softly" move towards the newly learned parameters. For example, if $\tau = 0.01$, the new $W$ is $1\%$ of $W_{\text{new}}$ and $99\%$ of the old $W$. This makes changes to the Q-function much more gradual.
+* **Benefit:** Soft updates cause the reinforcement learning algorithm to converge more reliably and stably, preventing oscillations or divergence that can arise from abrupt changes to the Q-function estimate.
+
+These two refinements (mini-batching and soft updates) significantly enhance the speed and stability of the DQN algorithm, making it more effective for complex tasks like the Lunar Lander.
