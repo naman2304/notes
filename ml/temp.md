@@ -581,3 +581,37 @@ This architecture also makes computing the target $Y$ for the Bellman equation m
 * When calculating $Q(S', A')$ for all $A'$ to find the maximum, the new architecture can get all those $Q(S', A')$ values in a single pass of $S'$ through the network, directly identifying the max.
 
 This architectural change significantly improves the overall efficiency of the DQN algorithm and will be used in the practice lab. The next video will introduce another important refinement: the Epsilon-Greedy policy.
+
+## DQN Refinement 2: Epsilon-Greedy Policy for Action Selection
+
+While the DQN algorithm learns to approximate $Q(s,a)$, we need a strategy to select actions in the environment, especially during the learning process when the Q-function estimate is still imperfect. The **Epsilon-Greedy policy** is the most common approach for this.
+
+### The Problem: Exploration vs. Exploitation
+
+* **Exploitation (Greedy Action):** Always picking the action `a` that currently maximizes $Q(s,a)$ based on the neural network's current estimate. This leverages (exploits) what the agent has already learned.
+    * **Downside:** If the Q-network's initial random initialization or early experiences lead it to believe a truly good action is bad, it might *never try it*, preventing it from discovering optimal strategies. It gets stuck in local optima of its own flawed beliefs.
+* **Exploration (Random Action):** Randomly picking an action `a`. This allows the agent to try new things and gain more information about the environment, potentially discovering better actions it hadn't considered.
+    * **Downside:** Random actions are often suboptimal and can lead to low returns, making the learning process inefficient or even dangerous (e.g., crashing the Lunar Lander).
+
+### The Epsilon-Greedy Policy:
+
+This policy balances exploration and exploitation using a parameter $\epsilon$ (epsilon):
+
+* **With probability $1 - \epsilon$ (most of the time):** The agent takes a **greedy action** – it picks the action `a` that maximizes its current estimate of $Q(s,a)$. (Exploitation)
+* **With probability $\epsilon$ (a small fraction of the time):** The agent picks an action `a` **randomly** from all possible actions. (Exploration)
+
+* **Example:** If $\epsilon = 0.05$: 95% of the time, the agent exploits its current knowledge; 5% of the time, it explores randomly.
+
+### Annealing Epsilon (Gradually Decreasing $\epsilon$):
+
+A common and effective trick is to **start with a high $\epsilon$** (e.g., $\epsilon = 1.0$, taking actions completely randomly initially) and **gradually decrease it over time** (e.g., down to 0.01 or less).
+
+* **Initial High $\epsilon$:** Encourages broad exploration early in training when the Q-function estimate is very poor. This helps the agent discover the environment's dynamics and potential rewards.
+* **Gradually Decreasing $\epsilon$:** As the Q-function estimate improves, the agent transitions to exploiting its knowledge more often, converging towards optimal behavior.
+
+### Finicky Nature of RL Hyperparameters:
+
+* Compared to supervised learning, RL algorithms are often **more sensitive ("finicky")** to hyperparameter choices (like $\epsilon$, learning rate, discount factor).
+* A slightly suboptimal choice of parameters in RL can lead to significantly worse performance (e.g., 10-100x slower learning or complete failure to learn), making tuning more challenging. However, good default values are often provided in practical labs.
+
+The next (optional) video will discuss further refinements to the DQN algorithm, including mini-batching and soft updates, to improve training speed and stability.
