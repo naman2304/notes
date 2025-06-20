@@ -544,10 +544,9 @@ The core idea is to turn the Bellman equation into a supervised learning problem
 1.  **Initialize Q-Network:** Randomly initialize the neural network's parameters. This is your initial (random) guess for the Q-function.
 2.  **Repeat (for many iterations):**
     *  **Explore/Act:** Take actions in the environment (e.g., Lunar Lander simulator). Initially, actions might be random. Over time, they might be chosen based on the current Q-network (exploiting).
-    *  **Store Experience:** Save the $(S, A, R(S), S')$ tuples to the replay buffer.
-    *  **Sample and Train:** Periodically (e.g., every few steps or epochs):
-        * Sample a batch of tuples from the replay buffer.
-        * For each tuple, calculate the target $Y$ using the Bellman equation and the *current* Q-network's estimate for $Q(S', A')$.
+    *  **Store Experience:** Save the $(S, A, R(S), S')$ tuples to the replay buffer. Say 10000 of these.
+    *  **Sample and Train:** Now:
+        * For each of these say 10000 tuple, calculate the target $Y$ using the Bellman equation and the *current* Q-network's estimate for $Q(S', A')$.
         * Train the Q-network (using supervised learning) to predict these $(X, Y)$ pairs.
     *  **Update Q-Network:** The newly trained network becomes the "current" Q-network for the next iteration of experience collection and target calculation.
 
