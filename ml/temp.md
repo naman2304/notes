@@ -431,3 +431,60 @@ In a **continuous state reinforcement learning problem** (or **continuous state 
 * It's a **vector of numbers**, where each number can take on any real value within its valid range.
 
 The upcoming practice lab will involve implementing an RL algorithm for a **simulated Lunar Lander**, which is another application with a continuous state space. This will provide practical experience with such problems.
+
+## The Lunar Lander: A Continuous State RL Application
+
+The Lunar Lander is a classic continuous state Reinforcement Learning (RL) problem where the goal is to safely land a simulated vehicle on a landing pad on the moon. This application is a fun video game scenario used by many RL researchers.
+
+### The Task:
+
+* Command a lunar lander to fire its thrusters to achieve a soft landing within a designated landing pad (between two yellow flags).
+* Failure: Crashing on the moon's surface.
+* Success: Soft landing on the pad.
+
+### Actions (Discrete):
+
+At each time step, the lander can choose one of four actions:
+1.  **Nothing:** Inertia and gravity pull the lander down.
+2.  **Left (Fire Left Thruster):** Pushes the lander to the right.
+3.  **Main (Fire Main Engine):** Provides downward thrust (slows descent).
+4.  **Right (Fire Right Thruster):** Pushes the lander to the left.
+
+### State Space (Continuous):
+
+The lander's state ($S$) is a vector of continuous and binary values, describing its current condition:
+* **Position:**
+    * $X$: Horizontal position (left/right).
+    * $Y$: Vertical position (height).
+* **Velocity:**
+    * $\dot{X}$: Horizontal velocity.
+    * $\dot{Y}$: Vertical velocity.
+* **Orientation:**
+    * $\theta$: Angle/tilt of the lander (how far it's tilted left/right).
+    * $\dot{\theta}$: Angular velocity (how fast it's rotating).
+* **Leg Grounded Status (Binary):**
+    * $L$: 1 if the left leg is grounded (touching the surface), 0 otherwise.
+    * $R$: 1 if the right leg is grounded (touching the surface), 0 otherwise.
+
+This state vector is the input to the policy ($\pi$).
+
+### Reward Function (Moderately Complex):
+
+The reward function incentivizes desired behaviors and penalizes undesired ones:
+* **Landing on Pad:** Reward between +100 and +140 (depends on how close to center).
+* **Moving Towards/Away from Pad:** Positive reward for moving closer, negative for drifting away.
+* **Crashing:** Large negative reward (e.g., -100).
+* **Soft Landing (Non-Crash):** +100 reward.
+* **Leg Grounded:** +10 reward for each leg (left or right) that touches the ground.
+* **Fuel Consumption (Penalties):**
+    * -0.3 for firing the main engine.
+    * -0.03 for firing a left or right side thruster.
+
+**Importance of Reward Function Design:** Crafting a good reward function is crucial for RL, as it tells the agent *what* to achieve without specifying *how*. For the Lunar Lander, it encourages safe, fuel-efficient landings on the pad.
+
+### Goal of the Lunar Lander Problem:
+
+* **Learn a Policy ($\pi$):** Find a function $\pi(S)$ that maps the current state $S$ to the optimal action $A$.
+* **Maximize Return:** This policy should maximize the sum of discounted rewards (return), typically using a high discount factor (e.g., $\gamma = 0.985$) to value future rewards significantly.
+
+This problem is a quintessential example of a continuous state RL application, which you will implement using deep learning in the practice lab. The next video will introduce Deep Reinforcement Learning.
