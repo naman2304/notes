@@ -394,3 +394,40 @@ The optional lab allows you to experiment with a "misstep probability" for the M
 ### Transition to Continuous State Spaces:
 
 This stochastic MDP framework applies to small, discrete state spaces. However, many practical RL problems involve much larger, even **continuous, state spaces**. The next video will generalize the RL framework to handle such continuous state spaces.
+
+## Reinforcement Learning with Continuous State Spaces
+
+While our simplified Mars Rover example used a discrete set of states (6 positions), most real-world robotic control applications, including the Lunar Lander project, operate in **continuous state spaces**. This means the state is represented by a vector of numbers, where each number can take on any value within a range.
+
+### What is a Continuous State Space?
+
+Instead of being in one of a few distinct positions, an agent's state is defined by measurements that are continuous, like positions, velocities, and orientations.
+
+### Examples of Continuous State Spaces:
+
+1.  **Mars Rover (Continuous Version):**
+    * Instead of 6 discrete boxes, imagine the rover can be at *any* position along a 6-kilometer line (e.g., at 2.7 km, 4.8 km). Its position is a single continuous number.
+
+2.  **Controlling a Car/Truck:**
+    * The state of a car or truck is described by multiple continuous numbers:
+        * **Position:** `x` (east-west), `y` (north-south)
+        * **Orientation:** `theta` ($\theta$, angle it's facing, 0-360 degrees)
+        * **Velocities:** `x_dot` (speed in x-direction), `y_dot` (speed in y-direction)
+        * **Angular Velocity:** `theta_dot` ($\dot{\theta}$, how fast it's turning)
+    * **Total State Vector:** A vector of 6 continuous numbers: $[x, y, \theta, \dot{x}, \dot{y}, \dot{\theta}]$.
+
+3.  **Controlling an Autonomous Helicopter:**
+    * The state of a helicopter requires even more continuous numbers to describe its complex movement:
+        * **Position:** `x, y, z` (north-south, east-west, height above ground)
+        * **Orientation (Euler Angles):** `phi` ($\phi$, roll - side-to-side tilt), `theta` ($\theta$, pitch - forward/backward tilt), `psi` ($\psi$, yaw - compass heading).
+        * **Velocities:** `x_dot, y_dot, z_dot` (speed in each direction).
+        * **Angular Velocities:** `phi_dot, theta_dot, psi_dot` (rates of change for roll, pitch, yaw).
+    * **Total State Vector:** A vector of 12 continuous numbers. This complex vector is the input to the helicopter's control policy.
+
+### Implication for Reinforcement Learning:
+
+In a **continuous state reinforcement learning problem** (or **continuous state Markov Decision Process - MDP**):
+* The state is no longer a small integer (e.g., 1 to 6).
+* It's a **vector of numbers**, where each number can take on any real value within its valid range.
+
+The upcoming practice lab will involve implementing an RL algorithm for a **simulated Lunar Lander**, which is another application with a continuous state space. This will provide practical experience with such problems.
