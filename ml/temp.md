@@ -89,3 +89,46 @@ At every time step, the agent (rover) is in some state $S$.
 The RL algorithm's job is to find a function (a "policy") that maps from the current state $S$ to an action $A$ that maximizes the **total future rewards**. This function is what the helicopter, robot dog, or Mars rover needs to learn to behave optimally.
 
 The next video will further define what we want the RL algorithm to do by introducing the concept of **"return"**, which quantifies the total future rewards.
+
+## Reinforcement Learning: The Return
+
+In Reinforcement Learning (RL), the goal is to maximize **total future rewards**. However, rewards received sooner are generally preferred over rewards received later. This concept is captured by the **Return**, which is a discounted sum of future rewards.
+
+### The Discount Factor ($\gamma$ - Gamma)
+
+* **Purpose:** The discount factor ($\gamma$), a number between 0 and 1 (typically close to 1, e.g., 0.9, 0.99), makes the RL agent "impatient." It reduces the value of future rewards.
+* **Interpretation:**
+    * A reward received one step in the future is multiplied by $\gamma$.
+    * A reward received two steps in the future is multiplied by $\gamma^2$.
+    * A reward received $t$ steps in the future is multiplied by $\gamma^t$.
+* **Benefit:** Getting rewards sooner results in a higher total return. This encourages the agent to achieve goals more quickly.
+* **Financial Analogy:** $\gamma$ is like an interest rate or the time value of money. A dollar today is worth more than a dollar in the future.
+
+### Formula for the Return ($G$)
+
+If an agent goes through a sequence of states and receives rewards $R_1, R_2, R_3, \dots$ at each step (where $R_t$ is the reward received at time step $t$):
+
+$$G = R_1 + \gamma R_2 + \gamma^2 R_3 + \gamma^3 R_4 + \dots$$
+This sum continues until a terminal state is reached.
+
+### Example: Mars Rover (with $\gamma = 0.5$)
+
+Let's revisit the Mars Rover example with states $S_1, \dots, S_6$ and rewards $R(S_1)=100, R(S_6)=40$, and $R(\text{other states})=0$.
+
+* **Path: $S_4 \rightarrow S_3 \rightarrow S_2 \rightarrow S_1$**
+    * Rewards: $R(S_4)=0, R(S_3)=0, R(S_2)=0, R(S_1)=100$
+    * Return ($G$ from $S_4$): $0 + (0.5 \times 0) + (0.5^2 \times 0) + (0.5^3 \times 100) = 0 + 0 + 0 + (0.125 \times 100) = 12.5$
+
+* **Path: $S_4 \rightarrow S_5 \rightarrow S_6$**
+    * Rewards: $R(S_4)=0, R(S_5)=0, R(S_6)=40$
+    * Return ($G$ from $S_4$): $0 + (0.5 \times 0) + (0.5^2 \times 40) = 0 + 0 + (0.25 \times 40) = 10$
+
+Comparing these two paths, "Go Left" (Return 12.5) yields a higher total discounted reward than "Go Right" (Return 10), suggesting "Go Left" might be a better overall strategy.
+
+### Impact of Negative Rewards:
+
+The discount factor also influences how negative rewards are handled:
+* If a negative reward occurs far in the future (multiplied by a small $\gamma^t$), its negative impact on the total return is reduced.
+* This incentivizes the agent to **postpone negative rewards** as much as possible, which is often desirable in real-world applications (e.g., delaying a payment).
+
+The next video will formalize the goal of an RL algorithm: to maximize this return.
