@@ -219,14 +219,14 @@ Let's assume the optimal policy is: Go Left from $S_2, S_3, S_4$, and Go Right f
 
 * **Calculating $Q(S_2, \text{Right})$:**
     * Start at $S_2$, take action Right.
-    * Sequence: $S_2 \xrightarrow{\text{Right, R=0}} S_3 \xrightarrow{\text{Optimal (Left), R=0}} S_2 \xrightarrow{\text{Optimal (Left), R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * Sequence: $S_2 \xrightarrow{\text{R R=0}} S_3 \xrightarrow{\text{Optimal (Left), R=0}}        S_2         \xrightarrow{\text{Optimal (Left), R=0}} S_1 \xrightarrow{\text{T R=100}}$
     * Rewards: $0, 0, 0, 100$
     * Return: $0 + (0.5 \times 0) + (0.5^2 \times 0) + (0.5^3 \times 100) = 12.5$
     * So, $Q(S_2, \text{Right}) = 12.5$. (This value simply reports the outcome of that specific initial action followed by optimal play).
 
 * **Calculating $Q(S_2, \text{Left})$:**
     * Start at $S_2$, take action Left.
-    * Sequence: $S_2 \xrightarrow{\text{Left, R=0}} S_1 \xrightarrow{\text{Terminal, R=100}}$
+    * Sequence: $S_2 \xrightarrow{\text{L R=0}} S_1 \xrightarrow{\text{T, R=100}}$
     * Rewards: $0, 100$
     * Return: $0 + (0.5 \times 100) = 50$
     * So, $Q(S_2, \text{Left}) = 50$.
@@ -250,11 +250,51 @@ By calculating $Q(s,a)$ for all states $s$ and all actions $a$, you get a table 
 
 Once you have the $Q(s,a)$ values for all states and actions, finding the optimal policy is straightforward:
 
-* **Optimal Policy ($\pi^*(s)$):** For any given state $s$, the optimal action $a$ is the one that **maximizes $Q(s,a)$**.
-    $$\pi^*(s) = \underset{a}{\operatorname{argmax}} Q(s, a)$$
+* **Optimal Policy** (π*(s)): For any given state $s$, the optimal action $a$ is the one that **maximizes** $Q(s,a)$.
+    π*(s) = $$\underset{a}{{argmax}} Q(s, a)$$
     * **Intuition:** $Q(s,a)$ tells you the maximum return you can get by starting in $s$, taking $a$, and playing optimally afterward. To get the best overall return from state $s$, you should simply pick the action $a$ that leads to this maximum value.
     * **Example (from table):**
         * In $S_2$: $Q(S_2, \text{Left}) = 50$, $Q(S_2, \text{Right}) = 12.5$. Max is 50, so $\pi^*(S_2) = \text{Left}$.
         * In $S_5$: $Q(S_5, \text{Left}) = 6.25$, $Q(S_5, \text{Right}) = 20$. Max is 20, so $\pi^*(S_5) = \text{Right}$.
 
 In summary, the Q-function provides a comprehensive "map" of the value of taking any action from any state, assuming subsequent optimal play. Once computed, it directly yields the optimal policy. The next video will likely focus on algorithms to compute this Q-function.
+
+## Exploring the State-Action Value Function (Q-Function) with the Mars Rover
+
+This video introduces an optional Jupyter Notebook lab that allows you to interactively explore how changes to the Mars Rover example's parameters affect the Q-function values and the optimal policy. The goal is to build intuition about the relationship between rewards, the discount factor, and optimal decision-making in Reinforcement Learning.
+
+### Lab Setup:
+
+* The lab uses helper functions to compute and visualize the optimal policy and Q-function values.
+* **Default Parameters:**
+    * Number of states: 6
+    * Number of actions: 2 (Left/Right)
+    * Terminal Rewards: State 1 = 100, State 6 = 40. Intermediate states = 0.
+    * Discount Factor ($\gamma$): 0.5
+    * Misstep Probability: 0 (ignored for now, implying deterministic actions).
+* The initial output of $Q(s,a)$ will match the values discussed in the previous lecture.
+
+### Interactive Exploration (Key Changes to Observe):
+
+The lab encourages you to modify parameters and observe the resulting changes in $Q(s,a)$ and the optimal policy:
+
+1.  **Changing Terminal Right Reward:**
+    * **Example:** Update terminal reward at State 6 from 40 to 10.
+    * **Observation:** $Q(s, \text{Right})$ values for states leading to State 6 will decrease significantly. The optimal policy will likely shift to strongly favor paths leading to State 1, even if they are longer. For instance, from $S_5$, the optimal policy might switch to "Go Left" to eventually reach $S_1$, rather than "Go Right" to reach the now low-reward $S_6$.
+
+2.  **Changing Discount Factor ($\gamma$):**
+    * **Increase $\gamma$ (e.g., from 0.5 to 0.9):**
+        * **Effect:** The rover becomes **less impatient**. Rewards in the future are discounted less severely.
+        * **Observation:** The agent becomes more willing to take longer paths to reach larger, more distant rewards. The $Q(s,a)$ values will generally increase for all paths that reach a reward. The optimal policy might shift to prefer longer paths to the 100-reward State 1, even from states closer to State 6.
+    * **Decrease $\gamma$ (e.g., from 0.5 to 0.3):**
+        * **Effect:** The rover becomes **extremely impatient**. Future rewards are heavily discounted.
+        * **Observation:** The agent will prioritize immediate or very near rewards, even if they are smaller. The $Q(s,a)$ values will decrease significantly for longer paths. The optimal policy might shift to prefer the smaller 40-reward State 6 if it's closer, as the 100-reward State 1 is too heavily discounted by the time it's reached.
+
+### Learning from the Lab:
+
+By playing with the reward function and the discount factor $\gamma$, you can observe:
+* How $Q(s,a)$ values change in response to these parameters.
+* How the optimal return (the maximum $Q(s,a)$ from each state) changes.
+* How the optimal policy adapts to prioritize either larger, distant rewards (higher $\gamma$) or smaller, immediate rewards (lower $\gamma$).
+
+This hands-on exploration will strengthen your intuition about the fundamental trade-offs and decision-making processes in Reinforcement Learning. After completing the lab, you will be ready to discuss the **Bellman Equation**, a central concept in RL.
