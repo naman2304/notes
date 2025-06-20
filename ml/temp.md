@@ -317,6 +317,8 @@ The **Bellman Equation** is a fundamental equation in Reinforcement Learning tha
 The core Bellman equation states:
 $$Q(S,A) = R(S) + \gamma \max_{A'} Q(S', A')$$
 
+Simplisticly, this can be solved using dynamic programming. But for small problems too, the state space so large that solving this via DP becomes infeasible. And hence, we resort to Deep RL techniques (DQN algorithm for instance).
+
 * **Intuition:**
     * $Q(S,A)$ is the total return if you start in state $S$, take action $A$, and then act optimally thereafter.
     * This total return can be decomposed into two parts:
