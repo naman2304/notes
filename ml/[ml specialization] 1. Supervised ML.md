@@ -1028,6 +1028,35 @@ When a model overfits (has high variance), it performs well on training data but
 
 <img src="/metadata/regularization.png" width="600" />
 
+## Types of regularization
+
+### L1 vs L2 Norm
+
+* **L1 norm (Manhattan distance / Taxicab norm):**
+    * Formula: $||w||_1 = \sum |w_i|$
+    * Effect: Encourages **sparsity** by driving some weights ($w_i$) to exactly zero.
+* **L2 norm (Euclidean norm / Frobenious norm):**
+    * Formula: $||w||_2 = \sqrt{\sum w_i^2}$
+    * Effect: Encourages **small weights** by shrinking them smoothly toward zero. It spreads weight values more evenly.
+
+### Lasso vs Ridge Regression
+
+* **Lasso Regression (L1 regularization):**
+    * Adds $\lambda \sum |w_i|$ to the loss function.
+    * **Effect:** Pushes some weights to exactly zero, effectively performing **feature selection** (some features are effectively ignored).
+    * **Use case:** Useful when you suspect only a few features are truly relevant.
+    * **Optimization:** Harder due to the absolute value function being non-differentiable at zero.
+* **Ridge Regression (L2 regularization):**
+    * Adds $\lambda \sum w_i^2$ to the loss function.
+    * **Effect:** Shrinks all weights smoothly toward zero, but typically **not exactly zero**.
+    * **Use case:** Useful when many features contribute small effects, and you want to keep all of them but reduce their individual impact.
+    * **Optimization:** Smoother and more stable as the squared term is differentiable everywhere.
+
+**Hence:**
+* **Lasso** gives **sparse models**.
+* **Ridge** gives **smooth models**.
+* **Elastic Net** combines both L1 and L2 regularization: $\lambda_1 ||w||_1 + \lambda_2 ||w||_2^2$.
+
 ## Summary of Anti-Overfitting Strategies:
 
 * **More data:** Best solution when possible.
