@@ -740,6 +740,37 @@ The collaborative filtering cost function $J(\\vec{w}, \\vec{b}, X)$ is defined 
   * The `model.fit` recipe is designed for sequential layers in a typical neural network. Collaborative filtering has a custom cost function and parameter structure.
   * AutoDiff provides the flexibility to define any custom cost function and automatically get its gradients, making it a powerful tool for implementing algorithms beyond standard neural network architectures.
 
-### Practice Lab:
+## Finding Related Items with Collaborative Filtering
 
-The practice lab will use the MovieLens dataset (real user movie ratings) to implement collaborative filtering using TensorFlow's AutoDiff capabilities, demonstrating its application on real-world data.
+The collaborative filtering algorithm not only predicts user ratings but also learns **feature vectors ($X^{(i)}$) for each item $i$ (e.g., movie)**. These learned features provide a natural way to find similar items.
+
+### Learned Item Features:
+
+* The algorithm automatically learns feature vectors $X^{(i)}$ for each item $i$ (e.g., $X^{(1)}$ for Movie 1, $X^{(2)}$ for Movie 2, etc.).
+* While these features ($x_1, x_2, \dots$) might be abstract and hard for humans to directly interpret (e.g., "feature 1 doesn't clearly mean 'romance'"), collectively, they capture the essence of what each item is like based on user preferences.
+
+### Finding Related Items (Similarity Search):
+
+* **Method:** To find items similar to a given item $i$ (with features $X^{(i)}$), search for other items $k$ (with features $X^{(k)}$) that have a **small squared distance** between their feature vectors.
+* **Formula (Squared Euclidean Distance):**
+    $$\text{Distance}(X^{(k)}, X^{(i)})^2 = \sum_{l=1}^{n} (X_l^{(k)} - X_l^{(i)})^2$$
+    (This is also written as $||X^{(k)} - X^{(i)}||^2$).
+* **Process:** Identify the top 5 or 10 items $k$ with the smallest squared distance to $X^{(i)}$. These will be the most "related" items based on the learned features.
+* **Application:** This is how many online shopping or streaming websites show "items similar to this one."
+
+### Limitations of Collaborative Filtering:
+
+Despite its power, collaborative filtering has limitations:
+
+1.  **Cold Start Problem:**
+    * **New Items:** It struggles to recommend **new items** that have very few or no ratings. Without ratings, the algorithm cannot learn meaningful feature vectors $X^{(i)}$ for these items.
+    * **New Users:** It also struggles to make good recommendations for **new users** who have rated only a few or no items. (Mean normalization helps mitigate this, but a new user still lacks rich preference data).
+    * **Reason:** Collaborative filtering relies on a sufficient amount of interaction data between users and items.
+
+2.  **Lack of Side Information / Additional Features:**
+    * Collaborative filtering doesn't naturally incorporate "side information" or external features about items or users that might be readily available.
+    * **Item Side Info:** Genre, cast, budget, studio (for movies); description, brand, category (for products).
+    * **User Side Info:** Demographics (age, gender, location), explicit preferences (e.g., "likes sci-fi"), implicit cues (e.g., IP address, device type, web browser used).
+    * **Impact:** This side information can be highly predictive and useful, especially for cold start situations or when user interaction data is sparse. Collaborative filtering, in its pure form, doesn't utilize it.
+
+The next video will introduce **content-based filtering algorithms**, which directly address these limitations by leveraging side information about items and users, and are widely used in commercial applications.
