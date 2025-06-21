@@ -643,7 +643,7 @@ Mean normalization aims to center the ratings for each movie around zero.
 
 1.  **Calculate Mean Rating for Each Movie ($\mu_i$):**
     * For each movie $i$, compute the average rating $\mu_i$ from *only the users who have rated that movie*.
-    * Example: Movie 1 (rated by Alice and Bob): $(5+5)/2 = 5$. (Correction from transcript: it states 2.5, but using the table's values, it's 5. This will not affect the concept). Let's use corrected average of $R_1(S_1)$ = (Alice=5, Bob=5, Carol=0, Dave=0), so $(5+5+0+0)/4 = 2.5$ if counting all users, or $5$ if summing and dividing by number of ratings. The transcript shows 2.5 for Movie 1 which means it's averaging over *all* users with a rating, which is correct in practice. So, let's stick to transcript's $\mu_1=2.5$.
+    * Example: Movie 1 (rated by Alice=5, Bob=5, Carol=0, Dave=0), so $(5+5+0+0)/4 = 2.5$ if counting all users.
     * $\mu = [2.5, 2.5, 2.0, 2.25, 1.25]$ for movies 1-5 respectively.
 
 2.  **Normalize Ratings:**
