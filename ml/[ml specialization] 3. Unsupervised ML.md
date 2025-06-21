@@ -904,3 +904,34 @@ To address this, large-scale recommender systems typically employ a **two-step a
 * **Optimization:** Use offline experiments to determine the optimal number of items to retrieve (e.g., 100, 500, 1000 items) by evaluating the impact on recommendation relevance.
 
 This two-step approach allows recommender systems to deliver both **fast and accurate** recommendations even with extremely large catalogs. The next video will discuss ethical issues associated with recommender systems.
+
+## Ethical Considerations in Recommender Systems
+
+Recommender systems, while highly profitable, also have potential for problematic use cases that can negatively impact individuals and society. It's crucial to adopt an ethical approach when building them.
+
+### Goals of Recommender Systems (and their potential downsides):
+
+Recommender systems are configured to optimize various objectives, some of which can have unintended consequences:
+
+1.  **Maximize User Satisfaction (e.g., 5-star ratings):** Recommending movies users are most likely to rate highly. (Generally innocuous).
+2.  **Maximize Purchase Likelihood:** Recommending products users are most likely to buy. (Generally innocuous).
+3.  **Maximize Ad Clicks (and Advertiser Bids):** Showing ads users are most likely to click, especially if the advertiser bids high.
+    * **Problem:** This can amplify harmful businesses (e.g., highly exploitative payday loan companies). A profitable but exploitative business can outbid ethical ones, leading to a virtuous cycle for harm: more profit allows higher bids, leading to more traffic to harmful businesses.
+    * **Amelioration:** Refuse to show ads from exploitative businesses (though defining "exploitative" is difficult).
+4.  **Maximize Profit/Margin:** Recommending products that generate the most profit for the company, not necessarily the most relevant or useful for the user.
+    * **Problem:** Lack of transparency for users. Users might assume recommendations are for their benefit, but they are serving the company's profit.
+    * **Amelioration:** Be transparent with users about the criteria for recommendations (e.g., "sorted by highest profit").
+5.  **Maximize User Engagement/Watch Time:** Recommending content that keeps users on the platform longer.
+    * **Problem:** Can inadvertently amplify harmful content like conspiracy theories, hate speech, or toxicity, because such content is often highly engaging. This has been widely reported for social media and video platforms.
+    * **Amelioration:** Actively filter out problematic content (hate speech, fraud, scams, violent content), though defining "problematic" is complex.
+
+### General Ethical Considerations and Ameliorations:
+
+* **Transparency:** Be transparent with users about why specific items are being recommended (e.g., "Recommended because it's popular," "Recommended to maximize our profit"). This builds trust.
+* **Content Moderation:** Implement robust systems to filter out problematic, harmful, or incendiary content, even if it is highly engaging.
+* **Bias Mitigation:** Ensure the system does not unfairly discriminate or amplify harmful stereotypes.
+* **Refuse Harmful Businesses:** Companies should consider refusing to serve (e.g., advertise for) businesses that engage in exploitative or harmful practices.
+* **Debate and Diverse Perspectives:** For challenging ethical dilemmas, invite open discussion and debate within the team, involving diverse perspectives.
+* **Prioritize Societal Benefit:** Ultimately, strive to build systems that genuinely make society and people better off. If a project feels unethical, even if financially sound, consider walking away.
+
+Recommender systems are powerful and lucrative, but their builders have a responsibility to consider potential harms and actively design for positive societal impact.
