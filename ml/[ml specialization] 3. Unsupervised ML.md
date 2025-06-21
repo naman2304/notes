@@ -863,3 +863,44 @@ The core idea is to use two separate neural networks (often called "towers") tha
 * **Pre-computation:** Finding similar items can be pre-computed offline (e.g., overnight) for all items in the catalog, allowing fast retrieval when a user is Browse.
 
 The next video will discuss practical issues and modifications to scale this content-based filtering approach for very large item catalogs.
+
+## Scaling Recommender Systems: Retrieval and Ranking
+
+Modern recommender systems often deal with catalogs containing thousands, millions, or even tens of millions of items (movies, ads, songs, products). Running a deep learning model to predict a user's preference for *every single item* in such a large catalog every time a user visits is computationally infeasible.
+
+To address this, large-scale recommender systems typically employ a **two-step architecture: Retrieval and Ranking.**
+
+### 1. Retrieval (Candidate Generation):
+
+* **Goal:** Efficiently generate a **large list of plausible item candidates** (e.g., 100s or 1000s) from the entire catalog. This list should be broad enough to include most items the user might like, even if it also includes some irrelevant ones.
+* **Characteristics:** This step prioritizes **speed and broad coverage** over extreme accuracy. It often uses simpler, pre-computed methods or less computationally intensive operations.
+* **Examples of Retrieval Strategies:**
+    * **Similarity Search:** For each of the last 10 movies the user watched, find the 10 most similar movies (using pre-computed item-item similarities, as discussed in previous videos). This can be a simple lookup.
+    * **Genre/Category Favorites:** Add the top 10 most popular movies from the user's top 3 favorite genres.
+    * **Geographic/Popularity Trends:** Add the top 20 most popular movies in the user's country.
+    * **Other Heuristics:** Items trending locally, items related to user's explicitly stated interests, etc.
+* **Output:** A combined list of candidate items (duplicates removed, already-watched/purchased items removed).
+
+### 2. Ranking (Fine-Tuning and Personalization):
+
+* **Goal:** Take the smaller list of plausible candidates from the retrieval step and **fine-tune their ranking** to select the very best items for the user.
+* **Characteristics:** This step prioritizes **accuracy and personalization**. It can afford to use more complex, computationally intensive models.
+* **Process:**
+    * For *each* item in the retrieved candidate list:
+        1.  Compute the user's latent vector ($\vec{v}_u$) by feeding the user's features ($X_u$) through the user network (one inference pass).
+        2.  Access the item's pre-computed latent vector ($\vec{v}_m$).
+        3.  Feed the user's latent vector and the item's latent vector into the final prediction part of the neural network (often just a dot product, or a small final layer) to compute the predicted rating or probability of engagement.
+    * **Output:** A ranked list of items, ordered by their predicted rating for the user. The top few items are then displayed to the user.
+
+### Optimizations:
+
+* **Pre-computation:** Item latent vectors ($\vec{v}_m$) can be pre-computed offline for all items.
+* **Single User Inference:** The user's latent vector ($\vec{v}_u$) needs to be computed only once per user session.
+* **Reduced Scope for Ranking Model:** The full, accurate ranking model is only run on a *few hundreds* of items, not millions, making it feasible in real-time.
+
+### Deciding Retrieval Quantity:
+
+* **Trade-off:** Retrieving more items leads to potentially better overall recommendations (higher recall of good items), but increases the computational cost of the ranking step.
+* **Optimization:** Use offline experiments to determine the optimal number of items to retrieve (e.g., 100, 500, 1000 items) by evaluating the impact on recommendation relevance.
+
+This two-step approach allows recommender systems to deliver both **fast and accurate** recommendations even with extremely large catalogs. The next video will discuss ethical issues associated with recommender systems.
