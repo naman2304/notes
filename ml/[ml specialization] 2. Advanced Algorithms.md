@@ -2271,6 +2271,34 @@ When comparing multiple algorithms, and they have different precision/recall val
 
 This concludes the practical tips for building ML systems. Next week, we'll cover Decision Trees, another powerful ML algorithm.
 
+## Handling Class Imbalance
+
+### Upsampling (Minority Class Oversampling)
+
+* **Method:** Increase the number of samples in the minority class by duplicating existing ones.
+* **Pros:**
+    * No information loss from the original minority samples.
+    * Helps the model learn patterns specific to the minority class.
+* **Cons:**
+    * Risk of **overfitting** to the duplicated samples.
+
+### Downsampling (Majority Class Undersampling)
+
+* **Method:** Reduce the number of samples in the majority class to match the size of the minority class.
+* **Pros:**
+    * Reduces training time significantly.
+    * Generally less prone to overfitting than upsampling.
+* **Cons:**
+    * **Potential loss of important information** from the discarded majority class samples.
+    * Lower data efficiency, as you're effectively throwing data away.
+
+### Precision & Recall
+
+* These metrics are crucial for **evaluating** model performance in the presence of class imbalance; they do not directly solve the imbalance.
+* They are used instead of raw accuracy:
+    * **Precision:** Of all instances predicted as positive, how many were actually correct positives?
+    * **Recall:** Of all actual positive instances, how many were correctly detected by the model?
+
 ## [Week 4] Introduction to Decision Trees
 
 Decision trees are powerful and widely used machine learning algorithms, particularly popular for winning competitions, even if they receive less academic attention than neural networks. They are a valuable tool for classification and regression.
