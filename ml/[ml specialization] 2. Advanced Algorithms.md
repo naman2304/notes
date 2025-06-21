@@ -1270,7 +1270,7 @@ While **dense layers** (where every neuron connects to every activation in the p
 
 **Note**: There are many architectures in ML
 * Feedforward architectures
-  * Linear models (Linear regression, Logistic regression(
+  * Linear models (Linear regression, Logistic regression)
   * Multilayer Perceptrons / Deep Neural Network (DNN)
 * Spatial / structured input architectures
   * Convolutional Neural Network (CNN) -- predominantly used for images, spatial data, video frames.
