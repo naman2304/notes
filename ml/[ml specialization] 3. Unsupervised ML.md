@@ -670,3 +670,76 @@ Mean normalization aims to center the ratings for each movie around zero.
 * **Improved Behavior for Unrated Items:** While normalizing rows is more critical for new users, normalizing columns (i.e., making users' average ratings zero) can help for predicting new items that few users have rated. However, normalizing rows (for users) is generally more impactful for collaborative filtering.
 
 Mean normalization is an important implementation detail that makes collaborative filtering more robust and its predictions more reasonable, especially for users with very few or no ratings.
+
+## Implementing Collaborative Filtering with TensorFlow (AutoDiff)
+
+This video demonstrates how to implement the collaborative filtering algorithm using TensorFlow, leveraging its automatic differentiation (AutoDiff) capabilities. This allows for optimization without manually calculating gradients.
+
+### Why Use TensorFlow for Collaborative Filtering?
+
+  * **AutoDiff:** TensorFlow can automatically compute the derivatives of the cost function with respect to all parameters (user parameters $\\vec{w}^{(j)}, b^{(j)}$ and item features $X^{(i)}$). This eliminates the need for manual calculus.
+  * **Powerful Optimizers:** Once derivatives are available, you can use advanced optimizers like Adam, which are often more efficient than basic gradient descent.
+
+### AutoDiff (Automatic Differentiation) in TensorFlow:
+
+  * **Concept:** TensorFlow's `tf.GradientTape` feature records all operations performed within its context. It then uses this recorded "tape" to automatically compute gradients (derivatives) of a target loss with respect to specified `tf.Variable`s.
+  * **Example (Simple $J=(wx-1)^2$):**
+    ```python
+    import tensorflow as tf
+
+    w = tf.Variable(3.0) # Declare w as a TensorFlow Variable to be optimized
+    x = 1.0
+    y = 1.0
+    learning_rate = 0.01
+
+    for _ in range(30): # Iterations
+        with tf.GradientTape() as tape:
+            f_x = w * x
+            J = (f_x - y)**2 # Define the cost function
+
+        # Automatically compute derivative dJ/dw
+        dJ_dw = tape.gradient(J, w)
+
+        # Apply update (TensorFlow Variables use assign_sub)
+        w.assign_sub(learning_rate * dJ_dw)
+    ```
+      * `tf.Variable`: Marks parameters that TensorFlow should track for gradient computation.
+      * `tf.GradientTape()`: Records operations.
+      * `tape.gradient(J, w)`: Computes $\\frac{dJ}{dw}$.
+      * `w.assign_sub()`: Updates the variable in place.
+
+### Implementing Collaborative Filtering with AutoDiff:
+
+The collaborative filtering cost function $J(\\vec{w}, \\vec{b}, X)$ is defined (as in the previous video). The optimization process involves repeatedly computing this cost and its gradients.
+
+1.  **Define Optimizer:**
+    ```python
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001) # Or a different optimizer
+    ```
+2.  **Training Loop:**
+    ```python
+    for iteration in range(num_iterations):
+        with tf.GradientTape() as tape:
+            # Implement the FULL collaborative filtering cost function J here
+            # J = sum_over_all_rated_pairs(L(y_hat, y)) + regularization_terms
+            # Need to define y_norm, r, num_users, num_movies, lambda_val etc.
+            # And compute predictions y_hat = w_j . x_i + b_j
+
+        # Compute gradients of J with respect to ALL optimizable parameters (x, w, b)
+        # Note: x, w, b would also be tf.Variable objects
+        gradients = tape.gradient(J, [X_items_variable, W_users_variable, B_users_variable])
+
+        # Apply gradients
+        optimizer.apply_gradients(zip(gradients, [X_items_variable, W_users_variable, B_users_variable]))
+    ```
+      * The `apply_gradients` function efficiently updates all parameters.
+
+### Why this approach instead of `model.compile`/`model.fit`?
+
+  * The collaborative filtering algorithm's structure (where both item features $X^{(i)}$ and user parameters $\\vec{w}^{(j)}, b^{(j)}$ are learned simultaneously as "parameters" through Bellman-like equations) doesn't neatly map to TensorFlow's standard `tf.keras.layers.Dense` and `model.compile`/`model.fit` paradigm.
+  * The `model.fit` recipe is designed for sequential layers in a typical neural network. Collaborative filtering has a custom cost function and parameter structure.
+  * AutoDiff provides the flexibility to define any custom cost function and automatically get its gradients, making it a powerful tool for implementing algorithms beyond standard neural network architectures.
+
+### Practice Lab:
+
+The practice lab will use the MovieLens dataset (real user movie ratings) to implement collaborative filtering using TensorFlow's AutoDiff capabilities, demonstrating its application on real-world data.
