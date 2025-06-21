@@ -935,3 +935,86 @@ Recommender systems are configured to optimize various objectives, some of which
 * **Prioritize Societal Benefit:** Ultimately, strive to build systems that genuinely make society and people better off. If a project feels unethical, even if financially sound, consider walking away.
 
 Recommender systems are powerful and lucrative, but their builders have a responsibility to consider potential harms and actively design for positive societal impact.
+
+## Implementing Content-Based Filtering with TensorFlow
+
+This video walks through the key code concepts for implementing a content-based filtering algorithm using TensorFlow, particularly highlighting its flexible API for building custom model structures.
+
+### Model Architecture: Two Sequential Networks + Dot Product
+
+The content-based filtering model uses two separate sequential neural networks (towers), one for users and one for items, whose outputs are then dot-producted.
+
+1.  **User Network:**
+    ```python
+    user_nn = tf.keras.Sequential([
+        # Example: two Dense hidden layers
+        tf.keras.layers.Dense(units=128, activation='relu'), # Hidden layer 1
+        tf.keras.layers.Dense(units=64, activation='relu'),  # Hidden layer 2
+        # Output layer with 32 units for the user's latent vector
+        tf.keras.layers.Dense(units=32, activation='relu') # Use ReLU or linear based on preference
+    ])
+    ```
+2.  **Item Network (Movie Network):**
+    ```python
+    item_nn = tf.keras.Sequential([
+        # Example: two Dense hidden layers
+        tf.keras.layers.Dense(units=128, activation='relu'), # Hidden layer 1
+        tf.keras.layers.Dense(units=64, activation='relu'),  # Hidden layer 2
+        # Output layer with 32 units for the item's latent vector
+        tf.keras.layers.Dense(units=32, activation='relu') # Use ReLU or linear based on preference
+    ])
+    ```
+      * Both `user_nn` and `item_nn` use ReLU activation for hidden layers.
+      * Their final dense layers both output 32 units, ensuring the latent vectors have the same dimension for the dot product.
+
+### Combining Networks and Computing Output:
+
+TensorFlow's Keras Functional API is used to define how inputs flow through these networks and are combined.
+
+1.  **Define Inputs:**
+    ```python
+    user_features_input = tf.keras.layers.Input(shape=(user_features_dim,)) # Placeholder for user raw features
+    item_features_input = tf.keras.layers.Input(shape=(item_features_dim,)) # Placeholder for item raw features
+    ```
+2.  **Compute Latent Vectors:**
+    ```python
+    vu = user_nn(user_features_input) # Pass user features through user network
+    vm = item_nn(item_features_input) # Pass item features through item network
+    ```
+3.  **L2 Normalization (Important Refinement):**
+      * **Purpose:** Normalizing the length (L2 norm) of the latent vectors $\\vec{v}\_u$ and $\\vec{v}\_m$ to 1 (i.e., making them unit vectors) often improves algorithm performance and stability.
+      * **Implementation:**
+        ```python
+        vu_normalized = tf.linalg.normalize(vu, axis=1)[0] # Normalize along the feature axis
+        vm_normalized = tf.linalg.normalize(vm, axis=1)[0] # Normalize along the feature axis
+        ```
+        *(Note: `tf.linalg.normalize` returns both normalized vector and its norm; we take the 0th element for the vector)*
+4.  **Compute Dot Product:**
+      * **Purpose:** The dot product of the normalized latent vectors gives the final predicted rating.
+      * **Implementation:** Keras provides a special layer for this.
+        ```python
+        predicted_rating = tf.keras.layers.Dot(axes=1)([vu_normalized, vm_normalized]) # Dot product along the feature dimension
+        ```
+5.  **Define Overall Model:**
+    ```python
+    model = tf.keras.Model(inputs=[user_features_input, item_features_input], outputs=predicted_rating)
+    ```
+      * This tells Keras that the model takes two inputs (user features, item features) and produces one output (predicted rating).
+
+### Training the Model:
+
+  * **Cost Function:** The mean squared error (MSE) loss is typically used for continuous ratings.
+    ```python
+    model.compile(optimizer='adam', loss='mse') # Or other optimizers/losses
+    ```
+  * **Training:**
+    ```python
+    model.fit([X_users_train, X_items_train], y_ratings_train, epochs=...)
+    ```
+
+### Key Takeaways:
+
+  * TensorFlow is flexible enough to implement custom model architectures like this two-tower network, not just simple sequential ones.
+  * The `tf.keras.layers.Dot` layer is used for efficiently computing dot products between learned latent vectors.
+  * **L2 normalization of latent vectors (`tf.linalg.normalize`) is a crucial refinement** that often improves stability and performance.
+  * **Feature Engineering:** Designers often spend significant time carefully crafting the input features ($X\_u, X\_m$) for these content-based filtering algorithms.
