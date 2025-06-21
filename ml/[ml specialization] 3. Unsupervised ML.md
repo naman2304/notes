@@ -818,3 +818,48 @@ Given user features ($X_u^{(j)}$) and item features ($X_m^{(i)}$), the goal is t
 * **Leverages Side Information:** Directly incorporates rich descriptive data about users and items that CF struggles with.
 
 The next video will delve into how these latent vectors $\vec{v}_u$ and $\vec{v}_m$ are actually computed.
+
+## Content-Based Filtering with Deep Learning
+
+Deep learning is a state-of-the-art approach for content-based filtering, allowing recommender systems to leverage rich user and item features effectively.
+
+### Model Architecture: Two-Tower Neural Network
+
+The core idea is to use two separate neural networks (often called "towers") that learn compact representations (latent vectors) for users and items:
+
+1.  **User Network:**
+    * **Input:** Raw features of the user ($X_u^{(j)}$) (e.g., age, gender, country, past purchase history, average ratings per genre).
+    * **Architecture:** Typically a few dense neural network layers.
+    * **Output:** A fixed-size latent vector $\vec{v}_u^{(j)}$ (e.g., 32 numbers) that succinctly describes the user's preferences.
+
+2.  **Movie Network (Item Network):**
+    * **Input:** Raw features of the movie/item ($X_m^{(i)}$) (e.g., year, genre, critic reviews, average user rating for that movie).
+    * **Architecture:** Typically a few dense neural network layers.
+    * **Output:** A fixed-size latent vector $\vec{v}_m^{(i)}$ (e.g., 32 numbers) that succinctly describes the item's attributes.
+
+3.  **Prediction:** The predicted rating ($\hat{y}(i,j)$) is computed as the **dot product** of the user's latent vector and the item's latent vector:
+    $$\hat{y}(i,j) = \vec{v}_u^{(j)} \cdot \vec{v}_m^{(i)}$$
+    * **Interpretation:** This dot product measures the similarity or "match" between the user's learned preferences and the item's learned characteristics.
+    * **For Binary Labels:** If predicting "like/dislike," a Sigmoid function can be applied to the dot product: $\hat{y}(i,j) = g(\vec{v}_u^{(j)} \cdot \vec{v}_m^{(i)})$.
+
+### Training the Combined Network:
+
+* **Single Cost Function:** Both the user network and the movie network are trained simultaneously using a **single cost function**.
+    * **Loss:** For star ratings, it's typically the mean squared error (MSE) between the predicted dot product and the actual rating.
+    $$J = \sum_{(i,j): r(i,j)=1} (\vec{v}_u^{(j)} \cdot \vec{v}_m^{(i)} - y(i,j))^2 + \text{regularization terms}$$
+    * Regularization terms (e.g., L2 regularization) are added to the cost function to keep the parameters of both neural networks small, preventing overfitting.
+* **Optimization:** Gradient descent (or Adam) is used to tune all parameters across both the user network and the movie network to minimize this combined cost function.
+
+### Finding Similar Items with Learned Embeddings:
+
+* After training, the learned latent vectors ($\vec{v}_m^{(i)}$) effectively act as "embeddings" or representations of the items.
+* To find items similar to a given item $i$ (with vector $\vec{v}_m^{(i)}$), you can search for other items $k$ (with vector $\vec{v}_m^{(k)}$) that have the **smallest squared Euclidean distance** between their latent vectors: $|| \vec{v}_m^{(k)} - \vec{v}_m^{(i)} ||^2$.
+
+### Advantages and Considerations:
+
+* **Powerful:** This deep learning approach is used in many state-of-the-art commercial recommenders.
+* **Feature Engineering:** Good feature engineering for the raw inputs ($X_u, X_m$) remains crucial, as it provides the raw material for the networks to learn from.
+* **Scalability Challenge:** While powerful, this model can be computationally expensive to run predictions for a very large catalog of items, as you need to compute dot products for all possible user-item pairs.
+* **Pre-computation:** Finding similar items can be pre-computed offline (e.g., overnight) for all items in the catalog, allowing fast retrieval when a user is Browse.
+
+The next video will discuss practical issues and modifications to scale this content-based filtering approach for very large item catalogs.
