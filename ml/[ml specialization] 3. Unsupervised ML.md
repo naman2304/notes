@@ -1018,3 +1018,48 @@ TensorFlow's Keras Functional API is used to define how inputs flow through thes
   * The `tf.keras.layers.Dot` layer is used for efficiently computing dot products between learned latent vectors.
   * **L2 normalization of latent vectors (`tf.linalg.normalize`) is a crucial refinement** that often improves stability and performance.
   * **Feature Engineering:** Designers often spend significant time carefully crafting the input features ($X\_u, X\_m$) for these content-based filtering algorithms.
+
+## Principal Components Analysis (PCA): Dimensionality Reduction for Visualization
+
+This video introduces **Principal Components Analysis (PCA)**, an unsupervised learning algorithm primarily used for **dimensionality reduction**, especially for **visualization** of high-dimensional data.
+
+### What is PCA?
+
+* **Goal:** To take a dataset with many features (e.g., 10, 50, 1000+) and reduce the number of features to a much smaller number (typically 2 or 3) while retaining as much important information as possible.
+* **Primary Use:** Visualization. You can't plot data with more than 3 features, so PCA helps project it onto a 2D or 3D space for inspection.
+* **Intuition:** PCA finds new axes (combinations of original features) along which the data varies the most.
+
+### Examples of PCA in Action:
+
+1.  **Car Data: Length (x1) vs. Width (x2)**
+    * **Scenario:** $x_1$ (length) varies a lot, $x_2$ (width) varies very little (cars fit roads).
+    * **PCA's Action:** PCA would effectively decide to keep $x_1$ and discard $x_2$, as $x_2$ provides little unique variation.
+2.  **Car Data: Length (x1) vs. Wheel Diameter (x2)**
+    * **Scenario:** $x_1$ (length) varies a lot, $x_2$ (wheel diameter) varies some.
+    * **PCA's Action:** PCA would still likely prioritize $x_1$ as the most informative single feature if reducing to one dimension.
+3.  **Car Data: Length (x1) vs. Height (x2)**
+    * **Scenario:** Both $x_1$ (length) and $x_2$ (height) vary significantly, often correlated (longer cars tend to be taller).
+    * **Challenge:** You can't just pick one (e.g., length) and discard the other (height) without losing significant information.
+    * **PCA's Action:** PCA would find a **new axis (let's call it $Z$)** that captures the combined variation of length and height. This $Z$-axis would represent something like the "size" of the car. Data points' coordinates on this new $Z$-axis would effectively reduce two features to one, while preserving much of the original data's variability. This $Z$-axis is not a third dimension sticking out but a new orientation within the existing 2D plane.
+
+4.  **3D Data on a "Pancake" (Manifold Learning):**
+    * **Scenario:** You have 3 features ($x_1, x_2, x_3$), but the data points effectively lie on a 2D surface (like a thin pancake) embedded in 3D space.
+    * **PCA's Action:** PCA can reduce these 3 features down to 2 new features ($Z_1, Z_2$) by finding the 2 dimensions of the "pancake" that capture most of the data's variance. This allows visualization on a 2D plot.
+
+5.  **Country Development Data (50 features):**
+    * **Scenario:** Data for many countries with 50 features each (GDP, per capita GDP, Human Development Index, life expectancy, etc.). Impossible to plot directly.
+    * **PCA's Action:** PCA reduces these 50 features to 2 features ($Z_1, Z_2$).
+        * **Interpretation (often possible post-hoc):** $Z_1$ might loosely correspond to "total country size/economy" (e.g., GDP), and $Z_2$ might correspond to "development level per person" (e.g., per capita GDP, HDI).
+    * **Visualization:** Plotting countries on the $Z_1$ vs. $Z_2$ axes allows visual clustering of similar countries (e.g., large developed nations, small highly developed nations, smaller less developed nations, large less developed nations).
+
+### Core Principle of PCA:
+
+PCA finds new axes (called principal components) that are linear combinations of the original features. It selects the axes along which the data has the **largest variance**, thereby capturing the most "information" (or spread) in the data in fewer dimensions.
+
+### Why Use PCA?
+
+* **Visualization:** Makes high-dimensional data plottable (2D or 3D), helping data scientists understand its structure, patterns, and outliers.
+* **Insight:** Can reveal hidden relationships or groupings in the data.
+* **Data Exploration:** Helps identify funny or unexpected patterns in the dataset.
+
+The next video will delve into the exact mechanism of how PCA works.
