@@ -2871,3 +2871,42 @@ Both decision trees (and their ensembles like Random Forest and XGBoost) and neu
 * The rise of faster computing and transfer learning has significantly boosted the applicability and performance of neural networks across a wide range of problems.
 
 This concludes the course on Advanced Learning Algorithms. You've now learned about both neural networks and decision trees, along with practical tips for building effective ML systems. The next course will cover unsupervised learning.
+
+## Data Leakage in Machine Learning
+
+Data leakage occurs when your model gains access to information during training that it wouldn't legitimately have at the time of making predictions (inference), leading to overly optimistic performance during development but poor real-world results.
+
+### 1. Classical ML Data Leakage (Feature Leakage)
+
+* **Definition:** The model inadvertently uses future or otherwise unavailable information from the training data.
+* **Key Points:**
+    * Most common in tabular or traditional machine learning tasks.
+    * Results in deceptively high training and validation accuracy during development.
+    * Leads to significantly worse performance when deployed in the real world.
+    * Often caused by errors in feature engineering or improper data splitting.
+* **Examples:**
+    * Using the target variable itself (e.g., a `loan_status` label that indicates if a loan defaulted, being present as an input feature for predicting default).
+    * Incorporating information that only becomes known *after* the prediction point (e.g., using `account_closed` as a feature to predict fraud before the account actually closes).
+    * Incorrectly splitting time-series data without respecting chronological order, or allowing test data to influence training data (test data contamination).
+* **Prevention:**
+    * Rigorously ensure that all features used for training are strictly those that would be available at the exact moment of inference.
+    * Implement time-aware train/test splits for time-series data to prevent future information leakage.
+    * Carefully audit features that show an unusually high correlation with the target variable, as this can be a red flag for leakage.
+
+### 2. LLM Data Leakage (Training Data Memorization)
+
+* **Definition:** A Large Language Model (LLM) memorizes and directly reproduces specific content (which may be sensitive, copyrighted, or from evaluation datasets) from its vast training data.
+* **Key Points:**
+    * A significant concern in the development and deployment of LLMs and other foundation models.
+    * Raises serious issues related to user privacy, intellectual property (copyright), and the validity of benchmark evaluations.
+    * The model might output private personal identifiable information (PII), confidential data like API keys, or exact questions/answers from standard test sets.
+* **Examples:**
+    * Generating user-specific PII (e.g., email addresses, phone numbers) in response to a prompt.
+    * Providing verbatim answers to benchmark questions (e.g., from datasets like MMLU) that it encountered during training, inflating its perceived performance.
+    * Reproducing copyrighted literary works or segments of code without attribution.
+* **Prevention:**
+    * **Data Deduplication:** Remove near-identical documents from the training dataset to reduce opportunities for memorization.
+    * **PII Filtering:** Employ regular expressions or automated detection systems to identify and remove sensitive personal data from training corpora.
+    * **Benchmark Exclusion:** Explicitly exclude known public benchmark datasets from the training data to ensure fair evaluation.
+    * **Red Teaming & Auditing:** Proactively test and audit the deployed model by intentionally crafting prompts designed to elicit potential data leaks.
+    * **Differential Privacy:** Explore advanced cryptographic techniques, though implementing differential privacy at the scale of LLM training remains a challenging research area.
