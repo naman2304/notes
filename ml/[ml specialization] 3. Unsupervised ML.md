@@ -533,6 +533,8 @@ The previous video assumed we have pre-defined features for each movie. This vid
 * **From Users to Item Features:** If we know how different users rate an item, and we know those users' preferences (their $\vec{w}^{(j)}$ and $b^{(j)}$ parameters), we can infer what characteristics that item must have to explain those ratings.
     * Example: If Alice (who likes romance) and Bob (who likes romance) both rate Movie 1 highly, but Carol (who likes action) and Dave (who likes action) rate Movie 1 low, this suggests Movie 1 is a "romance" movie.
 
+<img src="/metadata/colabb.png" width="500" />
+
 ### Step 1 (Conceptual): Learning Item Features ($X^{(i)}$) given User Parameters ($\vec{w}^{(j)}, b^{(j)}$)
 
 * **Goal:** For a specific movie $i$, learn its feature vector $X^{(i)}$.
@@ -568,3 +570,56 @@ The core idea is that we don't know *either* the user parameters *or* the item f
 **Why "Collaborative Filtering"?** It's called this because ratings from *multiple users* on the *same item* collaboratively help infer the item's features, and similarly, ratings from a *single user* on *multiple items* help infer that user's preferences. This collaboration between user data points helps predict ratings for other users and items.
 
 The next video will explore collaborative filtering for binary labels (e.g., user likes/favors an item) instead of star ratings.
+
+## Collaborative Filtering with Binary Labels
+
+Many recommender systems deal with **binary labels** (e.g., user "liked" or "disliked" an item, "purchased" or "did not purchase"), rather than explicit star ratings. This video generalizes the collaborative filtering algorithm to this setting, similar to how linear regression was generalized to logistic regression.
+
+### Binary Label Examples:
+
+* **Online Shopping:**
+    * 1: User purchased an item (after exposure).
+    * 0: User did not purchase (after exposure).
+    * ?: User was not exposed to the item.
+* **Social Media:**
+    * 1: User favorited/liked an item (after being shown it).
+    * 0: User did not favorite/like (after being shown it).
+    * ?: Item not yet shown to the user.
+* **Implicit Engagement (e.g., streaming, content sites):**
+    * 1: User spent $\ge 30$ seconds on an item.
+    * 0: User spent $< 30$ seconds on an item.
+    * ?: Item not yet shown.
+* **Online Advertising:**
+    * 1: User clicked on an ad.
+    * 0: User did not click.
+    * ?: Ad not shown.
+
+**Common Interpretation:**
+* **1:** User engaged after being shown the item (clicked, spent time, favorited, purchased).
+* **0:** User did not engage after being shown the item.
+* **?:** Item not yet shown.
+
+### Generalizing the Algorithm:
+
+Previously, we predicted $y(i,j) = \vec{w}^{(j)} \cdot X^{(i)} + b^{(j)}$ (similar to linear regression).
+For binary labels, we generalize this using the **Sigmoid (logistic) function**, similar to logistic regression:
+
+* **Predicted Probability of Liking/Engagement:**
+    $$\hat{y}(i,j) = P(y(i,j)=1) = g(\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)})$$
+    where $g(z) = \frac{1}{1 + e^{-z}}$ is the sigmoid function.
+    * This model now predicts the probability that user $j$ will like/engage with item $i$.
+
+### Modifying the Cost Function for Binary Labels:
+
+Instead of the squared error cost, we use a cost function appropriate for binary classification: the **binary cross-entropy loss** (which was used for logistic regression and binary neural network classification).
+
+* **Loss for a single $y(i,j)$:**
+    $$L(\hat{y}(i,j), y(i,j)) = -y(i,j) \log(\hat{y}(i,j)) - (1 - y(i,j)) \log(1 - \hat{y}(i,j))$$
+* **Overall Cost Function (for all parameters $\vec{w}, \vec{b}, X$):**
+    $$J(\vec{w}, \vec{b}, X) = \sum_{(i,j): r(i,j)=1} L(\hat{y}(i,j), y(i,j)) + \frac{\lambda}{2} \sum_{j=1}^{N_u} \sum_{k=1}^{n} (w_k^{(j)})^2 + \frac{\lambda}{2} \sum_{i=1}^{N_m} \sum_{k=1}^{n} (X_k^{(i)})^2$$
+    * The summation is over all user-item pairs where a rating/engagement exists ($r(i,j)=1$).
+    * The $\lambda$ terms are for regularization of user parameters and item features.
+
+By minimizing this modified cost function (e.g., using gradient descent), the algorithm learns optimal user preferences and item features for predicting binary engagement signals. This significantly expands the range of applications collaborative filtering can address.
+
+The next video will discuss implementation tips and refinements for this algorithm.
