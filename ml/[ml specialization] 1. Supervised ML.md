@@ -1172,4 +1172,53 @@ Regularized logistic regression is a powerful and widely used algorithm. Knowing
 
 **Congratulations!** You've completed Course 1. The next course in this specialization will introduce **Neural Networks (Deep Learning)**, which build upon the concepts of cost functions, gradient descent, and Sigmoid functions learned here.
 
----
+## K-Nearest Neighbors (KNN)
+
+KNN is a **supervised learning** algorithm used for both **classification and regression** tasks. It makes predictions for new data points based on the characteristics of their $K$ closest data points in the training set.
+
+### How It Works:
+
+1.  **No Explicit Training Phase (Lazy Learner):** Unlike many other algorithms, KNN does not build an explicit model during a "training" phase. Instead, it simply stores the entire training dataset.
+2.  **Prediction Process for a New Point:**
+    * **Calculate Distances:** Compute the distance (e.g., Euclidean distance) from the new data point to all existing points in the training set.
+    * **Identify K Nearest Neighbors:** Select the $K$ training data points that are closest to the new point.
+    * **For Classification Tasks:** The predicted class for the new point is determined by a **majority vote** among its $K$ nearest neighbors.
+    * **For Regression Tasks:** The predicted value for the new point is the **average** (mean) of the values of its $K$ nearest neighbors.
+
+### Example: Classifying Fruits
+
+**Training Data:**
+
+| Fruit  | Weight (g) | Texture |
+| :----- | :--------- | :------ |
+| Apple  | 150        | Smooth  |
+| Apple  | 170        | Smooth  |
+| Orange | 160        | Bumpy   |
+| Orange | 180        | Bumpy   |
+
+**New Fruit to Classify:** Weight = 155g, Texture = Smooth.
+
+* **Conversion to Numeric (for distance calculation):** Assume Smooth = 0, Bumpy = 1.
+* New point: (155, 0).
+
+**Distance Calculations (example using Euclidean distance):**
+
+* Apple (150, 0) $\rightarrow$ distance = $\sqrt{(155-150)^2 + (0-0)^2} = \sqrt{5^2} = 5$
+* Apple (170, 0) $\rightarrow$ distance = $\sqrt{(155-170)^2 + (0-0)^2} = \sqrt{(-15)^2} = 15$
+* Orange (160, 1) $\rightarrow$ distance = $\sqrt{(155-160)^2 + (0-1)^2} = \sqrt{(-5)^2 + (-1)^2} = \sqrt{25 + 1} = \sqrt{26} \approx 5.1$
+* Orange (180, 1) $\rightarrow$ distance = $\sqrt{(155-180)^2 + (0-1)^2} = \sqrt{(-25)^2 + (-1)^2} = \sqrt{625 + 1} = \sqrt{626} \approx 25$
+
+**For K = 3 Nearest Neighbors:**
+
+* The 3 closest points are:
+    1.  Apple (150, 0) - distance 5
+    2.  Orange (160, 1) - distance $\approx 5.1$
+    3.  Apple (170, 0) - distance 15
+
+**Prediction:** Based on the majority vote of these 3 neighbors, 2 are Apples and 1 is an Orange. Therefore, the **prediction is Apple**.
+
+### Key Points:
+
+* **Choice of K:** The value of $K$ is a hyperparameter that directly influences the bias-variance trade-off. A small $K$ can lead to high variance (sensitive to noise), while a large $K$ can lead to high bias (oversmoothing, missing local patterns).
+* **Sensitivity:** KNN is highly sensitive to irrelevant features (which can distort distances) and requires proper **feature scaling** (as features with larger scales will disproportionately influence distance calculations).
+* **Prediction Speed:** KNN is generally slower at prediction time compared to other "eager" learning algorithms, especially when dealing with very large datasets, because it must calculate distances to (or search through) all training points for each new prediction.
