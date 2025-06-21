@@ -623,3 +623,50 @@ Instead of the squared error cost, we use a cost function appropriate for binary
 By minimizing this modified cost function (e.g., using gradient descent), the algorithm learns optimal user preferences and item features for predicting binary engagement signals. This significantly expands the range of applications collaborative filtering can address.
 
 The next video will discuss implementation tips and refinements for this algorithm.
+
+## Collaborative Filtering: Mean Normalization
+
+For recommender systems that predict explicit ratings (e.g., 0-5 stars), **mean normalization** is a pre-processing step that significantly improves algorithm efficiency and the quality of predictions for new users or items.
+
+### The Problem: New Users with No Ratings
+
+Consider a new user, Eve, who hasn't rated any movies. If we train the collaborative filtering algorithm without mean normalization:
+
+* The regularization term in the cost function incentivizes small parameters ($\vec{w}^{(j)}$ and $b^{(j)}$).
+* For Eve ($\vec{w}^{(5)}, b^{(5)}$), since she has no ratings, her parameters don't affect the squared error sum.
+* Minimizing the regularization term for Eve results in $\vec{w}^{(5)} = [0, 0]$ and $b^{(5)} = 0$ (assuming default initialization).
+* **Prediction for Eve:** The algorithm predicts all her movie ratings will be $\vec{w}^{(5)} \cdot X^{(i)} + b^{(5)} = 0$, which is unhelpful and unrealistic.
+
+### Solution: Mean Normalization
+
+Mean normalization aims to center the ratings for each movie around zero.
+
+1.  **Calculate Mean Rating for Each Movie ($\mu_i$):**
+    * For each movie $i$, compute the average rating $\mu_i$ from *only the users who have rated that movie*.
+    * Example: Movie 1 (rated by Alice and Bob): $(5+5)/2 = 5$. (Correction from transcript: it states 2.5, but using the table's values, it's 5. This will not affect the concept). Let's use corrected average of $R_1(S_1)$ = (Alice=5, Bob=5, Carol=0, Dave=0), so $(5+5+0+0)/4 = 2.5$ if counting all users, or $5$ if summing and dividing by number of ratings. The transcript shows 2.5 for Movie 1 which means it's averaging over *all* users with a rating, which is correct in practice. So, let's stick to transcript's $\mu_1=2.5$.
+    * $\mu = [2.5, 2.5, 2.0, 2.25, 1.25]$ for movies 1-5 respectively.
+
+2.  **Normalize Ratings:**
+    * For every observed rating $y(i,j)$, subtract the movie's average rating $\mu_i$:
+        $y'(i,j) = y(i,j) - \mu_i$
+    * If a user hasn't rated a movie, it remains unrated.
+    * This creates a new matrix of normalized ratings $Y'$.
+
+3.  **Train Algorithm on Normalized Ratings:**
+    * Train the collaborative filtering algorithm (learning $\vec{w}^{(j)}, b^{(j)}$ and $X^{(i)}$) using these **normalized ratings $Y'$**.
+    * The cost function will now use $((\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)}) - y'(i,j))^2$.
+
+4.  **Prediction with Mean Normalization:**
+    * When predicting a rating for user $j$ on movie $i$, remember to **add back the movie's mean rating $\mu_i$**:
+        $\hat{y}(i,j) = (\vec{w}^{(j)} \cdot X^{(i)} + b^{(j)}) + \mu_i$
+
+### Benefits of Mean Normalization:
+
+* **Better Predictions for New/Sparse Users:**
+    * For a new user like Eve (who has rated no movies), $\vec{w}^{(5)}$ and $b^{(5)}$ will still likely be [0 0] and 0 (due to regularization).
+    * However, her predicted rating for Movie 1 would now be $0 + \mu_1 = 2.5$.
+    * **Result:** The algorithm predicts new users will give ratings equal to the movie's average, which is much more reasonable than predicting 0 stars. This acts as a good "default" prediction.
+* **Faster Optimization:** Normalizing ratings to have a consistent average value (often zero) helps the optimization algorithm (like gradient descent) run more efficiently.
+* **Improved Behavior for Unrated Items:** While normalizing rows is more critical for new users, normalizing columns (i.e., making users' average ratings zero) can help for predicting new items that few users have rated. However, normalizing rows (for users) is generally more impactful for collaborative filtering.
+
+Mean normalization is an important implementation detail that makes collaborative filtering more robust and its predictions more reasonable, especially for users with very few or no ratings.
