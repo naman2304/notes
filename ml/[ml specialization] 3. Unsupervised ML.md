@@ -774,3 +774,47 @@ Despite its power, collaborative filtering has limitations:
     * **Impact:** This side information can be highly predictive and useful, especially for cold start situations or when user interaction data is sparse. Collaborative filtering, in its pure form, doesn't utilize it.
 
 The next video will introduce **content-based filtering algorithms**, which directly address these limitations by leveraging side information about items and users, and are widely used in commercial applications.
+
+## Content-Based Filtering: A New Recommender System Approach
+
+This video introduces **Content-Based Filtering (CBF)**, a different approach to recommender systems that explicitly leverages features of both users and items to find good matches, addressing limitations of Collaborative Filtering (CF).
+
+### Collaborative Filtering vs. Content-Based Filtering:
+
+* **Collaborative Filtering (CF):** Recommends items based on ratings from *similar users* (users who liked what you liked) or item similarities derived from shared ratings. Relies solely on user-item interaction data.
+* **Content-Based Filtering (CBF):** Recommends items based on **features of the user** and **features of the item**, seeking a good match between them. It requires explicit descriptive attributes for users and items.
+
+### Features in Content-Based Filtering:
+
+CBF makes good use of diverse features for users and items:
+
+* **User Features ($X_u^{(j)}$ for user $j$):**
+    * **Demographics:** Age, gender, country (often one-hot encoded).
+    * **Past Behaviors:** List of top movies watched, products purchased (e.g., a binary vector for the 1000 most popular movies).
+    * **Aggregated Preferences:** Average rating per genre the user has given (e.g., average rating for romance movies, average for action movies). These features depend on user ratings.
+
+* **Item Features ($X_m^{(i)}$ for movie $i$):**
+    * **Metadata:** Year of release, genre(s), critic reviews (can be numerical scores or textual features).
+    * **Aggregated User Feedback:** Average rating of the movie (overall, or per country, or per user demographic). These features depend on user ratings of the item.
+
+### The Content-Based Filtering Model:
+
+Given user features ($X_u^{(j)}$) and item features ($X_m^{(i)}$), the goal is to predict the rating $\hat{y}(i,j)$.
+
+* **Mapping to Latent Vectors:** Instead of directly using the raw features $X_u^{(j)}$ and $X_m^{(i)}$ (which can be of different lengths), CBF often learns to map them into lower-dimensional, fixed-size **latent vectors**:
+    * $\vec{v}_u^{(j)}$: A vector representing user $j$'s preferences/profile.
+    * $\vec{v}_m^{(i)}$: A vector representing item $i$'s attributes/content.
+    * **Crucial:** These latent vectors ($\vec{v}_u$ and $\vec{v}_m$) must have the **same dimension** (e.g., both are 32-dimensional vectors) to allow for a dot product.
+
+* **Prediction Model:** The predicted rating is given by the dot product of the user's latent vector and the item's latent vector:
+    $$\hat{y}(i,j) = \vec{v}_u^{(j)} \cdot \vec{v}_m^{(i)}$$
+    * **Intuition:** This dot product effectively measures how well a user's preferences ($\vec{v}_u$) align with an item's characteristics ($\vec{v}_m$). For example, if $\vec{v}_u$ contains a component for "likes romance" and $\vec{v}_m$ contains a component for "is a romance movie," their dot product reflects this match.
+
+### Advantages over Collaborative Filtering:
+
+* **Addresses Cold Start Problem:**
+    * **New Items:** If a new item has good descriptive features ($X_m$), $\vec{v}_m$ can be computed even without many ratings, allowing it to be recommended immediately.
+    * **New Users:** If a new user provides some demographic or preference features ($X_u$), $\vec{v}_u$ can be computed, enabling recommendations without a long rating history.
+* **Leverages Side Information:** Directly incorporates rich descriptive data about users and items that CF struggles with.
+
+The next video will delve into how these latent vectors $\vec{v}_u$ and $\vec{v}_m$ are actually computed.
