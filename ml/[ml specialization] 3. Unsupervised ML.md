@@ -1037,18 +1037,19 @@ This video introduces **Principal Components Analysis (PCA)**, an unsupervised l
 2.  **Car Data: Length (x1) vs. Wheel Diameter (x2)**
     * **Scenario:** $x_1$ (length) varies a lot, $x_2$ (wheel diameter) varies some.
     * **PCA's Action:** PCA would still likely prioritize $x_1$ as the most informative single feature if reducing to one dimension.
-3.  **Car Data: Length (x1) vs. Height (x2)**
+  
+<img src="/metadata/pca.png" width="400" />
+
+4.  **Car Data: Length (x1) vs. Height (x2)**
     * **Scenario:** Both $x_1$ (length) and $x_2$ (height) vary significantly, often correlated (longer cars tend to be taller).
     * **Challenge:** You can't just pick one (e.g., length) and discard the other (height) without losing significant information.
     * **PCA's Action:** PCA would find a **new axis (let's call it $Z$)** that captures the combined variation of length and height. This $Z$-axis would represent something like the "size" of the car. Data points' coordinates on this new $Z$-axis would effectively reduce two features to one, while preserving much of the original data's variability. This $Z$-axis is not a third dimension sticking out but a new orientation within the existing 2D plane.
 
-<img src="/metadata/pca.png" width="400" />
-
-4.  **3D Data on a "Pancake" (Manifold Learning):**
+5.  **3D Data on a "Pancake" (Manifold Learning):**
     * **Scenario:** You have 3 features ($x_1, x_2, x_3$), but the data points effectively lie on a 2D surface (like a thin pancake) embedded in 3D space.
     * **PCA's Action:** PCA can reduce these 3 features down to 2 new features ($Z_1, Z_2$) by finding the 2 dimensions of the "pancake" that capture most of the data's variance. This allows visualization on a 2D plot.
 
-5.  **Country Development Data (50 features):**
+6.  **Country Development Data (50 features):**
     * **Scenario:** Data for many countries with 50 features each (GDP, per capita GDP, Human Development Index, life expectancy, etc.). Impossible to plot directly.
     * **PCA's Action:** PCA reduces these 50 features to 2 features ($Z_1, Z_2$).
         * **Interpretation (often possible post-hoc):** $Z_1$ might loosely correspond to "total country size/economy" (e.g., GDP), and $Z_2$ might correspond to "development level per person" (e.g., per capita GDP, HDI).
