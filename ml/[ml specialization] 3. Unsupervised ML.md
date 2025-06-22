@@ -157,6 +157,12 @@ K-means aims to minimize the distortion cost function $J$. However, because $J$ 
 * Different random initializations can lead to different final clusterings.
 * Some clusterings might be suboptimal, with higher $J$ values, even if K-means converged for that specific initialization.
 
+The cost function for K-means (the distortion function $J$) is **convex** with respect to the cluster centroids ($\mu$) when the assignments ($c$) are fixed, and it's also **convex** with respect to the assignments ($c$) when the centroids ($\mu$) are fixed.
+
+However, the **overall optimization problem** of finding the global minimum of the cost function with respect to *both* assignments and centroids simultaneously is **non-convex**.
+
+This is why K-means can get stuck in local minima despite its iterative steps always reducing the cost function.
+
 ### Solution: Multiple Random Initializations
 
 To mitigate the problem of local optima and increase the chance of finding a good clustering, run K-means multiple times with different random initializations.
