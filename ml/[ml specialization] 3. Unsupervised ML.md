@@ -1136,13 +1136,22 @@ This video demonstrates how to implement PCA using the `scikit-learn` library an
     * **Example (1 component):** `pca_1 = PCA(n_components=1).fit(X)`
 3.  **Analyze Explained Variance Ratio:**
     * After fitting, check `pca.explained_variance_ratio_`. This tells you the percentage of the original data's variance (information) captured by each principal component.
-    * **Example (2 components):** `[0.992, 0.008]` means the first component explains 99.2% of variance, and the second explains 0.8%. The sum of explained variances for all components will be 1 (100%).
+    * **Example (2 components):** `[0.992, 0.008]` means the first component explains 99.2% of variance, and the second explains 0.8%.
 4.  **Transform Data (Project):**
     * Use the `transform()` method to project your original data onto the newly found principal components (axes).
     * `Z = pca_1.transform(X)` (for 1 component). The output `Z` will have `n_components` features for each example.
     * Each data point is now represented by fewer numbers (its coordinates on the new axes).
 5.  **Visualize:**
     * If `n_components` is 2 or 3, you can now plot the transformed data ($Z_1$ vs. $Z_2$ or $Z_1$ vs. $Z_2$ vs. $Z_3$) to visualize the high-dimensional data.
+
+```python
+X = np.array([[1,1], [2,1], [3,2], [-1,-1], [-2,-1], [-3,-2]])
+pca_1 = PCA(n_components=1)
+pca_1.fit(X)
+pca_1.explained_variance_ratio_ # 0.992
+X_trans_1 = pca_1.transform(X)
+X_reduced_1 = pca.inverse_transform(X_trans_1) # array[[1.38, 2.22, 3.60, -1.38, -2.22, -3.60]])
+```
 
 ### Applications of PCA:
 
