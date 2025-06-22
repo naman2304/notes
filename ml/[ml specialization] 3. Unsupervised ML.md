@@ -1042,6 +1042,8 @@ This video introduces **Principal Components Analysis (PCA)**, an unsupervised l
     * **Challenge:** You can't just pick one (e.g., length) and discard the other (height) without losing significant information.
     * **PCA's Action:** PCA would find a **new axis (let's call it $Z$)** that captures the combined variation of length and height. This $Z$-axis would represent something like the "size" of the car. Data points' coordinates on this new $Z$-axis would effectively reduce two features to one, while preserving much of the original data's variability. This $Z$-axis is not a third dimension sticking out but a new orientation within the existing 2D plane.
 
+<img src="/metadata/pca.png" width="400" />
+
 4.  **3D Data on a "Pancake" (Manifold Learning):**
     * **Scenario:** You have 3 features ($x_1, x_2, x_3$), but the data points effectively lie on a 2D surface (like a thin pancake) embedded in 3D space.
     * **PCA's Action:** PCA can reduce these 3 features down to 2 new features ($Z_1, Z_2$) by finding the 2 dimensions of the "pancake" that capture most of the data's variance. This allows visualization on a 2D plot.
