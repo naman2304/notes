@@ -1066,3 +1066,57 @@ PCA finds new axes (called principal components) that are linear combinations of
 * **Data Exploration:** Helps identify funny or unexpected patterns in the dataset.
 
 The next video will delve into the exact mechanism of how PCA works.
+
+## Principal Components Analysis (PCA): How it Works
+
+PCA is an unsupervised learning algorithm for **dimensionality reduction**, primarily used to reduce a large number of features to a smaller set (e.g., 2 or 3) for visualization and data understanding.
+
+### Goal of PCA:
+
+To find a new axis (or set of axes), called **principal components**, such that when the original data is projected onto this new axis, the projected data retains the **largest possible variance (spread)**. Maximizing variance means minimizing the information lost during dimensionality reduction.
+
+### Preprocessing Steps:
+
+Before applying PCA, features should be preprocessed:
+
+1.  **Zero Mean Normalization:** Subtract the mean from each feature so that each feature has a mean of zero. This centers the data around the origin.
+2.  **Feature Scaling:** If features are on very different scales (e.g., house size in sq ft vs. number of bedrooms), perform feature scaling (e.g., min-max scaling or z-score normalization) to ensure features contribute equally to variance calculation.
+
+### Finding the Principal Component (for 2D to 1D Reduction):
+
+* **Visualization:** Imagine plotting data points (e.g., car length $x_1$ vs. height $x_2$) in a 2D space.
+* **Projection:** PCA aims to find a new axis ($Z$-axis) such that when each data point is **projected** onto this $Z$-axis (by drawing a perpendicular line from the point to the axis), the resulting projected points are as spread out as possible.
+* **Optimal Axis:** The $Z$-axis that maximizes the variance of these projected points is called the **first principal component**. This axis captures the most significant direction of variation in the data.
+
+### Projecting a Data Point onto the Principal Component:
+
+* Let the first principal component be represented by a **unit vector** (length 1) in the direction of the $Z$-axis (e.g., $[0.71, 0.71]$ for a diagonal axis).
+* To project a data point (e.g., $[2, 3]$ for $x_1, x_2$) onto this axis, compute the **dot product** of the data point's vector and the principal component unit vector.
+    * Example: $[2, 3] \cdot [0.71, 0.71] = (2 \times 0.71) + (3 \times 0.71) = 3.55$. This $3.55$ is the new single coordinate for the data point on the $Z$-axis.
+
+### Multiple Principal Components:
+
+* If reducing to more than one dimension (e.g., 50 features to 3 features):
+    * The **second principal component** is an axis perpendicular (at 90 degrees) to the first principal component, capturing the next largest amount of variance in the remaining data.
+    * The **third principal component** is perpendicular to both the first and second, and so on.
+
+### PCA vs. Linear Regression:
+
+PCA is fundamentally different from Linear Regression:
+
+* **PCA (Unsupervised):**
+    * Has no target label $Y$. It only uses input features ($X_1, X_2, \dots$).
+    * Treats all features equally, aiming to find new axes ($Z$-axes) that minimize the squared perpendicular distance from data points to the axis.
+    * Goal: **Reduce dimensionality** by finding directions of maximum variance.
+* **Linear Regression (Supervised):**
+    * Has a target label $Y$.
+    * Fits a line (or hyperplane) to predict $Y$ from $X$.
+    * Goal: **Minimize squared vertical distances** (along the $Y$-axis) between predictions and actual $Y$ values.
+
+### Reconstruction (Optional Step):
+
+* Given a projected point on the $Z$-axis (e.g., $Z=3.55$), PCA can **reconstruct** an approximation of the original high-dimensional data.
+* Formula: Multiply the $Z$ coordinate by the principal component unit vector (e.g., $3.55 \times [0.71, 0.71] = [2.52, 2.52]$).
+* **Purpose:** Shows how much information is retained. The reconstructed point is the closest point on the principal component axis to the original data point.
+
+**Summary:** PCA finds new axes (principal components) that capture the maximum variance in the data when projected. This reduces dimensionality, allowing for visualization and better understanding of high-dimensional datasets. The next video will show how to implement PCA using scikit-learn.
