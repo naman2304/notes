@@ -287,3 +287,279 @@ If all constant terms ($C$) in a system of linear equations are set to zero, the
 * The concepts of "complete," "redundant," and "contradictory" describe *why* a system has a certain number of solutions, but "singular" and "non-singular" are the overarching classifications.
 * **Significance:** This simplification means that to determine singularity, we can always analyze systems where all equations pass through the origin. This makes geometric interpretation simpler, as we only need to consider whether the lines/planes are distinct and intersecting, identical, or non-intersecting in their fundamental orientation, irrespective of their shifted positions.
 * For the rest of the course, **singularity** and **non-singularity** will be the primary terms used.
+
+## Introducing the Matrix
+
+Matrices are fundamental objects in linear algebra, arising naturally from the coefficients of systems of linear equations.
+
+### From System of Equations to Matrix
+
+* Since constants don't affect singularity, we can simplify systems by setting all constants to zero.
+* A **matrix** is an array of numbers (coefficients) arranged in a rectangle.
+* **Structure:**
+    * Each **row** of the matrix corresponds to an equation.
+    * Each **column** of the matrix corresponds to the coefficients of a specific variable.
+* **Examples (2x2 Systems):**  
+**System 1:** $a + b = 0$, $a + 2b = 0$
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+1 & 2
+\end{pmatrix}
+$$
+
+**System 2:** $a + b = 0$, $2a + 2b = 0$
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+2 & 2
+\end{pmatrix}
+$$
+
+### Matrix Singularity
+
+* A matrix is classified as **singular** or **non-singular** based on the singularity of its corresponding system of linear equations.
+* If the system has a **unique solution** (non-singular), its matrix is **non-singular**.
+* *Example:* Following is non-singular because $a+b=0, a+2b=0$ has only $(0,0)$ as a solution.
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+1 & 2
+\end{pmatrix}
+$$
+
+* If the system has **infinitely many solutions** or **no solutions** (singular), its matrix is **singular**.
+* *Example:* Following is singular because $a+b=0, 2a+2b=0$ has infinitely many solutions.
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+2 & 2
+\end{pmatrix}
+$$
+
+### 3x3 Systems and their Matrices
+
+Similar principles apply to systems with more variables and larger matrices.
+
+* **System 1 (Non-Singular):**
+* Example: $a+b+c=0$, $a+2b+c=0$, $a+b+2c=0$.
+* Unique solution $(0,0,0)$.
+* Corresponding Matrix (non-singular):
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+1 & 2 & 1 \\
+1 & 1 & 2
+\end{pmatrix}
+$$
+
+* **System 2 & 3 (Singular - after setting constants to zero):**
+    * Example: $a+b+c=0$, $a+b+2c=0$, $a+b+3c=0$ (originally had different constants, but becomes this when constants are zero).
+    * Leads to $c=0$ and $a=-b$, thus infinitely many solutions where $a+b=0, c=0$.
+    * Corresponding Matrix (singular):
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+1 & 1 & 2 \\
+1 & 1 & 3
+\end{pmatrix}
+$$
+
+* **System 4 (Singular):**
+    * Example: $a+b+c=0$, $2a+2b+2c=0$, $3a+3b+3c=0$.
+    * All equations are multiples of the first, leading to infinitely many solutions where $a+b+c=0$.
+    * Corresponding Matrix (singular):
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+2 & 2 & 2 \\
+3 & 3 & 3
+\end{pmatrix}
+$$
+
+**Note:** Quicker methods exist to determine matrix singularity without solving the system (e.g., using determinants, which will be covered later).
+
+## Linear Dependence and Independence of Rows
+
+This concept provides a direct way to determine if a matrix (and its corresponding system of linear equations) is singular or non-singular, without solving the system.
+
+### Linear Dependence
+
+A set of rows (or equations) is **linearly dependent** if at least one row can be expressed as a **linear combination** of the others, meaning that row does not provide new information. One row can be a sum or weighted sum of others.
+
+* **Example 1:** For the system $a = 1$, $b = 2$, $a+b = 3$, the coefficient matrix (assuming constants are zero for singularity check) is following. Here, Row 3 is Row 1 + Row 2. This indicates linear dependence, implying the matrix is **singular**.
+
+$$
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+1 & 1 & 0
+\end{pmatrix}
+$$
+
+* **Example 2:** For following matrix, Row 2 is $2 \times$ Row 1, and Row 3 is $3 \times$ Row 1. This demonstrates linear dependencies. This implies the matrix is **singular**.
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+2 & 2 & 2 \\
+3 & 3 & 3
+\end{pmatrix}
+$$
+
+* **Example 3:** For following matrix, Row 2 is the average of Row 1 and Row 3 ($2 \times \text{Row 2} = \text{Row 1} + \text{Row 3}$). This implies the rows are linearly dependent, and the matrix is **singular**.
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+1 & 1 & 2 \\
+1 & 1 & 3
+\end{pmatrix}
+$$
+
+### Linear Independence
+
+A set of rows (or equations) is **linearly independent** if no row can be expressed as a linear combination of the others. Each row provides unique information.
+
+* **Example:** For the system $a + b = 0$, $a + 2b = 0$, the matrix is following. Here, Row 2 is not a multiple of Row 1. This implies the rows are linearly independent, and the matrix is **non-singular** (system has a unique solution).
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+1 & 2
+\end{pmatrix}
+$$
+
+### Summary of Linear Dependence/Independence and Singularity
+
+* **Linearly Dependent Rows $\implies$ Singular Matrix** (System has infinite solutions or no solutions).
+* **Linearly Independent Rows $\implies$ Non-Singular Matrix** (System has a unique solution).
+
+The concept of linear dependence also applies to columns of a matrix, which also determines singularity. Techniques to easily verify linear independence will be covered later.
+
+## Determinant of a Matrix
+
+The **determinant** is a quick formula to determine if a matrix is singular or non-singular.
+* If the determinant is **zero**, the matrix is **singular**.
+* If the determinant is **non-zero**, the matrix is **non-singular**.
+
+### Determinant of a 2x2 Matrix
+
+For a 2x2 matrix with entries:
+
+$$
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+$$
+
+The determinant is calculated as: $det(A) = ad - bc$
+* $ad$ is the product of the numbers in the **main diagonal**.
+* $bc$ is the product of the numbers in the **antidiagonal**.
+
+**Example:**
+
+$$
+\begin{pmatrix}
+1 & 1 \\
+1 & 2
+\end{pmatrix}
+$$
+
+Determinant = $(1 \times 2) - (1 \times 1) = 2 - 1 = 1$. Since $1 \neq 0$, the matrix is non-singular.
+
+$$
+\begin{pmatrix}
+1 & 2 \\
+1 & 2
+\end{pmatrix}
+$$
+
+Determinant = $(1 \times 2) - (2 \times 1) = 2 - 2 = 0$. Since $0$, the matrix is singular.
+
+### Determinant of a 3x3 Matrix
+
+For a 3x3 matrix:
+
+$$
+\begin{pmatrix}
+a & b & c \\
+d & e & f \\
+g & h & i
+\end{pmatrix}
+$$
+
+The determinant is calculated by summing the products of the elements along the "main" diagonals (top-left to bottom-right) and subtracting the products of the elements along the "anti-diagonals" (top-right to bottom-left).
+
+**Visualizing the diagonals:**
+1.  **Main diagonals (add):**
+    * $a \cdot e \cdot i$
+    * $b \cdot f \cdot g$ (wrap around from top-right to bottom-left)
+    * $c \cdot d \cdot h$ (wrap around from top-right to bottom-left)
+2.  **Anti-diagonals (subtract):**
+    * $c \cdot e \cdot g$
+    * $a \cdot f \cdot h$ (wrap around from top-left to bottom-right)
+    * $b \cdot d \cdot i$ (wrap around from top-left to bottom-right)
+
+So, the determinant is: $det(A) = (aei + bfg + cdh) - (ceg + afh + bdi)$
+
+**Example:**
+
+$$
+\begin{pmatrix}
+1 & 1 & 1 \\
+1 & 2 & 1 \\
+1 & 1 & 2
+\end{pmatrix}
+$$
+
+* Main diagonals:
+    * $1 \times 2 \times 2 = 4$
+    * $1 \times 1 \times 1 = 1$
+    * $1 \times 1 \times 1 = 1$  
+    Sum of main diagonals = $4 + 1 + 1 = 6$
+
+* Anti-diagonals:
+    * $1 \times 2 \times 1 = 2$
+    * $1 \times 1 \times 1 = 1$
+    * $1 \times 1 \times 2 = 2$  
+    Sum of anti-diagonals = $2 + 1 + 2 = 5$
+
+Determinant = $6 - 5 = 1$. Since $1 \neq 0$, the matrix is non-singular.
+
+### Shortcut for Upper Triangular Matrices
+
+For an **upper triangular matrix** (where all elements below the main diagonal are zero), the determinant is simply the product of the elements in the main diagonal.
+
+**Example:**
+
+$$
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 2 & 0 \\
+0 & 0 & 3
+\end{pmatrix}
+$$
+
+Determinant = $1 \times 2 \times 3 = 6$.
+Even if an upper triangular matrix has a zero on its main diagonal, its determinant will be zero, indicating it is singular.
+
+**Example:**
+
+$$
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 2 & 0 \\
+0 & 0 & 0
+\end{pmatrix}
+$$
+
+Determinant = $1 \times 2 \times 0 = 0$. This matrix is singular.
