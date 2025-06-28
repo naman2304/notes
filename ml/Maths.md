@@ -252,3 +252,38 @@ Intersections of planes represent solutions to 3D systems:
 
 * **No Solution (Contradictory / Singular System):**
     * Planes have **no common intersection point**, potentially due to parallel planes or complex arrangements where no single point is on all planes.
+
+## Singular vs. Non-Singular: Simplified Visualization
+
+This section introduces a simplified way to determine if a system of linear equations is singular or non-singular, by focusing solely on the relationship between the lines/planes, independent of their absolute position.
+
+### The Role of Constants
+
+Consider the general form of a linear equation: $Ax + By = C$. The constant term $C$ determines where the line (or plane) is positioned in space.
+
+* **Original Systems:**
+    * System 1: $a + b = 10$, $a + 2b = 12$ (Unique Solution, Non-Singular)
+    * System 2: $a + b = 10$, $2a + 2b = 20$ (Infinitely Many Solutions, Singular - Redundant)
+    * System 3: $a + b = 10$, $2a + 2b = 24$ (No Solution, Singular - Contradictory)
+
+### Setting Constants to Zero
+
+If all constant terms ($C$) in a system of linear equations are set to zero, the resulting lines (or planes) will always pass through the **origin** $(0,0)$ (or $(0,0,0)$ in 3D). This is because $(0,0)$ (or $(0,0,0)$) becomes a solution to every equation if the constants are zero.
+
+* **Transformed Systems (Constants Set to Zero):**
+    * System 1 (transformed): $a + b = 0$, $a + 2b = 0$.
+        * **Plot:** Still two distinct lines intersecting at a unique point (the origin).
+        * **Status:** Still **non-singular** (unique solution).
+    * System 2 (transformed): $a + b = 0$, $2a + 2b = 0$.
+        * **Plot:** Still two identical lines passing through the origin.
+        * **Status:** Still **singular** (infinitely many solutions - redundant).
+    * System 3 (transformed): $a + b = 0$, $2a + 2b = 0$.
+        * **Plot:** Transforms from distinct parallel lines to identical lines (overlapping at the origin).
+        * **Status:** Changes from "no solution/contradictory" to "infinitely many solutions/redundant", but crucially, it **remains singular**.
+
+### Conclusion on Singularity
+
+* **Key Insight:** Setting the constants to zero **does not change whether a system is singular or non-singular**.
+* The concepts of "complete," "redundant," and "contradictory" describe *why* a system has a certain number of solutions, but "singular" and "non-singular" are the overarching classifications.
+* **Significance:** This simplification means that to determine singularity, we can always analyze systems where all equations pass through the origin. This makes geometric interpretation simpler, as we only need to consider whether the lines/planes are distinct and intersecting, identical, or non-intersecting in their fundamental orientation, irrespective of their shifted positions.
+* For the rest of the course, **singularity** and **non-singularity** will be the primary terms used.
