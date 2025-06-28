@@ -115,11 +115,11 @@ This week will cover:
 * Manipulation of these systems to compute determinants and other characteristics.
 
 **Challenge Scenario:** Suppose you have scores $a$ (Linear Algebra), $c$ (Calculus), and $p$ (Probability and Statistics).
-1.  **Equation 1:** Linear Algebra score + Calculus score - Probability and Statistics score = 6
+1.  **Equation 1:** Linear Algebra score + Calculus score - Probability and Statistics score = 6  
     $$a + c - p = 6$$
-2.  **Equation 2:** Linear Algebra score - Calculus score + 2 * Probability and Statistics score = 4
+2.  **Equation 2:** Linear Algebra score - Calculus score + 2 * Probability and Statistics score = 4  
     $$a - c + 2p = 4$$
-3.  **Equation 3:** 4 * Linear Algebra score - 2 * Calculus score + Probability and Statistics score = 10
+3.  **Equation 3:** 4 * Linear Algebra score - 2 * Calculus score + Probability and Statistics score = 10  
     $$4a - 2c + p = 10$$
 
 **Questions to Consider:**
@@ -134,3 +134,121 @@ This week will cover:
 5.  **Determinant:** Can you calculate the determinant of that matrix?
 
 Answering these questions indicates readiness for the week's quiz and labs. If not, the week's materials will guide you step-by-step through solving such systems and understanding properties like singularity and the determinant.
+
+## Introduction to Systems of Sentences (Analogy for Systems of Equations)
+
+Understanding how sentences (information) combine is analogous to how equations combine.
+
+### Types of Systems of Sentences
+
+Based on information conveyed:
+
+* **Complete System:** Contains as many unique pieces of information as sentences.
+    * *Example:* "The dog is black." "The cat is orange."
+* **Redundant System:** Contains fewer unique pieces of information than sentences, due to repetition.
+    * *Example:* "The dog is black." "The dog is black."
+* **Contradictory System:** Contains conflicting information.
+    * *Example:* "The dog is black." "The dog is white."
+
+### Terminology: Singular vs. Non-Singular
+
+* **Non-Singular System:** A **complete** system. It provides the maximum possible information (as many pieces of information as sentences).
+* **Singular System:** A system that is either **redundant** or **contradictory**. It provides less information than a non-singular system.
+
+* **Rank:** A measure of how redundant a system is (to be covered later).
+
+### Complex System Example
+
+**System:**
+1.  One of (dog, cat, bird) is red.
+2.  One of (dog, cat) is orange.
+3.  The dog is black.
+
+**Solution:**
+* From (3): Dog is black.
+* From (2) and Dog's color: Cat is orange.
+* From (1) and Dog/Cat colors: Bird is red.
+
+**Analysis:**
+* This system allows determining the color of all three animals (dog black, cat orange, bird red).
+* It provides three distinct pieces of information from three sentences.
+* Therefore, it is a **complete** and **non-singular** system.
+
+## Linear Equations and Systems of Linear Equations
+
+Equations are statements providing numerical information, fundamental to linear algebra.
+
+### What is a Linear Equation?
+
+* An equation where variables are only multiplied by scalars and then added or subtracted. A constant term is also allowed.
+    * *Example:* $a + b = 10$, $2x - 3y + z = 5$.
+* **Non-linear equations** include variables with powers ($x^2$), in exponents ($2^x$), multiplied together ($xy$), divided ($y/x$), or within non-linear functions ($\sin(x)$, $$log(x)$$).
+* Linear algebra specifically focuses on **linear equations** due to their predictable and manipulable properties.
+
+### Types of Solutions for Systems of Linear Equations
+
+Similar to systems of sentences, systems of linear equations are classified by the nature of their solutions.
+
+* **Unique Solution (Complete / Non-Singular):**
+    * Each equation provides genuinely new and independent information.
+    * The number of independent equations equals the number of unknowns.
+    * Results in exactly one specific set of values for all variables.
+    * *Example:* $a + b = 10$ and $a + 2b = 12$. These two distinct equations uniquely determine $a$ and $b$.
+
+* **Infinitely Many Solutions (Redundant / Singular):**
+    * At least one equation provides redundant information, meaning it can be derived from other equations.
+    * The number of independent equations is less than the number of unknowns.
+    * Results in an infinite set of solutions.
+    * *Example:* $a + b = 10$ and $2a + 2b = 20$. The second equation offers no new information, as it's just twice the first.
+
+* **No Solution (Contradictory / Singular):**
+    * The equations directly contradict each other, making it impossible for any values of the variables to satisfy all equations simultaneously.
+    * *Example:* $a + b = 10$ and $2a + 2b = 24$. These statements are inconsistent: if $a+b=10$, then $2a+2b$ must be $20$, not $24$.
+
+## Visualizing Systems of Linear Equations
+
+Linear equations can be visualized as geometric shapes:
+* **Two variables:** Represented as **lines** in a 2D coordinate plane ($a$-axis, $b$-axis).
+* **Three variables:** Represented as **planes** in 3D space ($a$-axis, $b$-axis, $c$-axis).
+* **More variables:** Represent "hyperplanes" in higher dimensions (hard to visualize).
+
+Visualizing helps understand solutions and singularity.
+
+### Visualizing 2D Systems (Lines in a Plane)
+
+A system of two linear equations in two variables is represented by two lines in the same plane.
+
+* **Unique Solution (Complete / Non-Singular System):**
+    * The two lines intersect at a **single, unique point**. This point's coordinates are the unique solution to the system.
+    * *Example:* $a + b = 10$ and $a + 2b = 12$. These lines cross at $(8, 2)$.
+
+* **Infinitely Many Solutions (Redundant / Singular System):**
+    * The two lines are **identical (overlap)**. Every point on that shared line is a solution.
+    * *Example:* $a + b = 10$ and $2a + 2b = 20$. Both equations represent the same line.
+
+* **No Solution (Contradictory / Singular System):**
+    * The two lines are **parallel and distinct** (they never intersect).
+    * *Example:* $a + b = 10$ and $2a + 2b = 24$. These lines are parallel but offset.
+
+### Visualizing 3D Systems (Planes in Space)
+
+A system of linear equations in three variables is represented by planes in 3D space.
+
+* **Equation $a+b+c=1$:** Forms a plane intersecting axes at $(1,0,0)$, $(0,1,0)$, $(0,0,1)$.
+* **Equation $3a-5b+2c=0$:** Forms a plane that *must* pass through the origin $(0,0,0)$ because $(0,0,0)$ is a solution.
+
+Intersections of planes represent solutions to 3D systems:
+
+* **Unique Solution (Complete / Non-Singular System):**
+    * All planes intersect at a **single, unique point**.
+    * *Example:* $a+b+c=0$, $a+2b+c=0$, $a+b+2c=0$. All three planes intersect only at the origin $(0,0,0)$.
+
+* **Infinitely Many Solutions (Redundant / Singular System):**
+    * Planes intersect along a **line** (e.g., three planes passing through the same line).
+    * Or, planes are **identical** (e.g., all equations represent the same plane).
+    * In both cases, there are multiple points of intersection.
+    * *Example 1 (intersecting at a line):* The system $a+b+c=0$, $a+2b+c=0$, $a+b+2c=0$ (if the third equation was, for instance, a linear combination of the first two, leading to a line of intersection).
+    * *Example 2 (identical planes):* $a+b+c=0$, $2a+2b+2c=0$, $3a+3b+3c=0$. All three equations represent the exact same plane.
+
+* **No Solution (Contradictory / Singular System):**
+    * Planes have **no common intersection point**, potentially due to parallel planes or complex arrangements where no single point is on all planes.
