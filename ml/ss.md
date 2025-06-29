@@ -485,6 +485,59 @@ The combined effect from the initial basis to the final positions is a single li
 
 **Important Note on Order:** If Transformation 1 is represented by matrix $A$ and Transformation 2 by matrix $B$, the combined transformation is represented by $BA$. This is because the transformations are applied sequentially, with the matrix closer to the vector being applied first (e.g., $B(Av)$).
 
+### Scaling
+Horizontal scaling can be defined, for example, considering transformation of a vector(x,y) [1 0] into a vector [2 0] and keeping [0 1] to [0 1] only. So transformation matrix here will be
+
+$$
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} = \begin{bmatrix}
+2 \\
+0
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix} \cdot \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+0 \\
+1
+\end{bmatrix}
+$$
+
+Solving this, we get 
+
+$$
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix} = \begin{bmatrix}
+2 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+Using same way, transformation matrix for reflection about y-axis, reflection about x-axis, stretching etc can be derived.
+
+### Rotation
+To rotate a vector in the plane by an angle of $\theta$ (radians), the matrix related to this transformation is given by:
+
+$$
+M = \begin{bmatrix}
+\cos \theta & - \sin \theta \\
+\sin \theta & \cos \theta
+\end{bmatrix}
+$$
+
 ## Calculating Matrix-Matrix Products
 
 Matrix multiplication involves a series of dot products.
