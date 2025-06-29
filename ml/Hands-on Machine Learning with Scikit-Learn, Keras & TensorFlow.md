@@ -60,7 +60,7 @@ This is about how the system generalizes to new instances it has never seen befo
         2.  **Training**: The algorithm finds the model parameters that best fit the training data. This usually involves minimizing a **cost function**.
         3.  **Inference**: Use the trained model to make predictions on new cases.
     * **Example**: Using a country's GDP per capita to predict life satisfaction. A linear model can be expressed as:
-        $life\_satisfaction = \theta_0 + \theta_1 \times \text{GDP_per_capita}$
+        $life\_satisfaction = \theta_0 + \theta_1 \times \text{GDPpercapita}$
         The parameters $\theta_0$ (bias) and $\theta_1$ (weight) are tuned during training to minimize the error between the model's predictions and the actual training data.
 
 ### Main Challenges of Machine Learning
