@@ -111,3 +111,147 @@ The two main things that can go wrong are "bad algorithm" and "bad data."
 
 ### No Free Lunch Theorem
 * This theorem states that if you make no assumptions about the data, then there is no reason to prefer one model over any other. There is no model that is a priori guaranteed to work better on all problems. The only way to know which model is best for a given task is to evaluate a few reasonable models.
+
+## Chapter 2: End-to-End Machine Learning Project
+
+Look at the Big Picture
+
+### Frame the Problem
+* The first step is to understand the business objective. The model's output is not the end goal, but a component of a larger system.
+* **Pipeline**: A sequence of data processing components is called a **data pipeline**. Components in ML systems often run asynchronously, making the system robust.
+* **Problem Framing for Housing Price Prediction**:
+    * **Supervised Learning**: The task is supervised as we are given labeled training examples (each district has a median housing price).
+    * **Regression Task**: We are asked to predict a value (price). Specifically, it's a **multiple regression** problem as we use multiple features, and a **univariate regression** problem as we predict a single value per district.
+    * **Batch Learning**: There is no continuous flow of data, and the dataset is small enough to fit in memory, so a plain batch learning approach is suitable.
+
+### Select a Performance Measure
+* A typical performance measure for regression tasks is the **Root Mean Square Error (RMSE)**. It gives more weight to large errors.
+
+    $$
+    RMSE(\mathbf{X}, h) = \sqrt{\frac{1}{m}\sum_{i=1}^{m}\left(h(\mathbf{x}^{(i)}) - y^{(i)}\right)^2}
+    $$
+
+    * $m$ is the number of instances in the dataset.
+    * $\mathbf{x}^{(i)}$ is a vector of all the feature values of the $i^{th}$ instance.
+    * $y^{(i)}$ is the label (the desired output value) for that instance.
+    * $\mathbf{X}$ is a matrix containing all the feature values of all instances.
+    * $h$ is the system's prediction function, also called a **hypothesis**. $h(\mathbf{x}^{(i)})$ is the predicted value, noted as $\hat{y}^{(i)}$.
+* If there are many outliers, you might prefer the **Mean Absolute Error (MAE)**.
+
+    $$
+    MAE(\mathbf{X}, h) = \frac{1}{m}\sum_{i=1}^{m}\left|h(\mathbf{x}^{(i)}) - y^{(i)}\right|
+    $$
+
+* **Norms**: Both RMSE and MAE are ways to measure the distance between the vector of predictions and the vector of target values.
+    * RMSE corresponds to the Euclidean norm, or $l_2$ norm. It is more sensitive to outliers.
+    * MAE corresponds to the Manhattan norm, or $l_1$ norm.
+
+## Get the Data
+
+### Take a Quick Look at the Data Structure
+* `pandas.read_csv()`: Loads the data into a DataFrame.
+* `.head()`: Shows the top five rows.
+* `.info()`: Provides a quick description of the data, including the total number of rows, each attribute's type, and the number of non-null values.
+    * Useful for spotting missing values. For example, `total_bedrooms` has missing values.
+* `.value_counts()`: For categorical attributes (like `ocean_proximity`), this shows the categories and how many districts belong to each.
+* `.describe()`: Shows a summary of the numerical attributes (count, mean, std, min, max, and percentiles).
+* `.hist()`: Plots a histogram for each numerical attribute. Histograms help understand the data's distribution.
+    * **Key Observations from Histograms**:
+        * Some attributes are capped (e.g., `housing_median_age`, `median_house_value`). Capping the target attribute can be a problem as the model may learn that prices never go beyond that limit.
+        * Attributes have very different scales, which will require feature scaling.
+        * Many histograms are **tail-heavy**, meaning they extend much farther to one side. This may require transformations (e.g., computing their logarithm) to get more bell-shaped distributions.
+
+### Create a Test Set
+* It's crucial to create a test set and put it aside *before* inspecting the data further to avoid **data snooping bias**. Your brain might spot patterns in the test set, leading you to choose a model that is biased toward those patterns, resulting in an overly optimistic evaluation.
+* **Random Sampling**: For large datasets, picking instances randomly is generally fine.
+* **Stratified Sampling**: When a dataset is not large enough, random sampling can introduce significant sampling bias. To avoid this, use stratified sampling. The population is divided into homogeneous subgroups called **strata**, and the right number of instances is sampled from each stratum to ensure the test set is representative of the overall population.
+    * **Example**: The `median_income` is a very important attribute. To ensure the test set represents the various income categories, you can create an income category attribute and sample based on that to maintain the same proportions in the test set as in the full dataset.
+
+## Discover and Visualize the Data to Gain Insights
+
+### Visualizing Geographical Data
+* For geographical data, a scatterplot of latitude and longitude is a good start.
+* Setting the `alpha` option to a smaller value (e.g., 0.1) can help visualize the density of data points.
+* Advanced plots can convey more information. For instance, using the radius of each circle to represent population (`s` parameter) and color to represent price (`c` parameter) can reveal that housing prices are strongly related to location and population density.
+
+### Looking for Correlations
+* The **standard correlation coefficient** (Pearson's r) measures the linear correlation between attributes. It ranges from -1 to 1.
+    * Use the `.corr()` method on the DataFrame.
+    * **Important**: The correlation coefficient only measures *linear* relationships. It may completely miss non-linear relationships.
+* The `pandas.plotting.scatter_matrix()` function plots every numerical attribute against every other. It's a great way to spot correlations visually. The diagonal plots histograms of each attribute.
+
+### Experimenting with Attribute Combinations
+* Before feeding data to an ML algorithm, try combining attributes to create new, more useful features.
+* **Example**:
+    * `total_rooms` in a district is not very useful. `rooms_per_household` is more informative.
+    * `bedrooms_per_room` can be more telling than `total_bedrooms`.
+    * These new attributes often show a stronger correlation with the target variable (`median_house_value`).
+
+## Prepare the Data for Machine Learning Algorithms
+It's best to write functions for data preparation to make the process reproducible.
+
+### Data Cleaning
+* Most ML algorithms can't work with missing features.
+* **Options for handling missing values** (e.g., in `total_bedrooms`):
+    1.  Get rid of the corresponding instances (rows). `housing.dropna(subset=["total_bedrooms"])`
+    2.  Get rid of the whole attribute (column). `housing.drop("total_bedrooms", axis=1)`
+    3.  Set the values to some value (zero, mean, median). `housing["total_bedrooms"].fillna(median, inplace=True)`
+* Scikit-Learn provides `SimpleImputer` to handle missing values. It's preferable because it can store the computed median/mean and apply it to the test set and new data.
+
+### Handling Text and Categorical Attributes
+* Most ML algorithms work with numbers, so text and categorical attributes need to be converted.
+* **From Text Categories to Numbers**:
+    * `OrdinalEncoder`: Maps each category to a different integer. This is risky because ML algorithms will assume that two nearby values are more similar than two distant values (e.g., category 0 is more similar to 1 than to 4), which is not true for a feature like `ocean_proximity`.
+    * **One-Hot Encoding**: A better solution for nominal categorical attributes. It creates one binary attribute per category. Only one attribute is "hot" (1) at a time, while the others are "cold" (0). Use `OneHotEncoder`. The output is a SciPy sparse matrix to save memory.
+
+### Custom Transformers
+* For custom cleanup or combining attributes, you can create your own transformers that work with Scikit-Learn pipelines.
+* Create a class and implement three methods: `fit()`, `transform()`, and `fit_transform()`. By inheriting from `BaseEstimator` and `TransformerMixin`, you get `fit_transform()` and methods for hyperparameter tuning for free.
+
+### Feature Scaling
+* ML algorithms generally don't perform well when input numerical attributes have very different scales.
+* Two common methods are:
+    * **Min-max scaling (Normalization)**: Values are shifted and rescaled to range from 0 to 1. Sensitive to outliers. Use `MinMaxScaler`.
+    * **Standardization**: Subtracts the mean value and divides by the standard deviation. Does not bound values to a specific range but is much less affected by outliers. Use `StandardScaler`.
+* **Important**: Fit scalers to the training data *only*, then use them to transform the training set, the test set, and new data.
+
+### Transformation Pipelines
+* Scikit-Learn's `Pipeline` class helps with sequences of transformations. It takes a list of name/estimator pairs.
+* The `ColumnTransformer` is even more useful. It allows you to apply different transformations to different columns. You can apply a pipeline of transformations for numerical columns and a different one (e.g., `OneHotEncoder`) for categorical columns in a single step.
+
+## Select and Train a Model
+
+### Training and Evaluating on the Training Set
+* After data preparation, you can train a model.
+* A **Linear Regression** model might show that the model is **underfitting** the data (the error is high).
+* A more powerful model, like a **DecisionTreeRegressor**, might achieve a perfect score on the training data (RMSE of 0). This is a clear sign of severe **overfitting**.
+
+### Better Evaluation Using Cross-Validation
+* A better way to evaluate models is using Scikit-Learn's **K-fold cross-validation** feature.
+* It splits the training set into K folds, then trains and evaluates the model K times, picking a different fold for evaluation each time and training on the other K-1 folds.
+* This provides not only a performance estimate but also a measure of how precise that estimate is (the standard deviation).
+* Using cross-validation, the `DecisionTreeRegressor` is shown to perform worse than the `LinearRegression` model, confirming it overfit the data.
+* A `RandomForestRegressor`, which is an **Ensemble** model, works much better.
+
+## Fine-Tune Your Model
+
+### Grid Search
+* To find the best combination of hyperparameters, use Scikit-Learn’s `GridSearchCV`.
+* You tell it which hyperparameters to experiment with and what values to try, and it uses cross-validation to evaluate all possible combinations.
+
+### Randomized Search
+* When the hyperparameter search space is large, `RandomizedSearchCV` is preferable.
+* Instead of trying all combinations, it evaluates a given number of random combinations, which is more efficient.
+
+### Analyze the Best Models and Their Errors
+* Inspect the best models to gain insights. For example, `RandomForestRegressor` can indicate the relative importance of each feature via `feature_importances_`. This might lead to dropping less useful features.
+
+### Evaluate Your System on the Test Set
+* After fine-tuning, you evaluate the final model on the test set to estimate the generalization error.
+* **Important**: Do not tweak your model after this step, as you would start overfitting the test set. You can compute a 95% confidence interval for the generalization error.
+
+## Launch, Monitor, and Maintain Your System
+* Get your solution ready for production (polish code, write tests, etc.).
+* Deploy the model.
+* Write monitoring code to check live performance and trigger alerts if it drops. Models can "rot" over time as data evolves.
+* Retrain your models on fresh data regularly, automating the process as much as possible.
