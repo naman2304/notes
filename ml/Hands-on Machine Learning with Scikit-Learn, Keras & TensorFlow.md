@@ -59,8 +59,8 @@ This is about how the system generalizes to new instances it has never seen befo
         1.  **Model Selection**: Select a model type (e.g., a linear model).
         2.  **Training**: The algorithm finds the model parameters that best fit the training data. This usually involves minimizing a **cost function**.
         3.  **Inference**: Use the trained model to make predictions on new cases.
-    * **Example**: Using a country's GDP per capita to predict life satisfaction. A linear model can be expressed as:
-        $life\_satisfaction = \theta_0 + \theta_1 \times \text{GDPpercapita}$
+    * **Example**: Using a country's GDP per capita to predict life satisfaction. A linear model can be expressed as:  
+        $lifeSatisfaction = \theta_0 + \theta_1 \times \text{GDPperCapita}$  
         The parameters $\theta_0$ (bias) and $\theta_1$ (weight) are tuned during training to minimize the error between the model's predictions and the actual training data.
 
 ### Main Challenges of Machine Learning
@@ -92,7 +92,21 @@ The two main things that can go wrong are "bad algorithm" and "bad data."
 
 ### Testing and Validating
 * **Training and Test Sets**: To know how well a model will generalize, you split your data into a **training set** and a **test set**. You train on the training set and evaluate on the test set. The error rate on the test set is the **generalization error**.
-* **Hyperparameter Tuning and Validation Set**: Tuning hyperparameters on the test set is a mistake, as it will lead to overfitting the test set. A common solution is to have a second holdout set called the **validation set** (or **dev set**). You train multiple models with various hyperparameters on the reduced training set (full training set minus the validation set) and select the model that performs best on the validation set. After finding the best model, you retrain it on the full training set (including the validation set) to get the final model.
+* **Hyperparameter Tuning and Validation Set**:
+  * Tuning hyperparameters on the test set is a mistake, as it will lead to overfitting the test set.
+  * To avoid this, introduce a validation set (also called a dev set).
+  * Data is split into:
+    * Training set: used to train models.
+    * Validation (or dev) set: used to tune hyperparameters.
+    * Test set: used to evaluate final model performance.
+  * Tuning Process
+    * Set aside part of the training data as the validation set.
+    * Train multiple models with different hyperparameter settings on the reduced training set (excluding validation set).
+    * Evaluate each model on the validation set.
+    * Select the model with the best performance on the validation set.
+  * Final Model Training
+    * Retrain the selected best model using the entire training data (including the validation set).
+    * Evaluate this final model on the test set for unbiased performance estimation.
 * **Data Mismatch**: If the data you have for training is not representative of the data that will be used in production, you might create a **train-dev set**. This is a part of the training set that is held out. If the model performs well on the training set but poorly on the train-dev set, it's overfitting. If it performs well on both but poorly on the validation set, there is a data mismatch between your training data and your validation/test data.
 
 ### No Free Lunch Theorem
