@@ -67,12 +67,12 @@ Vectors can be written:
 * **Vertically (Column Vector):**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 x_1 \\
 x_2 \\
 \vdots \\
 x_n
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * Components are denoted by subscripts, e.g., $x_2$ for the second component.
@@ -209,18 +209,18 @@ The **transpose** operation converts rows into columns and columns into rows. It
     * If a matrix $A$ has dimensions $m \times n$, its transpose $A^T$ will have dimensions $n \times m$.
 
 $$
-A = \begin{pmatrix}
+A = \begin{bmatrix}
 2 & 3 \\
 4 & 5 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
   
 $$
-A^T = \begin{pmatrix}
+A^T = \begin{bmatrix}
 2 & 4 & 1 \\
 3 & 5 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Dot Product Notation with Transpose
@@ -299,3 +299,518 @@ Then equation can be rearranged to evaluate cosine of the angle between vectors:
 $\cos(\theta)=\frac{x \cdot y}{\lvert x\rvert \lvert y\rvert}\tag{3}$
 
 Zero value corresponds to the zero similarity between vectors (and words corresponding to those vectors). Largest value is when vectors point in the same direction, lowest value is when vectors point in the opposite directions.
+
+## Matrices as Linear Transformations
+
+* Matrices can represent linear transformations, which map points from one space to another in a structured way.
+* For a 2x2 matrix, this transforms points in a 2D plane to new points in another 2D plane.
+
+### How a Linear Transformation Works
+
+* Given a matrix $M$ and a column vector $v$ (representing a point's coordinates), the transformed point $v'$ is found by the matrix-vector multiplication: $v' = Mv$.
+* **Example:** For a matrix
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+
+The origin (0, 0) always maps to the origin (0, 0) in a linear transformation.
+Point (1, 0) maps to (3, 1):
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} = \begin{bmatrix}
+3 \\
+1
+\end{bmatrix}
+$$
+
+Point (0, 1) maps to (1, 2):
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+1 \\
+2
+\end{bmatrix}
+$$
+
+Point (1, 1) maps to (4, 3):
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+4 \\
+3
+\end{bmatrix}
+$$
+
+### Basis and Tessellation
+
+<img src="/metadata/mat_lt.png" width="700" />
+
+* The initial square formed by points like (0,0), (1,0), (0,1), (1,1) is called a **basis**.
+* This basis transforms into a parallelogram under the linear transformation.
+* Both the original square and the transformed parallelogram tessellate (cover) the entire plane.
+* A linear transformation can be viewed as a **change of coordinates**.
+
+### Example of Change of Coordinates
+
+<img src="/metadata/mat_lt_2.png" width="700" />
+
+* To find where a point like (-2, 3) goes:
+    * In the original plane, (-2, 3) means moving 2 units left and 3 units up from the origin.
+    * In the transformed plane, we apply the same "steps" but using the new basis vectors (the transformed (1,0) and (0,1) vectors) as the new "unit steps."
+    * So, -2 times the transformed (1,0) vector plus 3 times the transformed (0,1) vector gives the new point:
+
+### Analogy: Buying Apples and Bananas
+
+* Imagine a scenario:
+    * Day 1: Buy 3 apples, 1 banana.
+    * Day 2: Buy 1 apple, 2 bananas.
+* If 'a' is the price of an apple and 'b' is the price of a banana, the total cost for each day can be represented by a matrix multiplication:
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+a \\
+b
+\end{bmatrix}
+$$
+
+* This linear transformation maps a point (a, b) representing apple and banana prices to a point representing the total cost for Day 1 and Day 2.
+* If a = $1 and b = $1, then the matrix transforms (1, 1) to (4, 3):
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+4 \\
+3
+\end{bmatrix}
+$$
+
+Day 1 cost: $4. Day 2 cost: $3
+
+* This illustrates how the matrix facilitates a change of coordinates from ingredient prices to daily expenses.
+
+## Linear Transformation to Matrix
+
+### Finding the Matrix from Transformed Basis Vectors
+
+* To determine the matrix of a linear transformation, the key is to observe how the **basis vectors** are transformed.
+* In a 2D space, the standard basis vectors are:
+
+$$
+\begin{bmatrix}
+1 \\
+0
+\end{bmatrix} \text{unit vector along the x-axis}
+$$
+
+$$\begin{bmatrix}
+0 \\
+1
+\end{bmatrix} \text{unit vector along the y-axis}
+$$
+
+* If a linear transformation maps:
+
+$$
+\text{The vector} \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} \text{to a new vector} \begin{bmatrix}
+a \\
+b
+\end{bmatrix}
+$$
+
+$$
+\text{The vector} \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} \text{to a new vector} \begin{bmatrix}
+c \\
+d
+\end{bmatrix}
+$$
+
+* Then, the corresponding transformation matrix is constructed by using these transformed vectors as its columns:
+
+$$
+\begin{pmatrix}
+a & c \\
+b & d
+\end{pmatrix}
+$$
+
+## Matrix-Matrix Multiplication
+
+Matrix multiplication represents the combination of two linear transformations into a third one.
+
+### Visualizing Matrix Multiplication as Combined Transformations
+
+<img src="/metadata/combining_lt.png" width="700" />
+
+Imagine two successive linear transformations:
+* Transformation 1 (Matrix A): Maps basis vectors to new positions.
+* Transformation 2 (Matrix B): Maps the output basis vectors of Transformation 1 to yet another set of positions.
+
+The combined effect from the initial basis to the final positions is a single linear transformation, which corresponds to the product of the two matrices.
+
+**Important Note on Order:** If Transformation 1 is represented by matrix $A$ and Transformation 2 by matrix $B$, the combined transformation is represented by $BA$. This is because the transformations are applied sequentially, with the matrix closer to the vector being applied first (e.g., $B(Av)$).
+
+## Calculating Matrix-Matrix Products
+
+Matrix multiplication involves a series of dot products.
+
+To find an element in the resulting matrix at position $(i, j)$ (row $i$, column $j$), you take the dot product of the $i$-th row of the first matrix and the $j$-th column of the second matrix.
+
+**Example:**
+To multiply matrix
+
+$$
+\text{A = } \begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \text{and B = } \begin{bmatrix}
+2 & -1 \\
+0 & 2
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+2 & -1 \\
+0 & 2
+\end{bmatrix} = \begin{bmatrix}
+(3 \times 2) + (1 \times 0) & (3 \times -1) + (1 \times 2) \\
+(1 \times 2) + (2 \times 0) & (1 \times -1) + (2 \times 2)
+\end{bmatrix} = \begin{bmatrix}
+6 + 0 & -3 + 2 \\
+2 + 0 & -1 + 4
+\end{bmatrix} = \begin{bmatrix}
+6 & -1 \\
+2 & 3
+\end{bmatrix}
+$$
+
+**General Rule:**
+If matrix A has dimensions $m \times n$ and matrix B has dimensions $n \times p$:
+* The number of columns of the first matrix ($n$) must match the number of rows of the second matrix ($n$).
+* The resulting matrix will have dimensions $m \times p$. Its number of rows comes from the first matrix ($m$), and its number of columns comes from the second matrix ($p$).
+
+**Example with non-square matrices:**
+Multiplying a $2 \times 3$ matrix by a $3 \times 4$ matrix will result in a $2 \times 4$ matrix.
+
+$$
+\text{A = } \begin{bmatrix}
+3 & 1 & 4 \\
+2 & -1 & 2
+\end{bmatrix}
+$$
+
+$$
+\text{B = } \begin{bmatrix}
+3 & 0 & 5 & -1 \\
+1 & 5 & 2 & 3 \\
+-2 & 1 & 0 & 2
+\end{bmatrix}
+$$
+
+The element at the bottom-left cell (row 2, column 1) of the resulting matrix is calculated by taking the dot product of the second row of A and the first column of B:
+$(2 \times 3) + (-1 \times 1) + (2 \times -2) = 6 - 1 - 4 = 1$.
+
+## The Identity Matrix
+
+The identity matrix, denoted as $I$, plays a role in matrix multiplication similar to the number '1' in scalar multiplication.
+
+* **Definition:** When multiplied by any other matrix $A$, the identity matrix leaves $A$ unchanged ($IA = AI = A$).
+* **Linear Transformation:** The linear transformation corresponding to the identity matrix is one that leaves the space (e.g., the plane) intact. Every point is mapped precisely to itself.
+* **Structure:** The identity matrix has '1's along its main diagonal (from top-left to bottom-right) and '0's everywhere else.
+
+* For a $2 \times 2$ matrix:
+
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+* For a $3 \times 3$ matrix:
+
+$$
+\begin{bmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+$$
+
+* **How it Works (Example with a vector):**
+ When multiplied by a vector
+
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix} \cdot \begin{bmatrix}
+a \\
+b
+\end{bmatrix} = \begin{bmatrix}
+(1 \times a) + (0 \times b) \\
+(0 \times a) + (1 \times b)
+\end{bmatrix} = \begin{bmatrix}
+a \\
+b
+\end{bmatrix}
+$$
+
+## The Inverse of a Matrix
+
+The inverse of a matrix, denoted as $A^{-1}$, is analogous to the reciprocal of a number.
+
+* **Definition:** For a square matrix $A$, its inverse $A^{-1}$ is a matrix such that when multiplied by $A$, it yields the identity matrix $I$.
+    * $A \cdot A^{-1} = A^{-1} \cdot A = I$
+
+* **Linear Transformation:** In terms of linear transformations, the inverse matrix $A^{-1}$ represents the transformation that "undoes" the job of the original matrix $A$. If $A$ transforms a plane in a certain way, $A^{-1}$ transforms it back to its original state.
+
+### Finding the Inverse of a $2 \times 2$ Matrix
+
+To find the inverse of a matrix, we solve a system of linear equations.
+
+Given a matrix
+
+$$
+\text{A = } \begin{bmatrix}
+p & q \\
+r & s
+\end{bmatrix} \text{and its inverse } A^{-1} \text{ = } \begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+p & q \\
+r & s
+\end{bmatrix} \cdot \begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix} = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+This expands into four linear equations:
+* $pa + qc = 1$
+* $pb + qd = 0$
+* $ra + sc = 0$
+* $rb + sd = 1$
+
+Solving this system for $a, b, c, d$ will give the entries of the inverse matrix.
+
+**Example 1:** Find the inverse of 
+
+$$\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+
+The system of equations is:
+1.  $3a + 1c = 1$
+2.  $3b + 1d = 0$
+3.  $1a + 2c = 0$
+4.  $1b + 2d = 1$
+
+Solving these equations yields: $a = \frac{2}{5}, b = -\frac{1}{5}, c = -\frac{1}{5}, d = \frac{3}{5}$.
+
+$$
+\text{So, } A^{-1} \text{ = } \begin{bmatrix}
+\frac{2}{5} & -\frac{1}{5} \\
+-\frac{1}{5} & \frac{3}{5}
+\end{bmatrix}
+$$
+
+### When an Inverse Does Not Exist
+
+Not all matrices have an inverse. This occurs when the system of linear equations derived from the inverse definition leads to a contradiction.
+
+**Example:** Consider the matrix 
+
+$$
+\begin{bmatrix}
+1 & 2 \\
+2 & 4
+\end{bmatrix}
+$$
+
+The system of equations for its inverse would be:
+1.  $1a + 2c = 1$
+2.  $1b + 2d = 0$
+3.  $2a + 4c = 0$
+4.  $2b + 4d = 1$
+
+From equation (1), $a + 2c = 1$.
+From equation (3), $2a + 4c = 0$, which simplifies to $2(a + 2c) = 0$, meaning $a + 2c = 0$.
+
+This is a contradiction ($1 = 0$), indicating that no solution exists for $a, b, c, d$. Therefore, the matrix does not have an inverse.
+
+## Invertible and Non-Invertible Matrices
+
+Just like numbers, not all matrices have a multiplicative inverse.
+
+* **Analogy to Numbers:**
+    * Any non-zero number has a multiplicative inverse (e.g., the inverse of 5 is 1/5).
+    * The number zero does *not* have a multiplicative inverse (there's no number you can multiply by zero to get 1).
+
+* **Matrices:**
+    * Some matrices have an inverse (called **invertible matrices**).
+    * Some matrices do not have an inverse (called **non-invertible matrices**).
+
+### The Rule for Matrix Invertibility
+
+The rule for whether a matrix has an inverse is directly related to its **determinant** and whether it is **singular** or **non-singular**.
+
+* **Non-Singular Matrices:**
+    * Are also called **invertible matrices**.
+    * Always have an inverse.
+    * Their determinant is **non-zero** ($\det(A) \neq 0$).
+    * This is analogous to non-zero numbers having an inverse.
+
+* **Singular Matrices:**
+    * Are also called **non-invertible matrices**.
+    * Never have an inverse.
+    * Their determinant is **zero** ($\det(A) = 0$).
+    * This is analogous to zero not having an inverse.
+
+**In summary:**
+
+* **Non-singular matrix** ⇔ **Determinant ≠ 0** ⇔ **Inverse exists**
+* **Singular matrix** ⇔ **Determinant = 0** ⇔ **Inverse does not exist**
+
+## Machine Learning Application: Neural Networks
+
+Neural networks, a powerful machine learning model, are fundamentally built upon matrices and matrix products.
+
+### Simple Neural Network: Spam Classifier (Perceptron)
+
+Let's consider a spam classification problem using a simple neural network, often called a perceptron.
+
+* **Problem:** Classify emails as "spam" or "not spam" based on the frequency of certain words, e.g., "lottery" and "win."
+* **Data Representation:** Each email can be represented as a vector (or a row in a matrix) where entries correspond to the count of specific words.
+    * Example: `[count_of_lottery, count_of_win]`
+* **Classifier Model:**
+    * Assign a "score" (weight) to each word (e.g., `score_lottery`, `score_win`).
+    * Calculate a sentence score: `(count_of_lottery * score_lottery) + (count_of_win * score_win)`.
+    * Apply a **threshold**: If the sentence score is greater than the threshold, classify as "spam"; otherwise, "not spam."
+
+**Example Walkthrough:**
+Consider a model where `score_lottery = 1`, `score_win = 1`, and `threshold = 1.5`.
+
+| Email | Lottery Count | Win Count | Spam (Actual) | Sentence Score (Dot Product) | Prediction (>1.5?) | Correct? |
+| :---- | :------------ | :-------- | :------------ | :--------------------------- | :----------------- | :------- |
+| 1     | 2             | 1         | Spam          | $(2 \times 1) + (1 \times 1) = 3$ | Spam               | Yes      |
+| 2     | 0             | 1         | Not Spam      | $(0 \times 1) + (1 \times 1) = 1$ | Not Spam           | Yes      |
+
+* This process of multiplying counts by scores and summing them is a **dot product**.
+* If we have multiple emails (a dataset), we can represent the email word counts as a matrix and the word scores as a vector. The predictions for all emails can then be calculated simultaneously using **matrix-vector multiplication**.
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 1 \\
+\vdots & \vdots
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+(2 \times 1) + (1 \times 1) \\
+(0 \times 1) + (1 \times 1) \\
+\vdots
+\end{bmatrix} = \begin{bmatrix}
+3 \\
+1 \\
+\vdots
+\end{bmatrix}
+$$
+
+The resulting vector contains the scores for each email, which are then compared against the threshold.
+
+### Graphical Representation: Linear Separator
+
+This type of classifier can be visualized graphically:
+* Plot emails on a 2D plane: X-axis = "Lottery Count", Y-axis = "Win Count".
+* The classification rule (score > threshold) defines a **line** that separates the "spam" points from the "not spam" points.
+    * The equation of this line is `(score_lottery * X) + (score_win * Y) = threshold`.
+    * One side of the line is the "positive region" (spam), and the other is the "negative region" (not spam).
+* This is a **linear classifier**.
+
+### Bias Term
+
+Instead of a threshold, a **bias** term can be incorporated:
+* The classification rule becomes: `(score_lottery * X) + (score_win * Y) - bias > 0`.
+* This can be integrated into the matrix multiplication by:
+    * Adding an extra column of `1`s to the input data matrix.
+    * Adding the bias term as an extra entry in the model vector (e.g., `-threshold`).
+* This allows checking if the result is positive or negative, rather than comparing to a threshold.
+
+### The AND Perceptron
+
+The "AND" logical operator can also be modeled as a single-layer neural network (perceptron).
+* **Dataset:**
+    | X | Y | AND (Output) |
+    | :- | :- | :----------- |
+    | 0 | 0 | 0            |
+    | 0 | 1 | 0            |
+    | 1 | 0 | 0            |
+    | 1 | 1 | 1            |
+* Using weights (scores) of `1` for X and `1` for Y, and a threshold of `1.5`:
+    * `[X, Y] . [1, 1] = Score`
+    * If `Score > 1.5`, output 1 (True); else output 0 (False).
+* This perfectly replicates the AND logic.
+
+### Perceptron Diagram
+
+A common way to represent a perceptron is:
+* **Inputs:** `x1, x2, ..., xn` (e.g., word counts).
+* **Weights:** `w1, w2, ..., wn` (e.g., word scores).
+* **Bias:** `b` (or ` -threshold`).
+* **Node (Summation):** Calculates the weighted sum of inputs plus the bias: `z = (x1*w1 + x2*w2 + ... + xn*wn) + b`. This is a dot product plus a bias.
+* **Activation Function:** Applies a non-linear function to `z` to produce the output. For a simple perceptron, this is often a step function:
+    * Returns 1 (or "Yes") if `z >= 0`.
+    * Returns 0 (or "No") if `z < 0`.
+
+This structure highlights how linear algebra concepts like dot products and matrix multiplication are fundamental to neural networks.
