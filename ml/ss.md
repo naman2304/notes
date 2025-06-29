@@ -291,3 +291,11 @@ For a given vector $u$:
 * Vectors orthogonal to $u$ lie on a line perpendicular to $u$ through the origin (dot product = 0).
 * Vectors on the "side" of $u$ (acute angle) have a positive dot product.
 * Vectors on the "opposite side" of $u$ (obtuse angle) have a negative dot product.
+
+Geometric definition of a dot product is used in one of the applications - to evaluate **vector similarity**. In Natural Language Processing (NLP) words or phrases from vocabulary are mapped to a corresponding vector of real numbers. Similarity between two vectors can be defined as a cosine of the angle between them. When they point in the same direction, their similarity is 1 and it decreases with the increase of the angle. 
+
+Then equation can be rearranged to evaluate cosine of the angle between vectors:
+
+$\cos(\theta)=\frac{x \cdot y}{\lvert x\rvert \lvert y\rvert}\tag{3}$
+
+Zero value corresponds to the zero similarity between vectors (and words corresponding to those vectors). Largest value is when vectors point in the same direction, lowest value is when vectors point in the opposite directions.
