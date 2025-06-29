@@ -303,19 +303,19 @@ Matrices are fundamental objects in linear algebra, arising naturally from the c
 **System 1:** $a + b = 0$, $a + 2b = 0$
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 **System 2:** $a + b = 0$, $2a + 2b = 0$
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 2 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Matrix Singularity
@@ -325,20 +325,20 @@ $$
 * *Example:* Following is non-singular because $a+b=0, a+2b=0$ has only $(0,0)$ as a solution.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * If the system has **infinitely many solutions** or **no solutions** (singular), its matrix is **singular**.
 * *Example:* Following is singular because $a+b=0, 2a+2b=0$ has infinitely many solutions.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 2 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### 3x3 Systems and their Matrices
@@ -351,11 +351,11 @@ Similar principles apply to systems with more variables and larger matrices.
 * Corresponding Matrix (non-singular):
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 1 & 2 & 1 \\
 1 & 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **System 2 & 3 (Singular - after setting constants to zero):**
@@ -364,11 +364,11 @@ $$
     * Corresponding Matrix (singular):
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 1 & 1 & 2 \\
 1 & 1 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **System 4 (Singular):**
@@ -377,11 +377,11 @@ $$
     * Corresponding Matrix (singular):
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 2 & 2 & 2 \\
 3 & 3 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 **Note:** Quicker methods exist to determine matrix singularity without solving the system (e.g., using determinants, which will be covered later).
@@ -397,31 +397,31 @@ A set of rows (or equations) is **linearly dependent** if at least one row can b
 * **Example 1:** For the system $a = 1$, $b = 2$, $a+b = 3$, the coefficient matrix (assuming constants are zero for singularity check) is following. Here, Row 3 is Row 1 + Row 2. This indicates linear dependence, implying the matrix is **singular**.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 0 & 0 \\
 0 & 1 & 0 \\
 1 & 1 & 0
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **Example 2:** For following matrix, Row 2 is $2 \times$ Row 1, and Row 3 is $3 \times$ Row 1. This demonstrates linear dependencies. This implies the matrix is **singular**.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 2 & 2 & 2 \\
 3 & 3 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **Example 3:** For following matrix, Row 2 is the average of Row 1 and Row 3 ($2 \times \text{Row 2} = \text{Row 1} + \text{Row 3}$). This implies the rows are linearly dependent, and the matrix is **singular**.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 1 & 1 & 2 \\
 1 & 1 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Linear Independence
@@ -431,10 +431,10 @@ A set of rows (or equations) is **linearly independent** if no row can be expres
 * **Example:** For the system $a + b = 0$, $a + 2b = 0$, the matrix is following. Here, Row 2 is not a multiple of Row 1. This implies the rows are linearly independent, and the matrix is **non-singular** (system has a unique solution).
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Summary of Linear Dependence/Independence and Singularity
@@ -455,10 +455,10 @@ The **determinant** is a quick formula to determine if a matrix is singular or n
 For a 2x2 matrix with entries:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 a & b \\
 c & d
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 The determinant is calculated as: $det(A) = ad - bc$
@@ -468,19 +468,19 @@ The determinant is calculated as: $det(A) = ad - bc$
 **Example:**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = $(1 \times 2) - (1 \times 1) = 2 - 1 = 1$. Since $1 \neq 0$, the matrix is non-singular.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 2 \\
 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = $(1 \times 2) - (2 \times 1) = 2 - 2 = 0$. Since $0$, the matrix is singular.
@@ -490,11 +490,11 @@ Determinant = $(1 \times 2) - (2 \times 1) = 2 - 2 = 0$. Since $0$, the matrix i
 For a 3x3 matrix:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 a & b & c \\
 d & e & f \\
 g & h & i
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 The determinant is calculated by summing the products of the elements along the "main" diagonals (top-left to bottom-right) and subtracting the products of the elements along the "anti-diagonals" (top-right to bottom-left).
@@ -514,11 +514,11 @@ So, the determinant is: $det(A) = (aei + bfg + cdh) - (ceg + afh + bdi)$
 **Example:**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 & 1 \\
 1 & 2 & 1 \\
 1 & 1 & 2
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * Main diagonals:
@@ -542,11 +542,11 @@ For an **upper triangular matrix** (where all elements below the main diagonal a
 **Example:**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 0 & 0 \\
 0 & 2 & 0 \\
 0 & 0 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = $1 \times 2 \times 3 = 6$.
@@ -555,11 +555,11 @@ Even if an upper triangular matrix has a zero on its main diagonal, its determin
 **Example:**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 0 & 0 \\
 0 & 2 & 0 \\
 0 & 0 & 0
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = $1 \times 2 \times 0 = 0$. This matrix is singular.
@@ -778,12 +778,12 @@ A matrix is in **Row Echelon Form** if it satisfies all of the following conditi
 3. **The entries below each leading entry (pivot) are all zero.**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 2 & 0 & 3 \\
 0 & 1 & 4 & -2 \\
 0 & 0 & 0 & 1 \\
 0 & 0 & 0 & 0 \\
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 
@@ -791,28 +791,28 @@ For a 2x2 matrix, the REF can have:
 1.  **Two 1s on the diagonal:** Corresponds to a non-singular system with a unique solution.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & x \\
 0 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 2.  **One 1 on the diagonal:** Corresponds to a singular system with infinitely many solutions (if no contradiction arises).
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & x \\
 0 & 0
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 3.  **Zero 1s on the diagonal:** Corresponds to a trivial system (all zeros) or a singular system.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 0 & 0 \\
 0 & 0
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 
@@ -823,10 +823,10 @@ $$
 **Example (2x2 RREF):**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 0 \\
 0 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Connecting Systems of Equations to Matrix Forms
@@ -840,10 +840,10 @@ When solving a system of linear equations, the steps correspond directly to row 
     **Corresponding Coefficient Matrix:**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 5 & 1 \\
 4 & -3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **Intermediate System (after eliminating 'a' from the second equation):**
@@ -854,10 +854,10 @@ $$
     (After appropriate row operations to get leading '1's and zeros below diagonal) (where $x$ would be $0.2$ and the lower right $1$ comes from normalizing $-0.95b = -1.9$ to $b=2$)
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & x \\
 0 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **Solved System:**
@@ -867,10 +867,10 @@ $$
     **Corresponding Matrix (Reduced Row Echelon Form):**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 0 \\
 0 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 ### Row Echelon Form and System Singularity
@@ -881,10 +881,10 @@ The Row Echelon Form provides immediate insight into the nature of the system:
     **Example (2x2):**
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & x \\
 0 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 * **Singular system (redundant - infinitely many solutions):** The REF will have at least one row of all zeros (below the main diagonal) corresponding to a trivially true statement ($0=0$).
@@ -893,10 +893,10 @@ $$
     REF: This corresponds to $a+b=10$ and $0a+0b=0$.
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 1 & 1 \\
 0 & 0
-\end{pmatrix}
+\end{bmatrix}
 $$
     
 
@@ -911,10 +911,10 @@ Matrix row operations are the fundamental manipulations applied to the rows of a
 Let's consider an example matrix:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 5 & 1 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Its determinant is $(5 \times 3) - (1 \times 4) = 15 - 4 = 11$. Since the determinant is non-zero, this matrix is **non-singular**.
@@ -931,10 +931,10 @@ There are three types of elementary row operations:
 Original Matrix:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 5 & 1 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = 11.
@@ -942,10 +942,10 @@ Determinant = 11.
 Swap Row 1 and Row 2:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 4 & 3 \\
 5 & 1
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 New Determinant = $(4 \times 1) - (3 \times 5) = 4 - 15 = -11$.
@@ -963,10 +963,10 @@ New Determinant = $(4 \times 1) - (3 \times 5) = 4 - 15 = -11$.
 Original Matrix:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 5 & 1 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = 11.
@@ -974,17 +974,17 @@ Determinant = 11.
 Multiply Row 1 by 10:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 (5 \times 10) & (1 \times 10) \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 50 & 10 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 New Determinant = $(50 \times 3) - (10 \times 4) = 150 - 40 = 110$.
@@ -1000,10 +1000,10 @@ New Determinant = $(50 \times 3) - (10 \times 4) = 150 - 40 = 110$.
 Original Matrix:
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 5 & 1 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 Determinant = 11.
@@ -1011,17 +1011,17 @@ Determinant = 11.
 Add Row 2 to Row 1 (R1 = R1 + R2):
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 (5+4) & (1+3) \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 $$
-\begin{pmatrix}
+\begin{bmatrix}
 9 & 4 \\
 4 & 3
-\end{pmatrix}
+\end{bmatrix}
 $$
 
 New Determinant = $(9 \times 3) - (4 \times 4) = 27 - 16 = 11$.
