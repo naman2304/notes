@@ -174,17 +174,17 @@ The **dot product** is a fundamental operation in linear algebra that combines t
 The dot product of two vectors is the sum of the products of their corresponding components.
 
 **Example: Cost Calculation**
-* **Quantities Vector (column):**$Q = \begin{pmatrix} 2 \\ 4 \\ 1 \end{pmatrix}$ (2 apples, 4 bananas, 1 cherry)
-* **Prices Vector (column):** $P = \begin{pmatrix} 3 \\ 5 \\ 2 \end{pmatrix}$ (Apples $3, Bananas $5, Cherries $2)
+* **Quantities Vector (column):** (2 apples, 4 bananas, 1 cherry). Q = [2, 4, 1]
+* **Prices Vector (column):** (Apples $3, Bananas $5, Cherries $2). P = [3, 5, 2]
 
-To find the total cost, you multiply corresponding quantities by their prices and sum the results:
+To find the total cost, you multiply corresponding quantities by their prices and sum the results:  
 $(2 \times 3) + (4 \times 5) + (1 \times 2) = 6 + 20 + 2 = 28$
 
 This operation is the dot product. It's often written with the first vector as a row vector and the second as a column vector for clarity in matrix multiplication context.
 
 **Formal Definition:**
 Given two vectors $x = (x_1, x_2, \dots, x_n)$ and $y = (y_1, y_2, \dots, y_n)$ with the same number of components (dimension):
-The dot product, denoted as $x \cdot y$ or $\langle x, y \rangle$, is:
+The dot product, denoted as $x \cdot y$ or $\langle x, y \rangle$, is:  
 $x \cdot y = x_1 y_1 + x_2 y_2 + \dots + x_n y_n = \sum_{i=1}^{n} x_i y_i$
 
 ### Connection to the L2-Norm
@@ -204,38 +204,17 @@ L2-norm: $\sqrt{25} = 5$.
 
 The **transpose** operation converts rows into columns and columns into rows. It is denoted by a superscript $T$.
 
-* **Vector Transpose:**
-    * If you have a column vector:
-
-$$
-x = \begin{pmatrix}
-2 \\
-4 \\
-1
-\end{pmatrix}
-$$  
-        Then its transpose $x^T$ is a row vector:
-        $x^T = \begin{pmatrix} 2 & 4 & 1 \end{pmatrix}$
-
-    * If you have a row vector:
-        $y = \begin{pmatrix} 3 & 5 & 2 \end{pmatrix}$
-        Then its transpose $y^T$ is a column vector:
-
-$$
-y^T = \begin{pmatrix}
-3 \\
-5 \\
-2
-\end{pmatrix}
-$$
-
 * **Matrix Transpose:**
     * To transpose a matrix, simply transpose each of its columns to become rows, or equivalently, swap rows and columns.
     * If a matrix $A$ has dimensions $m \times n$, its transpose $A^T$ will have dimensions $n \times m$.
 
-    **Example:**
-    If $A = \begin{pmatrix} 2 & 3 \\ 4 & 5 \\ 1 & 2 \end{pmatrix}$ (a $3 \times 2$ matrix)
-    Then $A^T$ will be:
+$$
+A = \begin{pmatrix}
+2 & 3 \\
+4 & 5 \\
+1 & 2
+\end{pmatrix}
+$$
   
 $$
 A^T = \begin{pmatrix}
@@ -243,8 +222,6 @@ A^T = \begin{pmatrix}
 3 & 5 & 2
 \end{pmatrix}
 $$
-  
-    (a $2 \times 3$ matrix)
 
 ### Dot Product Notation with Transpose
 
@@ -252,3 +229,65 @@ In contexts where the dot product is expected to be a row vector multiplied by a
 $x \cdot y = x^T y$
 
 This notation emphasizes the matrix multiplication aspect, where a $1 \times n$ row vector multiplies an $n \times 1$ column vector to yield a $1 \times 1$ scalar (the dot product).
+
+## Angle Between Vectors and Dot Product
+
+The angle between two vectors is a crucial concept, and it has a direct relationship with the dot product.
+
+### Orthogonal Vectors and Zero Dot Product
+
+* Two vectors are **perpendicular** or **orthogonal** if the angle between them is 90 degrees ($\pi/2$ radians).
+* **Key Property:** Two vectors are orthogonal if and only if their dot product is zero.
+
+**Example:**
+* Vector $u = (-1, 3)$
+* Vector $v = (6, 2)$
+* Dot product $u \cdot v = (-1 \times 6) + (3 \times 2) = -6 + 6 = 0$.
+    Since the dot product is 0, these vectors are orthogonal.
+
+### Dot Product Formula with Angle
+
+The dot product of two vectors $u$ and $v$ is related to their magnitudes and the cosine of the angle $\theta$ between them:
+
+$u \cdot v = |u| \ |v| \cos(\theta)$
+
+Where:
+* $|u|$ is the magnitude (L2-norm) of vector $u$.
+* $|v|$ is the magnitude (L2-norm) of vector $v$.
+* $\theta$ is the angle between vector $u$ and vector $v$.
+
+**Derivations:**
+
+* **Vector with itself:** If $u = v$, then $\theta = 0$, and $\cos(0) = 1$.
+    $u \cdot u = |u| \ |u| \cos(0) = |u|^2 \times 1 = |u|^2$. This confirms the earlier definition of the L2-norm squared.
+* **Vectors in the same direction:** If $u$ and $v$ are in the same direction, $\theta = 0$, and $\cos(0) = 1$.
+    $u \cdot v = |u| \ |v|$.
+* **Perpendicular vectors:** If $u$ and $v$ are perpendicular, $\theta = 90^\circ$, and $\cos(90^\circ) = 0$.
+    $u \cdot v = |u| \ |v| \times 0 = 0$. This confirms the property of orthogonal vectors.
+
+### Geometric Interpretation of Dot Product Sign
+
+The sign of the dot product indicates the general direction of one vector relative to another:
+
+* **Positive Dot Product ($u \cdot v > 0$):**
+    * This occurs when $\cos(\theta) > 0$, meaning the angle $\theta$ is acute ($0^\circ \le \theta < 90^\circ$).
+    * The vectors generally point in the same direction.
+    * The projection of one vector onto the other has a positive length (points in the same direction as the projected-onto vector).
+
+* **Zero Dot Product ($u \cdot v = 0$):**
+    * This occurs when $\cos(\theta) = 0$, meaning $\theta = 90^\circ$.
+    * The vectors are orthogonal (perpendicular).
+
+* **Negative Dot Product ($u \cdot v < 0$):**
+    * This occurs when $\cos(\theta) < 0$, meaning the angle $\theta$ is obtuse ($90^\circ < \theta \le 180^\circ$).
+    * The vectors generally point in opposite directions.
+    * The projection of one vector onto the other has a negative length (points in the opposite direction of the projected-onto vector).
+
+**Visual Summary:**
+
+<img src="/metadata/gp_dot.png" width="700" />
+
+For a given vector $u$:
+* Vectors orthogonal to $u$ lie on a line perpendicular to $u$ through the origin (dot product = 0).
+* Vectors on the "side" of $u$ (acute angle) have a positive dot product.
+* Vectors on the "opposite side" of $u$ (obtuse angle) have a negative dot product.
