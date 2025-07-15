@@ -745,15 +745,15 @@ Equation 3: $3a + b - 2c = 4$
         $c = \frac{-10}{-4} = 2.5$  
 
 3.  **Back-substitution:**
-    * We found $c=3$.
-    * Substitute $c=3$ into the second equation of the reduced 2x2 system (e.g., $-5b + 5c = -1$ or $b - c = 1/5$ from our generic example, or $b - 5/6c = 5/3$ from the transcript's example):
-    * Substitute $b=2$ and $c=3$ into the original first equation:  
-        $a + 2(2) - (3) = 5$  
-        $a + 4 - 3 = 5$  
-        $a + 1 = 5$  
-        $a = 4$  
+    * We found $c=2.5$.
+    * Substitute $c=2.5$ into the second equation of the reduced 2x2 system (e.g., $-5b + 5c = -1$ or $b - c = 1/5$ from our generic example): $b = 2.7$
+    * Substitute $b=2.7$ and $c=2.5$ into the original first equation:  
+        $a + 2(2.7) - (2.5) = 5$  
+        $a + 5.4 - 2.5 = 5$  
+        $a + 2.9 = 5$  
+        $a = 2.1$  
 
-The final solution is $a=4, b=2, c=3$.
+The final solution is $a=2.1, b=2.7, c=2.5$.
 
 ## Matrix Row Reduction (Gaussian Elimination)
 
