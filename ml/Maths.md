@@ -48,10 +48,6 @@ This specialization consists of three courses:
 * Basic Python knowledge is assumed, with resources provided for those needing to get up to speed.
 * The specialization progresses from a high school math level to core concepts relevant for ML and data science.
 
-Understood. I will revert to using `$` for inline equations and `$$` for display-block equations, without any HTML tags for centering, as GitHub's rendering environment for MathJax/LaTeX often overrides or ignores them.
-
-Here are the notes:
-
 ## Week 1: Systems of Linear Equations
 
 This week introduces the concept of a **system of linear equations**, its representations, and the significance of **singular** and **non-singular systems** in linear algebra. Linear algebra is a fundamental and widespread mathematical field in machine learning.
