@@ -1101,3 +1101,160 @@ A matrix is **non-singular if and only if it has full rank**.
 * Pixelated images can be represented as matrices where pixel intensities are numbers.
 * The rank of this matrix is related to the amount of information (and storage space) needed for the image.
 * **Singular Value Decomposition (SVD)** is a powerful technique that can reduce the rank of an image matrix, allowing for significant compression while maintaining visual quality. Lower-rank approximations often appear slightly blurrier but use much less storage.
+
+## Rank of a Matrix
+
+The rank of a matrix is a measure of its "non-singularity" and is closely related to the number of independent equations it represents.
+
+### Rank and Systems of Linear Equations
+
+For an $m \times n$ matrix (e.g., a $3 \times 3$ matrix representing a system of three equations with three unknowns), the rank is defined by the number of independent equations within the system.
+
+* **Independent Equation:** An equation that provides genuinely new information and cannot be derived as a linear combination of the other equations in the system.
+
+**Examples for a $3 \times 3$ system:**
+
+* **System 1 (Rank 3):** All three equations are linearly independent. Each equation contributes new information.
+    * This system has 3 independent pieces of information.
+    * The matrix representing this system has **Rank 3**.
+    * Geometrically, for a $3 \times 3$ system, a rank 3 matrix corresponds to three planes intersecting at a single point (a unique solution).
+
+* **System 2 (Rank 2):** Two of the three equations are linearly independent, and the third can be derived from the other two (e.g., one equation is an average of the other two).
+    * This system has 2 independent pieces of information.
+    * The matrix representing this system has **Rank 2**.
+    * Geometrically, this can correspond to three planes intersecting along a line (infinite solutions) or two parallel planes and one intersecting plane, etc.
+
+* **System 3 (Rank 1):** Only one equation is linearly independent, and the other two are scalar multiples of the first.
+    * This system has 1 independent piece of information.
+    * The matrix representing this system has **Rank 1**.
+    * Geometrically, this can correspond to three planes that are all the same, or parallel.
+
+* **System 4 (Rank 0):** No equation provides any information about the variables (e.g., all coefficients are zero).
+    * This system has 0 independent pieces of information.
+    * The matrix representing this system has **Rank 0**. (This typically means the matrix is a zero matrix).
+
+### Easier Calculation of Rank
+
+Directly identifying independent equations can be challenging. A simpler method to calculate the rank involves transforming the matrix into its **row echelon form**. The number of non-zero rows in the row echelon form of a matrix is equal to its rank.
+
+## Row Echelon Form and Rank
+
+The row echelon form of a matrix is a simplified version obtained through elementary row operations. It provides valuable information about the matrix, particularly its rank.
+
+### Obtaining Row Echelon Form through Row Operations
+
+The goal of obtaining row echelon form is to create a matrix where:
+* The first non-zero element (leading entry or pivot) in each row is a '1'.
+* Each leading '1' is to the right of the leading '1' in the row above it.
+* Rows consisting entirely of zeros are at the bottom.
+
+**Steps and Examples:**
+
+1.  **For a non-singular matrix (e.g., Rank 2):**
+
+$$
+Given A = \begin{bmatrix}
+5 & 1 \\
+4 & -3
+\end{bmatrix}
+$$
+
+**Step 1:** Divide each row by its leftmost non-zero coefficient to make the leading entry '1'.
+  * Row 1: Divide by 5 $\rightarrow$ [ 1 & 0.2 ]
+  * Row 2: Divide by 4 $\rightarrow$ [ 1 & -0.75 ]
+
+$$
+\begin{bmatrix}
+1 & 0.2 \\
+1 & -0.75
+\end{bmatrix}
+$$
+
+**Step 2:** Create zeros below the leading '1's.
+  * Subtract Row 1 from Row 2 to make the bottom-left entry zero.
+  * $R_2 \leftarrow R_2 - R_1$
+
+$$
+\begin{bmatrix}
+1 & 0.2 \\
+0 & -0.95
+\end{bmatrix}
+$$
+
+**Step 3:** Make the leftmost non-zero coefficient of the second row a '1'.
+   * Divide Row 2 by -0.95.
+
+$$
+\begin{bmatrix}
+1 & 0.2 \\
+0 & 1
+\end{bmatrix}
+$$
+
+This is the row echelon form.
+
+2.  **For a singular matrix (e.g., Rank 1):**
+
+$$
+Given A = \begin{bmatrix}
+5 & 1 \\
+10 & 2
+\end{bmatrix}
+$$
+
+**Step 1:** Divide each row by its leftmost non-zero coefficient.
+
+$$
+\begin{bmatrix}
+1 & 0.2 \\
+1 & 0.2
+\end{bmatrix}
+$$
+
+**Step 2:** Create zeros below the leading '1's.
+   * Subtract Row 1 from Row 2.
+   * $R_2 \leftarrow R_2 - R_1$
+
+$$
+\begin{bmatrix}
+1 & 0.2 \\
+0 & 0
+\end{bmatrix}
+$$
+
+This is the row echelon form. Note the row of zeros.
+
+3.  **For a very singular matrix (e.g., Rank 0):**
+
+$$
+Given A = \begin{bmatrix}
+0 & 0 \\
+0 & 0
+\end{bmatrix}
+$$
+
+This matrix is already in row echelon form, as there are no non-zero coefficients to divide by.
+
+$$
+\begin{bmatrix}
+0 & 0 \\
+0 & 0
+\end{bmatrix}
+$$
+
+### Connection Between Rank and Row Echelon Form
+
+The rank of a matrix can be easily determined from its row echelon form:
+
+* The **rank of a matrix is the number of ones on the diagonal of its row echelon form** (or more generally, the number of non-zero rows).
+
+    * Matrix 1 (Rank 2) had two '1's on the diagonal.
+    * Matrix 2 (Rank 1) had one '1' on the diagonal.
+    * Matrix 3 (Rank 0) had zero '1's on the diagonal.
+
+### Rank and Singularity
+
+There's also a direct relationship between the row echelon form and whether a matrix is singular or non-singular:
+
+* A matrix is **non-singular (invertible)** if and only if its row echelon form has **only ones on the main diagonal and no zeros**, meaning it is the identity matrix or an identity-like upper triangular matrix.
+* A matrix is **singular (non-invertible)** if and only if its row echelon form contains at least one **row of all zeros** or a **zero on its main diagonal where a '1' would be expected for an identity matrix**.
