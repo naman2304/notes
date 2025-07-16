@@ -42,3 +42,113 @@ This lesson introduces fundamental concepts required to understand PCA.
     * **Eigenvalues**: Constants associated with eigenvectors.
     * **Property**: Applying a linear transformation to a point along its eigenvector simply scales the point along that same vector; it doesn't change its direction. This means multiplying by a matrix is equivalent to multiplying by a constant (the eigenvalue) for points on the eigenvector.
     * **Significance**: Eigenvectors help characterize linear transformations and are crucial in many machine learning applications, including PCA.
+
+## Singular and Non-Singular Linear Transformations
+
+Linear transformations, like matrices, can be **singular** or **non-singular**. This property relates to the **image** of the transformation and its **rank**.
+
+### Image of a Linear Transformation
+
+* The **image** of a linear transformation is the set of all possible output points when the transformation is applied to every point in the input space.
+
+### Non-Singular Transformations
+
+* A linear transformation is **non-singular** if its image covers the entire output space.
+* **Geometric Interpretation**: If a transformation maps a basis (like a square grid) to a new set of basis vectors that still span the entire plane (forming a parallelogram that covers all points), it is non-singular. Example: Following matrix transforms a grid into a stretched grid that still covers the entire plane.
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+        
+        
+* **Rank**: For a non-singular transformation from a 2D plane to a 2D plane, the dimension of the image is 2. This dimension is equal to the **rank** of the corresponding matrix.
+
+### Singular Transformations
+
+* A linear transformation is **singular** if its image collapses the input space to a lower dimension. It does not cover the entire output space.
+* **Geometric Interpretation**: If a transformation maps a basis to vectors that do not span the entire plane (e.g., they all lie on a line or collapse to a single point), it is singular.
+* **Case 1: Image is a Line**: Example: Following matrix transforms any input vector such that the output vectors all lie on a single line. For instance:
+
+$$
+\begin{bmatrix}
+1 & 1 \\
+2 & 2
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+1 & 1 \\
+2 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} = \begin{bmatrix}
+1 \\
+2
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+1 & 1 \\
+2 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+1 \\
+2
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+1 & 1 \\
+2 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+2 \\
+4
+\end{bmatrix}
+$$
+
+The original square grid is mapped to a "degenerate parallelogram" (a line segment). The image is a line.  
+**Rank**: The dimension of the image (a line) is 1, which is the rank of the matrix.
+
+* **Case 2: Image is a Point**:
+  * Example: Following matrix transforms any input vector to the origin (0,0).
+
+$$
+\begin{bmatrix}
+0 & 0 \\
+0 & 0
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+0 & 0 \\
+0 & 0
+\end{bmatrix} \cdot \begin{bmatrix}
+x \\
+y
+\end{bmatrix} = \begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+$$
+
+The entire plane collapses to a single point.  
+**Rank**: The dimension of the image (a point) is 0, which is the rank of the matrix.
+
+### Rank of a Linear Transformation
+
+* The **rank** of a linear transformation (or its corresponding matrix) is the **dimension of its image**.
+* This provides a direct way to identify the rank by observing the dimensionality of the space covered by the transformation's output.
+
