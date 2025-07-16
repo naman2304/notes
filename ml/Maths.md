@@ -1488,7 +1488,7 @@ The goal of Gaussian elimination is to transform the augmented matrix into **red
 
 1.  **Forward Elimination (to Row Echelon Form):**
     * **Select a Pivot:** Start with the top-left element as your first pivot.
-    * **Set Pivot to 1:** Use row operations (e.g., multiply the row by the reciprocal of the pivot) to make the pivot equal to 1.
+    * **Set Pivot to 1:** Use row operations (e.g., multiply the row by the reciprocal of the pivot) to make the pivot equal to 1 (this is only applicable if this element is non zero). If this element is zero, then swap this row with the row which has non zero element below this pivot point -- and then multiply by reciprocal.
     * **Zero Out Elements Below Pivot:** Use row operations (e.g., subtract a multiple of the pivot row from rows below it) to make all elements directly below the pivot equal to 0.
     * **Repeat:** Move to the next pivot along the diagonal (the first non-zero element in the next row) and repeat the process until the matrix is in **row echelon form** (all pivots are 1s, and all elements below pivots are 0s).
 
