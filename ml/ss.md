@@ -147,6 +147,8 @@ $$
 The entire plane collapses to a single point.  
 **Rank**: The dimension of the image (a point) is 0, which is the rank of the matrix.
 
+<img src="/metadata/transformations.png" width="700" />
+
 ### Rank of a Linear Transformation
 
 * The **rank** of a linear transformation (or its corresponding matrix) is the **dimension of its image**.
