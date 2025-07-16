@@ -714,3 +714,163 @@ A function is **not differentiable** at points exhibiting any of these character
 
 If a function is differentiable over an entire interval, it means that the derivative exists for every single point in that interval, and none of these conditions are met.
 
+## Derivatives: Essential Rules for Complex Functions
+
+To differentiate complex functions, we build upon simple derivative rules using several key rules: **multiplication by a scalar**, **sum rule**, **product rule**, and **chain rule**.
+
+### Multiplication by a Scalar Rule
+
+If a function $f(x)$ is a constant $c$ multiplied by another function $g(x)$, i.e., $f(x) = c \cdot g(x)$, then its derivative $f'(x)$ is $c$ times the derivative of $g(x)$:
+
+$$\frac{d}{dx}[c \cdot g(x)] = c \cdot \frac{d}{dx}[g(x)]$$
+
+**Intuition:**
+
+* Consider a function $y = x^2$. Its derivative is $2x$.
+* Now consider $y = 2x^2$. This function is essentially the original $x^2$ function, but every y-value (and thus the graph) is stretched vertically by a factor of 2.
+* When a function is stretched vertically by a factor of $c$, the "rise" component of any secant line (and eventually the tangent line) is also multiplied by $c$, while the "run" component remains the same.
+* Since slope = rise/run, multiplying the rise by $c$ means the overall slope is also multiplied by $c$.
+* Therefore, the derivative, which represents the slope of the tangent line, also gets multiplied by $c$.
+
+**Example:**
+
+If $f(x) = 4g(x)$, then $f'(x) = 4g'(x)$.
+
+## Derivatives: Sum Rule
+
+The **sum rule** in derivatives states that if a function $f(x)$ is the sum of two (or more) other functions, say $g(x)$ and $h(x)$, then the derivative of $f(x)$ is simply the sum of the derivatives of $g(x)$ and $h(x)$.
+
+If $f(x) = g(x) + h(x)$, then:  
+$$f'(x) = g'(x) + h'(x)$$
+
+This rule can be extended to any number of functions:  
+$$\frac{d}{dx}[f_1(x) + f_2(x) + \dots + f_n(x)] = \frac{d}{dx}[f_1(x)] + \frac{d}{dx}[f_2(x)] + \dots + \frac{d}{dx}[f_n(x)]$$
+
+### Intuition: The Boat and Child Analogy
+
+Imagine a child running inside a moving boat.
+* Let $X_B$ be the distance the **boat** moves.
+* Let $X_C$ be the distance the **child moves relative to the boat**.
+* The **total distance** the child moves with respect to the earth, $X_{total}$, is $X_B + X_C$.
+
+Now, let's consider **velocities** (which are derivatives of distance with respect to time):
+* **Speed of the boat** ($V_B$) is the derivative of $X_B$ with respect to time.
+* **Speed of the child relative to the boat** ($V_C$) is the derivative of $X_C$ with respect to time.
+* The **total speed** of the child with respect to the earth ($V_{total}$) is the derivative of $X_{total}$ with respect to time.
+
+Since distances add up ($X_{total} = X_B + X_C$), their rates of change (velocities) also add up: $V_{total} = V_B + V_C$.
+
+This analogy highlights that if individual components of a quantity add up, then their rates of change (derivatives) also add up.
+
+### Formal Explanation
+
+Consider two functions, $f_1(x)$ and $f_2(x)$. Let their sum be $f(x) = f_1(x) + f_2(x)$.
+The derivative of a function at a point represents the slope of its tangent line at that point. If we consider a small change $\Delta x$:
+
+The change in $f(x)$ is $\Delta f = f(x + \Delta x) - f(x)$.  
+Since $f(x) = f_1(x) + f_2(x)$, we can write:  
+$\Delta f = (f_1(x + \Delta x) + f_2(x + \Delta x)) - (f_1(x) + f_2(x))$  
+$\Delta f = (f_1(x + \Delta x) - f_1(x)) + (f_2(x + \Delta x) - f_2(x))$  
+$\Delta f = \Delta f_1 + \Delta f_2$
+
+Dividing by $\Delta x$:
+$$\frac{\Delta f}{\Delta x} = \frac{\Delta f_1}{\Delta x} + \frac{\Delta f_2}{\Delta x}$$
+
+Taking the limit as $\Delta x \to 0$:
+$$\lim_{\Delta x \to 0} \frac{\Delta f}{\Delta x} = \lim_{\Delta x \to 0} \frac{\Delta f_1}{\Delta x} + \lim_{\Delta x \to 0} \frac{\Delta f_2}{\Delta x}$$
+$$f'(x) = f_1'(x) + f_2'(x)$$
+
+This demonstrates that the **slope of the sum of functions is the sum of their individual slopes**.
+
+## Derivatives: Product Rule
+
+The **product rule** is used when you need to find the derivative of a function that is the product of two or more other functions. If a function $f(x)$ is the product of two functions, $g(x)$ and $h(x)$, i.e., $f(x) = g(x) \cdot h(x)$, then its derivative $f'(x)$ is given by:
+
+$$f'(x) = g'(x)h(x) + g(x)h'(x)$$
+
+In simpler terms, it's the derivative of the first function times the second function (left alone) plus the first function (left alone) times the derivative of the second function.
+
+### Intuition: Building a House Analogy
+
+Imagine building a house with two walls, a side wall and a front wall, whose lengths are changing with time.
+* Let $g(t)$ be the length of the **side wall** as a function of time.
+* Let $h(t)$ be the length of the **front wall** as a function of time.
+* The **area** of the house at any given time, $f(t)$, is the product of these lengths: $f(t) = g(t) \cdot h(t)$.
+
+We want to find the **rate of change of the area** with respect to time, which is $f'(t)$.
+
+
+Consider a small change in time, $\Delta t$. This leads to small changes in the lengths of the walls, $\Delta g$ and $\Delta h$.
+The **change in area** ($\Delta f$) can be visualized as three new rectangles that are added to the original area $g(t)h(t)$:
+1. A rectangle with dimensions $\Delta g \cdot h(t)$.
+2. A rectangle with dimensions $g(t) \cdot \Delta h$.
+3. A tiny rectangle with dimensions $\Delta g \cdot \Delta h$.
+
+So, $\Delta f(t) = \Delta g(t)h(t) + g(t)\Delta h(t) + \Delta g(t)\Delta h(t)$.
+
+To find the derivative, we divide by $\Delta t$ and take the limit as $\Delta t \to 0$:
+
+$$\frac{\Delta f(t)}{\Delta t} = \frac{\Delta g(t)h(t)}{\Delta t} + \frac{g(t)\Delta h(t)}{\Delta t} + \frac{\Delta g(t)\Delta h(t)}{\Delta t}$$
+
+As $\Delta t \to 0$:
+* $\frac{\Delta g(t)}{\Delta t} \to g'(t)$
+* $\frac{\Delta h(t)}{\Delta t} \to h'(t)$
+* $\frac{\Delta g(t)\Delta h(t)}{\Delta t} \to 0$ (This term approaches zero much faster than the others because it involves the product of two small changes, $\Delta g$ and $\Delta h$, divided by only one $\Delta t$. As $\Delta t$ approaches zero, $\Delta g$ and $\Delta h$ also approach zero, making the numerator infinitesimally small compared to the denominator.)
+
+Thus, the product rule emerges:
+
+$$f'(t) = g'(t)h(t) + g(t)h'(t)$$
+
+## Derivatives: The Chain Rule
+
+The **chain rule** is a fundamental rule in calculus for differentiating composite functions. A **composite function** is a function within a function. If you have a function $y = f(u)$ where $u$ itself is a function of $x$, say $u = g(x)$, then $y$ is a composite function of $x$, i.e., $y = f(g(x))$. The chain rule provides a way to find the derivative of $y$ with respect to $x$.
+
+### Leibniz Notation
+
+In Leibniz notation, the chain rule is intuitive:
+
+If $y = f(u)$ and $u = g(x)$, then the derivative of $y$ with respect to $x$ is:
+$$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$$
+
+This can be extended for more layers of composition. For example, if $y = f(g(h(t)))$:
+$$\frac{dy}{dt} = \frac{dy}{df} \cdot \frac{df}{dg} \cdot \frac{dg}{dh} \cdot \frac{dh}{dt}$$
+
+The notation itself suggests a "chain" of multiplications, where intermediate variables "cancel out" (conceptually).
+
+### Lagrange (Prime) Notation
+
+While Leibniz notation is clear, the Lagrange notation requires careful attention to the input of the functions:
+
+If $f(t) = g(h(t))$, then:
+$$f'(t) = g'(h(t)) \cdot h'(t)$$
+Here, $g'(h(t))$ means the derivative of $g$ evaluated at $h(t)$, not just $g'(t)$.
+
+For a three-level composition, $f(t) = f_1(f_2(f_3(t)))$:
+$$f'(t) = f_1'(f_2(f_3(t))) \cdot f_2'(f_3(t)) \cdot f_3'(t)$$
+
+### Intuition: The Mountain Drive Analogy
+
+Imagine you are driving up a mountain.
+* **Temperature (T)** changes with **height (h)**: This rate of change is $\frac{dT}{dh}$. (e.g., as you go higher, it gets colder).
+* **Height (h)** changes with **time (t)**: This rate of change is $\frac{dh}{dt}$. (e.g., as time passes, you drive higher up the mountain).
+* You want to find how **temperature (T)** changes with **time (t)**: This is $\frac{dT}{dt}$.
+
+The chain rule states that if you know how T changes with h, and how h changes with t, you can find how T changes with t by multiplying these rates:
+
+$$\frac{dT}{dt} = \frac{dT}{dh} \cdot \frac{dh}{dt}$$
+
+### Deeper Understanding with Small Changes
+
+Consider infinitesimal changes:
+* A small change in time, $\Delta t$.
+* This causes a small change in height, $\Delta h$.
+* This change in height then causes a small change in temperature, $\Delta T$.
+
+We can write the relationship between these small changes:
+$$\frac{\Delta T}{\Delta t} = \frac{\Delta T}{\Delta h} \cdot \frac{\Delta h}{\Delta t}$$
+
+As $\Delta t \to 0$, then $\Delta h \to 0$ and $\Delta T \to 0$. In this limit, these ratios become derivatives:
+$$\lim_{\Delta t \to 0} \frac{\Delta T}{\Delta t} = \left(\lim_{\Delta h \to 0} \frac{\Delta T}{\Delta h}\right) \cdot \left(\lim_{\Delta t \to 0} \frac{\Delta h}{\Delta t}\right)$$
+$$\frac{dT}{dt} = \frac{dT}{dh} \cdot \frac{dh}{dt}$$
+
+This illustrates how the chain rule "links" the rates of change through an intermediate variable.
