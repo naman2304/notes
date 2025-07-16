@@ -1465,9 +1465,9 @@ The **rank** of a matrix is equal to the number of **pivots** (or leading ones) 
 
 To begin, you create an **augmented matrix**. This is formed by taking the coefficient matrix of your system of equations and adding an extra column on the right, which contains the constant values from the right-hand side of the equations. A vertical line typically separates the coefficients from the constants.
 
-For a system like:
-$2a + 4b - 2c = 1$
-$2a + 7b + 1c = -2$
+For a system like:  
+$2a + 4b - 2c = 1$  
+$2a + 7b + 1c = -2$  
 $4a + 14b + 0c = -1$
 
 The augmented matrix would be:
