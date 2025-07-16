@@ -1400,7 +1400,7 @@ $$
 The general method involves using each pivot (which should be 1) to eliminate all non-zero entries above it.
 
 1.  **Ensure Pivots are One:** If the pivots in the row echelon form are not 1, divide each row by its leading coefficient to make the pivots equal to 1.
-2.  **Clear Entries Above Pivots:** For each pivot (starting from the rightmost/bottommost pivot and working upwards):
+2.  **Clear Entries Above Pivots:** For each pivot (starting from the leftmost/topmost pivot and working downwards):
 * Multiply the row containing the pivot by a suitable scalar.
 * Subtract this modified row from the rows above to make the entries directly above the pivot zero.
 
@@ -1454,9 +1454,60 @@ This final matrix is the reduced row echelon form.
 ### Rank of a Matrix
 
 The **rank** of a matrix is equal to the number of **pivots** (or leading ones) in its row echelon form or reduced row echelon form.
-
   * A matrix with 5 pivots has a rank of 5.
   * A matrix with 3 pivots has a rank of 3.
 
-youtube: reduced row echelon form explanation
-youtube: row echelon form vs reduced row echelon form
+## Gaussian Elimination Algorithm
+
+**Gaussian elimination** is a classic algorithm used to solve systems of linear equations. It's essentially a formalized version of the elimination method.
+
+### Augmented Matrix
+
+To begin, you create an **augmented matrix**. This is formed by taking the coefficient matrix of your system of equations and adding an extra column on the right, which contains the constant values from the right-hand side of the equations. A vertical line typically separates the coefficients from the constants.
+
+For a system like:
+$2a + 4b - 2c = 1$
+$2a + 7b + 1c = -2$
+$4a + 14b + 0c = -1$
+
+The augmented matrix would be:
+
+$$
+\begin{bmatrix}
+2 & 4 & -2 & | & 1 \\
+2 & 7 & 1 & | & -2 \\
+4 & 14 & 0 & | & -1
+\end{bmatrix}
+$$
+
+Any row operations performed on the matrix (e.g., multiplying a row by a scalar, adding/subtracting rows) must also be applied to the constant column.
+
+### The Process: From Augmented Matrix to Reduced Row Echelon Form
+
+The goal of Gaussian elimination is to transform the augmented matrix into **reduced row echelon form (RREF)**. This involves two main phases:
+
+1.  **Forward Elimination (to Row Echelon Form):**
+    * **Select a Pivot:** Start with the top-left element as your first pivot.
+    * **Set Pivot to 1:** Use row operations (e.g., multiply the row by the reciprocal of the pivot) to make the pivot equal to 1.
+    * **Zero Out Elements Below Pivot:** Use row operations (e.g., subtract a multiple of the pivot row from rows below it) to make all elements directly below the pivot equal to 0.
+    * **Repeat:** Move to the next pivot along the diagonal (the first non-zero element in the next row) and repeat the process until the matrix is in **row echelon form** (all pivots are 1s, and all elements below pivots are 0s).
+
+2.  **Backward Substitution / Back Elimination (from Row Echelon Form to Reduced Row Echelon Form):**
+    * **Work Upwards:** Starting from the last row (bottom-rightmost pivot), use each pivot (which should be 1) to eliminate (make zero) all non-zero entries **above** it in its column. This process is very similar to how you made elements below the pivot zero.
+    * **Result:** Once this is complete, the coefficient part of the augmented matrix will be the **identity matrix** (1s on the diagonal, 0s everywhere else), and the constant column will contain the solutions for your variables.
+
+### Singular Cases
+
+Gaussian elimination can also identify if a matrix is **singular** (non-invertible), which implies issues with the system of equations.
+
+* If, during forward elimination, you obtain a **row of all zeros** in the coefficient part of the augmented matrix:
+    * **Infinitely Many Solutions:** If the corresponding constant value in that same row is also **zero** ($0a + 0b + 0c = 0$), then the system has **infinitely many solutions**. This equation is always true, implying a dependent system.
+    * **No Solution (Contradictory):** If the corresponding constant value in that same row is **non-zero** ($0a + 0b + 0c = \text{non-zero constant}$), then the system has **no solutions**. This is a contradiction (0 cannot equal a non-zero number).
+
+### Summary of Gaussian Elimination
+
+1.  **Create Augmented Matrix:** Combine coefficients and constants.
+2.  **Forward Elimination:** Transform the coefficient part into row echelon form (1s on diagonal, 0s below).
+3.  **Backward Substitution:** Transform the row echelon form into reduced row echelon form (0s above pivots).
+4.  **Read Solutions:** The constant column in the RREF will give the solutions for the variables.
+5.  **Handle Singularities:** If a row of zeros appears in the coefficient matrix, check the corresponding constant to determine if there are no solutions or infinitely many solutions.
