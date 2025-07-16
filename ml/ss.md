@@ -330,3 +330,188 @@ $$
 
 * A **singular matrix** has a determinant of 0.
 * A singular matrix **does not have an inverse**. This is consistent with the determinant rule for inverses, as division by zero is undefined. If $det(A) = 0$, then $\frac{1}{det(A)}$ would be undefined, indicating no inverse exists.
+
+## Basis of a Vector Space
+
+A **basis** in linear algebra is a set of vectors that can describe any point in a given space. It's a fundamental concept for understanding linear transformations and vector spaces.
+
+### Defining a Basis
+
+* A basis is not about the four corners of a square or parallelogram, but rather the **two vectors** originating from the origin that define them.
+* The **main property** of a basis is that every point in the space can be expressed as a **linear combination** of its constituent vectors.
+    * This means you can reach any point by scaling and summing the basis vectors.
+    * Scaling can involve positive or negative values (walking forwards or backwards), and fractional steps are also allowed.
+
+### Examples of Basis
+
+* Any two non-collinear vectors in a 2D plane can form a basis.
+* For example, if you have two vectors pointing in different directions, you can reach any point in the plane by combining them.
+
+### Examples of Non-Basis
+
+* Vectors that are **collinear** (lie on the same line) do **not** form a basis for a 2D plane.
+    * If two vectors point in the same or opposite directions, they can only cover that specific line, not the entire plane. You can't reach points off that line using only those two directions.
+
+## The Span of Vectors
+
+* The **span of a set of vectors** is the collection of all points reachable by combining those vectors (walking in their directions).
+* **Examples of Span:**
+    * Two non-collinear vectors in a plane span the **plane**.
+    * Two collinear vectors (pointing in the same or opposite directions) span a **line**.
+    * A single vector spans the **line** containing it and passing through the origin.
+
+## Basis of a Vector Space
+
+* A **basis** is a **minimal spanning set** for a vector space.
+    * **Minimal** means you cannot remove any vector from the set and still span the same space.
+    * If a set of vectors spans a space but has "too many" vectors (some are redundant), it's a spanning set but not a basis.
+* The **number of vectors in a basis** of a space is equal to the **dimension of that space**.
+    * A line (1D space) has a basis of length 1.
+    * A plane (2D space) has a basis of length 2.
+    * Any basis for a given space will always have the same number of elements.
+
+## Linear Independence and Dependence
+
+* A group of vectors is **linearly independent** if no vector in the group can be expressed as a linear combination of the others.
+* A group of vectors is **linearly dependent** if at least one vector in the group can be obtained as a linear combination of the others.
+    * If adding a new vector to a set does not change the span, the new set is linearly dependent.
+    * If you have more vectors than the dimension of the space you are trying to span, the set will always be linearly dependent.
+        * e.g., three or more vectors in a 2D plane are always linearly dependent.
+        * e.g., four or more vectors in 3D space are always linearly dependent.
+
+### Checking for Linear Dependence
+
+* To check if vectors $\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k$ are linearly dependent, try to find non-zero constants $\alpha_1, \alpha_2, \dots, \alpha_k$ such that:
+
+$$
+\alpha_1\mathbf{v}_1 + \alpha_2\mathbf{v}_2 + \dots + \alpha_k\mathbf{v}_k = \mathbf{0}
+$$
+
+If such non-zero constants exist, the vectors are linearly dependent. Equivalently, you can try to express one vector as a linear combination of the others.
+
+* **Example:** Given
+
+$$
+\alpha\mathbf{v}_1 + \beta\mathbf{v}_2 = \mathbf{v}_3
+$$
+
+$$
+\alpha \begin{bmatrix} -1 \\ 1 \end{bmatrix} + \beta \begin{bmatrix} 2 \\ 1 \end{bmatrix} = \begin{bmatrix} -5 \\ 3 \end{bmatrix}
+$$
+
+This leads to the system of equations:
+* $-\alpha + 2\beta = -5$ (Equation 1)
+* $\alpha + \beta = 3$ (Equation 2)
+
+Adding Equation 1 and Equation 2:  
+$(- \alpha + 2\beta) + (\alpha + \beta) = -5 + 3$  
+$3\beta = -2$  
+$\beta = -2/3$  
+
+Substitute $\beta$ into Equation 2:  
+$\alpha + (-2/3) = 3$  
+$\alpha = 3 + 2/3$  
+$\alpha = 11/3$
+
+Since we found a solution ($\alpha = 11/3, \beta = -2/3$), the set $\{\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3\}$ is **linearly dependent**.
+
+$$
+\frac{11}{3} \begin{bmatrix} -1 \\ 1 \end{bmatrix} - \frac{2}{3} \begin{bmatrix} 2 \\ 1 \end{bmatrix} = \begin{bmatrix} -11/3 - 4/3 \\ 11/3 - 2/3 \end{bmatrix} = \begin{bmatrix} -15/3 \\ 9/3 \end{bmatrix} = \begin{bmatrix} -5 \\ 3 \end{bmatrix}
+$$
+
+## Formal Definition of a Basis
+
+A set of vectors forms a basis for a vector space if it satisfies two conditions:
+1.  The set must **span** the vector space.
+2.  The vectors in the set must be **linearly independent**.
+
+* It's crucial to remember that not all sets of $n$ vectors will form a basis for an $n$-dimensional space. They must also be linearly independent.
+
+## Eigenbasis: The Special Basis
+
+* The **eigenbasis** is a particularly useful basis, especially in machine learning applications like **Principal Component Analysis (PCA)**.
+
+### How Eigenbasis Works
+
+* Consider a linear transformation represented by a matrix.
+* **Standard Basis:** When a transformation acts on the fundamental (standard) basis vectors (e.g., $[1, 0]$ and $[0, 1]$), it typically transforms a square into a parallelogram. This is a **change of coordinates** or **change of basis**.
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 3
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} = \begin{bmatrix}
+2 \\
+0
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 3
+\end{bmatrix} \cdot \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+1 \\
+3
+\end{bmatrix}
+$$
+
+* **Eigenbasis:** A special basis can be chosen such that the linear transformation only results in **stretching** along the directions of the basis vectors, without changing their orientation.
+    * For the following matrix, if we choose the basis vectors $[1, 0]$ and $[1, 1]$:
+        * The vector $[1, 0]$ transforms to $[2, 0]$ (stretched by 2).
+        * The vector $[1, 1]$ transforms to $[3, 3]$ (stretched by 3).
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 3
+\end{bmatrix}
+$$
+ 
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 3
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} = \begin{bmatrix}
+2 \\
+0
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+2 & 1 \\
+0 & 3
+\end{bmatrix} \cdot \begin{bmatrix}
+1 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+3 \\
+3
+\end{bmatrix}
+$$
+
+* In an eigenbasis, a parallelogram is transformed into another parallelogram with **sides parallel** to the original one. This means the transformation is simply a stretching along these specific directions.
+
+### Eigenvectors and Eigenvalues
+
+* The special vectors in the eigenbasis are called **eigenvectors**.
+* The stretching factors corresponding to these eigenvectors are called **eigenvalues**.
+    * In the example above, $[1, 0]$ and $[1, 1]$ are eigenvectors, and $2$ and $3$ are their respective eigenvalues.
+
+### Usefulness of Eigenbasis
+
+* Eigenbasis **simplifies linear transformations** by reducing them to simple stretchings along specific directions.
+* This significantly simplifies calculations, as finding the image of a point becomes a matter of applying the stretching factors to its components in the eigenbasis, rather than a full matrix multiplication.
+    * Example: To find the image of point $[3, 2]$ using the eigenbasis defined by $[1, 0]$ and $[1, 1]$:
+        * First, express $[3, 2]$ as a linear combination of the eigenvectors: $1 \cdot [1, 0] + 2 \cdot [1, 1]$.
+        * Then, apply the stretching: $1 \cdot (2 \cdot [1, 0]) + 2 \cdot (3 \cdot [1, 1]) = 2 \cdot [1, 0] + 6 \cdot [1, 1] = [2, 0] + [6, 6] = [8, 6]$.
