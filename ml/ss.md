@@ -232,3 +232,101 @@ will have a determinant of $(1 \times 1) - (3 \times 2) = 1 - 6 = -5$. This corr
 * A determinant of zero signifies a loss of dimension in the transformation (e.g., a square becoming a line or a point). 
 * A non-zero determinant indicates that the transformation preserves the original dimensionality. 
 
+## Determinant of a Product of Matrices
+
+The **determinant of the product of matrices** is equal to the **product of their individual determinants**. This means if you have two matrices, $A$ and $B$, then $det(AB) = det(A) \cdot det(B)$.
+
+For example:
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix} \cdot \begin{bmatrix}
+1 & 1 \\
+-2 & 1
+\end{bmatrix} = \begin{bmatrix}
+(3 \times 1) + (1 \times -2) & (3 \times 1) + (1 \times 1) \\
+(1 \times 1) + (2 \times -2) & (1 \times 1) + (2 \times 1)
+\end{bmatrix} = \begin{bmatrix}
+1 & 4 \\
+-3 & 3
+\end{bmatrix}
+$$
+
+* $det(A) = (3 \times 2) - (1 \times 1) = 6 - 1 = 5$
+* $det(B) = (1 \times 1) - (1 \times -2) = 1 - (-2) = 3$
+* $det(AB) = (1 \times 3) - (4 \times -3) = 3 - (-12) = 15$
+
+Notice that $5 \times 3 = 15$.
+
+### Intuition with Linear Transformations
+
+This rule makes intuitive sense when considering linear transformations:
+
+* **Determinant as an Area Scaling Factor:** The determinant of a matrix represents the factor by which the corresponding linear transformation scales areas (or volumes in higher dimensions).
+* **Composition of Transformations:** When you multiply two matrices, you are essentially composing two linear transformations.
+* **Combined Scaling:** If the first transformation scales areas by a factor of $det(A)$ and the second scales by $det(B)$, then the combined transformation scales areas by $det(A) \cdot det(B)$.
+
+## Singular and Non-Singular Matrices
+
+### Definitions
+
+* **Non-singular Matrix:** A matrix with a non-zero determinant. This means its linear transformation preserves or scales area, but doesn't collapse it to a lower dimension.
+* **Singular Matrix:** A matrix with a zero determinant. This means its linear transformation collapses the area to zero (e.g., mapping a 2D plane to a line or point).
+
+### Product of Singular and Non-Singular Matrices
+
+If one of the matrices in a product is singular, then the product of the matrices will **always be singular**.
+
+* **Mathematical Proof:** If $A$ is non-singular and $B$ is singular, then $det(B) = 0$.
+    Since $det(AB) = det(A) \cdot det(B)$, substituting $det(B) = 0$ gives $det(AB) = det(A) \cdot 0 = 0$.
+    Therefore, $AB$ is singular.
+
+* **Analogy with Numbers:** Just like any number multiplied by zero results in zero, any matrix multiplied by a singular matrix (which has a determinant of zero) results in a singular matrix (which also has a determinant of zero).
+
+* **Geometric Intuition:** A singular matrix "flattens" or "collapses" space. If you perform a transformation that collapses space to a lower dimension (e.g., a 2D plane to a line), and then apply another transformation, the space remains collapsed. Any initial area will ultimately be scaled by zero, resulting in zero area.
+
+## Determinant of an Inverse Matrix
+
+The **determinant of an inverse matrix** is the **reciprocal of the determinant of the original matrix**. This rule applies only if the original matrix is invertible.
+
+Mathematically, for an invertible matrix $A$:
+
+$det(A^{-1}) = \frac{1}{det(A)}$
+
+### Example
+
+* If $det(A) = 5$, then $det(A^{-1}) = \frac{1}{5} = 0.2$.
+* If $det(A) = 8$, then $det(A^{-1}) = \frac{1}{8} = 0.125$.
+
+### Proof
+
+The rule can be derived from the **determinant product rule**:
+
+1.  We know that for any two matrices $A$ and $B$, $det(AB) = det(A) \cdot det(B)$.
+2.  Let $B$ be the inverse of $A$, i.e., $B = A^{-1}$.
+3.  Substitute $B$ with $A^{-1}$ into the product rule:
+    $det(A \cdot A^{-1}) = det(A) \cdot det(A^{-1})$
+4.  The product of a matrix and its inverse is the **identity matrix** ($I$):
+    $A \cdot A^{-1} = I$
+5.  So, the equation becomes:
+    $det(I) = det(A) \cdot det(A^{-1})$
+6.  The **determinant of an identity matrix** is always 1. For a 2x2 identity matrix: $det(I) = (1 \times 1) - (0 \times 0) = 1$.
+
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+7.  Substituting $det(I) = 1$ into the equation:
+    $1 = det(A) \cdot det(A^{-1})$
+8.  Finally, solving for $det(A^{-1})$:
+    $det(A^{-1}) = \frac{1}{det(A)}$
+
+### Singular Matrices and Inverses
+
+* A **singular matrix** has a determinant of 0.
+* A singular matrix **does not have an inverse**. This is consistent with the determinant rule for inverses, as division by zero is undefined. If $det(A) = 0$, then $\frac{1}{det(A)}$ would be undefined, indicating no inverse exists.
