@@ -1364,3 +1364,99 @@ $$
 $$
 
 In this case, the rank is 2, as there are two pivots.
+
+## Reduced Row Echelon Form
+
+The **reduced row echelon form (RREF)** is an extension of the row echelon form, representing a fully solved system of linear equations.
+
+### Connection to Solving Systems of Equations
+
+Consider the system:  
+$5a + b = 17$  
+$4a - 3b = 6$
+
+This system can be solved to get $a = 3$ and $b = 2$.
+This solution can be expressed as a system:  
+$1a + 0b = 3$  
+$0a + 1b = 2$
+
+The corresponding matrix representation of this solved system is the reduced row echelon form.
+
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+### Characteristics of Reduced Row Echelon Form
+
+* It must first be in **row echelon form**.
+* Each **pivot** (the first non-zero entry in a row) must be a **one**.
+* All entries **above** each pivot must be **zero**.
+
+### Converting from Row Echelon Form to Reduced Row Echelon Form
+
+The general method involves using each pivot (which should be 1) to eliminate all non-zero entries above it.
+
+1.  **Ensure Pivots are One:** If the pivots in the row echelon form are not 1, divide each row by its leading coefficient to make the pivots equal to 1.
+2.  **Clear Entries Above Pivots:** For each pivot (starting from the rightmost/bottommost pivot and working upwards):
+* Multiply the row containing the pivot by a suitable scalar.
+* Subtract this modified row from the rows above to make the entries directly above the pivot zero.
+
+**Example:**
+To convert the following row echelon form matrix to reduced row echelon form:
+
+$$
+\\begin{bmatrix}
+1 & 2 & -5 & 4 \\
+0 & 1 & 3 & 0 \\
+0 & 0 & 1 & 0
+\\end{bmatrix}
+$$
+
+**Step 1: Eliminate '2' in R1C2**
+Subtract 2 times Row 2 from Row 1 ($R\_1 \\leftarrow R\_1 - 2R\_2$):
+
+$$
+\\begin{bmatrix}
+1 & 0 & -11 & 4 \\
+0 & 1 & 3 & 0 \\
+0 & 0 & 1 & 0
+\\end{bmatrix}
+$$
+
+
+**Step 2: Eliminate '-11' in R1C3**
+Add 11 times Row 3 to Row 1 ($R\_1 \\leftarrow R\_1 + 11R\_3$):
+
+$$
+\\begin{bmatrix}
+1 & 0 & 0 & 4 \\
+0 & 1 & 3 & 0 \\
+0 & 0 & 1 & 0
+\\end{bmatrix}
+$$
+
+**Step 3: Eliminate '3' in R2C3**
+Subtract 3 times Row 3 from Row 2 ($R\_2 \\leftarrow R\_2 - 3R\_3$):
+
+$$
+\\begin{bmatrix}
+1 & 0 & 0 & 4 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0
+\\end{bmatrix}
+$$
+
+This final matrix is the reduced row echelon form.
+
+### Rank of a Matrix
+
+The **rank** of a matrix is equal to the number of **pivots** (or leading ones) in its row echelon form or reduced row echelon form.
+
+  * A matrix with 5 pivots has a rank of 5.
+  * A matrix with 3 pivots has a rank of 3.
+
+youtube: reduced row echelon form explanation
+youtube: row echelon form vs reduced row echelon form
