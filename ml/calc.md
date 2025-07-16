@@ -463,7 +463,8 @@ There is a powerful relationship between the derivative of a function and the de
 $$
 \frac{\Delta g}{\Delta y} = \frac{\Delta x}{\Delta f}
 $$
-    * As $\Delta x$ (and thus $\Delta y$) approaches 0, we get:
+
+As $\Delta x$ (and thus $\Delta y$) approaches 0, we get:
 
 $$
 \frac{dg}{dy} = \frac{dx}{df} = \frac{1}{\frac{df}{dx}}
@@ -494,7 +495,222 @@ $$
 
 This relationship simplifies finding derivatives of inverse functions if the derivative of the original function is known.
 
-***
-Further YouTube videos:
-* "Inverse functions and their derivatives youtube"
-* "Derivative of inverse function formula explanation youtube"
+Let's delve into the derivatives of **trigonometric functions**, starting with sine and cosine.
+
+## Derivatives of Trigonometric Functions
+
+### Derivative of Sine Function
+
+* Consider the function $f(x) = \sin(x)$.
+* Let's look at the slopes of the tangent lines at a few specific points on the sine curve:
+    * At $x = \frac{\pi}{2}$ (peak): The tangent is horizontal, so its slope is **0**.
+    * At $x = -\frac{\pi}{2}$ (trough): The tangent is horizontal, so its slope is **0**.
+    * At $x = 0$: The tangent has a positive slope, which is **1**.
+    * At $x = -\pi$: The tangent has a negative slope, which is **-1**.
+    
+
+* Now, let's compare these slopes with the values of the **cosine function** at the same points:
+    * $\cos(\frac{\pi}{2}) = 0$
+    * $\cos(-\frac{\pi}{2}) = 0$
+    * $\cos(0) = 1$
+    * $\cos(-\pi) = -1$
+
+* **Observation**: The values of $\cos(x)$ perfectly match the slopes of $\sin(x)$ at these points.
+* **Conclusion**: The derivative of $\sin(x)$ is $\cos(x)$.
+    * If $f(x) = \sin(x)$, then $f'(x) = \cos(x)$ or $\frac{d}{dx}(\sin(x)) = \cos(x)$.
+
+### Derivative of Cosine Function
+
+* Now consider the function $f(x) = \cos(x)$.
+* Let's look at the slopes of the tangent lines at some specific points on the cosine curve:
+    * At $x = 0$ (peak): The tangent is horizontal, so its slope is **0**.
+    * At $x = -\pi$ (trough): The tangent is horizontal, so its slope is **0**.
+    * At $x = \frac{\pi}{2}$: The tangent has a negative slope, which is **-1**.
+    * At $x = -\frac{\pi}{2}$: The tangent has a positive slope, which is **1**.
+    
+* Let's compare these slopes with the values of the **sine function** at the same points, but with a negative sign:
+    * $-\sin(0) = 0$
+    * $-\sin(-\pi) = 0$
+    * $-\sin(\frac{\pi}{2}) = -1$
+    * $-\sin(-\frac{\pi}{2}) = -(-1) = 1$
+
+* **Observation**: The values of $-\sin(x)$ perfectly match the slopes of $\cos(x)$ at these points.
+* **Conclusion**: The derivative of $\cos(x)$ is $-\sin(x)$.
+    * If $f(x) = \cos(x)$, then $f'(x) = -\sin(x)$ or $\frac{d}{dx}(\cos(x)) = -\sin(x)$.
+
+## Euler's Number (e)
+
+**Euler's number (e)** is a fundamental mathematical constant, approximately **2.718281828**. It's an **irrational number**, meaning its decimal representation is non-repeating and non-terminating.
+
+**Definition using a Limit Expression:**
+One key way to define $e$ is through the limit of the expression $(1 + \frac{1}{n})^n$ as $n$ approaches infinity.
+* For $n=1: (1 + \frac{1}{1})^1 = 2^1 = 2$
+* For $n=10: (1 + \frac{1}{10})^{10} \approx 2.594$
+* For $n=100: (1 + \frac{1}{100})^{100} \approx 2.705$
+* For $n=1000: (1 + \frac{1}{1000})^{1000} \approx 2.717$
+As $n$ gets larger, the value of $(1 + \frac{1}{n})^n$ converges to $e$.
+
+## The Exponential Function $f(x) = e^x$
+
+The number $e$ is particularly special because the **exponential function $f(x) = e^x$ is its own derivative**.
+* If $f(x) = e^x$, then $f'(x) = e^x$ (or $\frac{d}{dx}(e^x) = e^x$).
+This unique property makes $e^x$ appear extensively in various fields like science, statistics, and probability.
+
+## Understanding 'e' through Compound Interest
+
+A practical way to understand $e$ is through the concept of **compound interest**.
+Imagine you invest $1 and aim to earn 100% annual interest.
+
+* **Bank 1: 100% interest once a year** ($n=1$)
+    * After 1 year: $1 + 100\%$ of $1 = 1 + 1 = 2$
+    * This can be represented as $(1 + \frac{1}{1})^1 = 2$.
+
+* **Bank 2: 50% interest twice a year** ($n=2$)
+    * After 6 months: $1 + 50\%$ of $1 = 1 + 0.5 = 1.5$
+    * After 1 year: $1.5 + 50\%$ of $1.5 = 1.5 + 0.75 = 2.25$
+    * This can be represented as $(1 + \frac{1}{2})^2 = (1.5)^2 = 2.25$.
+    * Here, the interest earned in the first 6 months also starts earning interest, which is called **accrued interest**. This is why Bank 2 yields more than Bank 1.
+
+* **Bank 3: 33.3% interest three times a year** ($n=3$)
+    * After 4 months: $1 + \frac{1}{3} = 1.333...$
+    * After 8 months: $(1 + \frac{1}{3})^2 \approx 1.777...$
+    * After 1 year: $(1 + \frac{1}{3})^3 \approx 2.370$
+    * This shows that compounding more frequently (Bank 3 vs. Bank 2) yields even more money.
+
+**Generalizing Compound Interest:**
+If a bank offers 100% annual interest, compounded $n$ times a year, the total amount after one year (starting with 1 dollar) will be $$(1 + \frac{1}{n})^n$$.
+
+* **Bank 12:** Compounded monthly ($n=12$)
+    * Amount after 1 year: $(1 + \frac{1}{12})^{12} \approx 2.613$
+
+* **Bank 365:** Compounded daily ($n=365$)
+    * Amount after 1 year: $(1 + \frac{1}{365})^{365} \approx 2.7145$
+
+* **Bank Infinity (Continuous Compounding):**
+    Imagine a bank that compounds interest infinitely many times per year (e.g., every second, every millisecond, or continuously). This means $n \to \infty$. The amount of money you would have at the end of the year from this "Bank Infinity" is precisely the value of $e$.
+
+$$
+\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n = e \approx 2.718281828
+$$
+
+Therefore, $e$ represents the maximum possible return on a 100% annual interest rate when compounded continuously. It signifies constant, continuous growth.
+
+
+## Derivative of the Exponential Function: $f(x) = e^x$
+
+The most fascinating property of the exponential function $f(x) = e^x$ is that its **derivative is the function itself**.
+
+* **Property**: If $f(x) = e^x$, then $f'(x) = e^x$.
+* In Leibniz's notation: $\frac{d}{dx}(e^x) = e^x$.
+* This means that at any point $(x, e^x)$ on the graph of $y = e^x$, the **slope of the tangent line** at that point is equal to the function's value $e^x$ at that point.
+
+### Numerical Verification at $x=2$
+
+Let's numerically verify this property by calculating the slope of secant lines for $f(x) = e^x$ at $x=2$. The point on the graph is $(2, e^2 \approx 7.39)$. We expect the slope of the tangent at this point to also be approximately $7.39$.
+
+1.  **$\Delta x = 1$**:
+    * Points: $(2, e^2)$ and $(2+1, e^{2+1}) = (3, e^3)$.
+    * $\Delta f = e^3 - e^2 \approx 20.09 - 7.39 = 12.7$.
+    * Slope = $\frac{\Delta f}{\Delta x} = \frac{12.7}{1} = 12.7$.
+
+2.  **$\Delta x = 0.5$ (or $\frac{1}{2}$)**:
+    * Points: $(2, e^2)$ and $(2+0.5, e^{2+0.5}) = (2.5, e^{2.5})$.
+    * $\Delta f = e^{2.5} - e^2 \approx 12.18 - 7.39 = 4.79$.
+    * Slope = $\frac{\Delta f}{\Delta x} = \frac{4.79}{0.5} = 9.58$.
+
+3.  **$\Delta x = 0.25$ (or $\frac{1}{4}$)**:
+    * Points: $(2, e^2)$ and $(2+0.25, e^{2.25})$.
+    * $\Delta f = e^{2.25} - e^2 \approx 9.49 - 7.39 = 2.1$.
+    * Slope = $\frac{\Delta f}{\Delta x} = \frac{2.1}{0.25} = 8.4$.
+
+4.  **Continuing with smaller $\Delta x$ values**:
+    * For $\Delta x = \frac{1}{8}$, the slope is approximately $7.87$.
+    * For $\Delta x = \frac{1}{16}$, the slope is approximately $7.62$.
+    * For $\Delta x = \frac{1}{1000}$, the slope is approximately $7.39$.
+
+* **Observation**: As $\Delta x$ approaches 0, the slope of the secant lines converges to approximately **7.39**.
+* **Conclusion**: This numerical evidence strongly suggests that the slope of the tangent line to $e^x$ at $x=2$ is indeed $e^2 \approx 7.39$. This illustrates that for any point $x$, the slope of the tangent to $e^x$ is $e^x$ itself. 
+
+This self-replicating property in its derivative is what makes $e^x$ so fundamental in modeling continuous growth and decay processes in nature and science.
+
+## The Natural Logarithmic Function
+
+* **Definition**: The natural logarithm of a number $x$, denoted as $\ln(x)$ (or $\log(x)$ in some contexts, but specifically base $e$ in this course), is the power to which $e$ must be raised to equal $x$.
+    * If $e^k = x$, then $k = \ln(x)$.
+    * **Example**: If $e^k = 3$, then $k = \ln(3)$.
+
+* **Inverse Relationship**: The natural logarithm function is the **inverse** of the exponential function $e^x$.
+    * If $f(x) = e^x$, then its inverse function is $f^{-1}(y) = \ln(y)$.
+    * This inverse relationship means:
+        * $e^{\ln(x)} = x$
+        * $\ln(e^y) = y$
+    
+
+## Derivative of the Natural Logarithm Function
+
+We will use the **inverse function derivative rule**: If $g(y) = f^{-1}(y)$, then $g'(y) = \frac{1}{f'(x)}$, where $y = f(x)$.
+
+1.  **Identify the functions**:
+    * Let $f(x) = e^x$.
+    * Its derivative is $f'(x) = e^x$.
+    * Its inverse is $g(y) = \ln(y)$. This is the derivative we want to find.
+
+2.  **Apply the inverse function rule**:
+    * $g'(y) = \frac{1}{f'(x)}$
+    * We know $f'(x) = e^x$. So, $g'(y) = \frac{1}{e^x}$.
+
+3.  **Express in terms of $y$**:
+    * Since $y = f(x) = e^x$, we can substitute $y$ for $e^x$ in the denominator.
+    * Therefore, $g'(y) = \frac{1}{y}$.
+
+* **Conclusion**: The derivative of the natural logarithm function is $\frac{1}{y}$ (or $\frac{1}{x}$ if using $x$ as the independent variable).
+    * If $f(x) = \ln(x)$, then $f'(x) = \frac{1}{x}$.
+    * In Leibniz's notation: $\frac{d}{dx}(\ln(x)) = \frac{1}{x}$.
+
+### Example Verification at $x=2$
+
+* Consider the point $(2, e^2 \approx 7.39)$ on the graph of $f(x) = e^x$.
+    * The slope of the tangent at this point is $f'(2) = e^2 \approx 7.39$.
+* The corresponding point on the graph of $g(y) = \ln(y)$ is $(e^2, 2)$, or approximately $(7.39, 2)$.
+    * Using the inverse derivative rule, the slope of the tangent at $(7.39, 2)$ should be $\frac{1}{\text{slope of } e^x \text{ at } x=2} = \frac{1}{e^2}$.
+    * According to our derived formula, $g'(y) = \frac{1}{y}$. So, at $y = e^2$, $g'(e^2) = \frac{1}{e^2}$.
+* This confirms that the derivative of $\ln(y)$ is $\frac{1}{y}$.
+
+## Visually Identifying Non-Differentiable Functions
+
+There are three primary visual indicators that a function is not differentiable at a specific point:
+
+### Corners or Cusps
+
+  * A function is **not differentiable** at a point where its graph has a sharp corner or a cusp.
+  * **Reason**: At a corner or cusp, you cannot draw a unique tangent line. Multiple lines could appear to "touch" the curve at that point.
+  * **Example**: The **absolute value function**, $f(x) = |x|$.
+      * This function is defined as $x$ for $x \\ge 0$ and $-x$ for $x \< 0$.
+      * At $x=0$, the graph forms a sharp corner. If you try to draw a tangent, it's not well-defined.
+      * Therefore, $f(x) = |x|$ is **not differentiable at $x=0$**.
+
+### Jump Discontinuities
+  * A function is **not differentiable** at any point where it has a jump discontinuity.
+  * **Reason**: If a function is discontinuous (you have to lift your pencil to draw it), you cannot draw any tangent line at the point of the jump. A function must be **continuous** at a point to be differentiable at that point.
+  * **Example**: A **step function** or a **piecewise function** with a jump.
+      * Consider a function defined as $f(x) = 2$ for $x \< -1$ and $f(x) = x+1$ for $x \\ge -1$.
+      * At $x=-1$, there is a sudden "jump" in the function's value.
+      * Therefore, this function is **not differentiable at $x=-1$**.
+
+### Vertical Tangents
+  * A function is **not differentiable** at a point where its tangent line is vertical.
+  * **Reason**: The slope of a vertical line is undefined (it's "rise over run" where run is zero, leading to division by zero, or an "infinite" slope). A well-defined derivative requires a finite slope.
+  * **Example**: The cubic root function, $f(x) = x^{1/3}$ (or $\\sqrt[3]{x}$).
+      * At $x=0$, the graph has a tangent line that is perfectly vertical (along the y-axis).
+      * Therefore, $f(x) = x^{1/3}$ is **not differentiable at $x=0$**.
+
+## Summary of Non-Differentiable Cases
+
+A function is **not differentiable** at points exhibiting any of these characteristics:
+
+  * **Corners or Cusps** (sharp points)
+  * **Jump Discontinuities** (breaks in the graph)
+  * **Vertical Tangents** (where the slope is undefined)
+
+If a function is differentiable over an entire interval, it means that the derivative exists for every single point in that interval, and none of these conditions are met.
+
