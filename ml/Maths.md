@@ -1258,3 +1258,109 @@ There's also a direct relationship between the row echelon form and whether a ma
 
 * A matrix is **non-singular (invertible)** if and only if its row echelon form has **only ones on the main diagonal and no zeros**, meaning it is the identity matrix or an identity-like upper triangular matrix.
 * A matrix is **singular (non-invertible)** if and only if its row echelon form contains at least one **row of all zeros** or a **zero on its main diagonal where a '1' would be expected for an identity matrix**.
+
+## Row Echelon Form (REF) in general
+
+### Definition
+
+A matrix is in row echelon form if it satisfies the following conditions:
+
+* All rows consisting entirely of zeros are at the bottom of the matrix.
+* For each non-zero row, the first non-zero entry (called the pivot) is 1. (Note: In some textbooks, pivots can be any non-zero number, but for this class, we will ensure pivots are 1).
+* For any two consecutive non-zero rows, the pivot of the lower row is strictly to the right of the pivot of the upper row.
+* All entries in a column below a pivot are zero.
+
+### Examples
+
+Consider a system of equations:
+
+$$
+\begin{aligned}
+ax + by + cz &= d \\
+ey + fz &= g \\
+hz &= i
+\end{aligned}
+$$
+
+The corresponding augmented matrix in row echelon form would have a structure similar to:
+
+$$
+\begin{bmatrix}
+1 & * & * & * \\
+0 & 1 & * & * \\
+0 & 0 & 1 & *
+\end{bmatrix}
+$$
+
+where '*' represents any number (zero or non-zero).
+
+### Identifying Pivots
+
+Pivots are the first non-zero entries in each non-zero row of a matrix in row echelon form.
+
+### Rank of a Matrix
+
+The rank of a matrix is equal to the number of pivots (or non-zero rows) in its row echelon form.
+
+* A matrix with 5 pivots has Rank 5.
+* A matrix with 3 pivots has Rank 3.
+
+### Row Operations to Achieve REF
+
+The same row operations used to solve systems of equations can be applied to matrices to transform them into row echelon form:
+
+* Swapping two rows.
+* Multiplying a row by a non-zero scalar.
+* Adding a multiple of one row to another row.
+
+### Examples of Reducing Matrices to REF
+
+* **Example 1:**
+
+$$
+\begin{bmatrix}
+1 & 1 & 1 \\
+1 & 2 & 3 \\
+1 & 3 & 6
+\end{bmatrix} {\text{ ---- R2 = R2 - R1, R3 = R3 - R1   ---->   }} \begin{bmatrix}
+1 & 1 & 1 \\
+0 & 1 & 2 \\
+0 & 2 & 5
+\end{bmatrix}
+$$
+
+* **Example 2 (Singular Matrix):**
+
+$$
+\begin{bmatrix}
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+1 & 2 & 3
+\end{bmatrix} {\text{ ---- R2 = R2 - R1, R3 = R3 - R1   ---->   }} \begin{bmatrix}
+1 & 2 & 3 \\
+0 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+$$
+
+In this case, the rank is 1, as there is only one pivot.
+
+* **Example 3 (Another Singular Matrix):**
+
+$$
+\begin{bmatrix}
+1 & 2 & 3 \\
+2 & 4 & 7 \\
+3 & 6 & 10
+\end{bmatrix} {\text{ ----   R2 = R2 - 2R1, R3 = R3 - 3R1   ---->   }} \begin{bmatrix}
+1 & 2 & 3 \\
+0 & 0 & 1 \\
+0 & 0 & 1
+\end{bmatrix} {\text{----    R3 = R3 - R2   ---->   }} \begin{bmatrix}
+1 & 2 & 3 \\
+0 & 0 & 1 \\
+0 & 0 & 0
+\end{bmatrix}
+$$
+
+In this case, the rank is 2, as there are two pivots.
