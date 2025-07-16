@@ -154,3 +154,81 @@ The entire plane collapses to a single point.
 * The **rank** of a linear transformation (or its corresponding matrix) is the **dimension of its image**.
 * This provides a direct way to identify the rank by observing the dimensionality of the space covered by the transformation's output.
 
+## Determinants and Matrix Singularity
+
+* The **determinant** of a matrix is a scalar value that provides information about the properties of the matrix, particularly its singularity.
+* In the context of **linear transformations**, the determinant can be intuitively understood as the **scaling factor of area or volume** of the transformed fundamental basis.
+
+### Determinant as Area/Volume
+
+* For a 2x2 matrix, the absolute value of its determinant represents the **area of the parallelogram** formed by the transformation of the unit square.
+    * **Example**: For the matrix its determinant is $(3 \times 2) - (1 \times 1) = 6 - 1 = 5$. This matrix transforms a unit square (area = 1) into a parallelogram with an area of 5.
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+        
+* For higher dimensions (e.g., 3x3 matrices), the determinant represents the **volume** of the transformed unit cube.
+
+### Singular vs. Non-Singular Matrices
+
+* A matrix is **singular** if its determinant is **zero**.
+    * This implies that the linear transformation "squashes" the space into a lower dimension, resulting in an area or volume of zero.
+* A matrix is **non-singular** if its determinant is **non-zero**.
+    * This means the linear transformation preserves the dimensionality of the space, and the transformed shape has a non-zero area or volume.
+    * The determinant being positive or negative **does not affect singularity**; only whether it's zero or non-zero matters.
+
+**Example 1**: For the matrix its determinant is $(1 \times 2) - (2 \times 1) = 0$. This matrix transforms the unit square into a line segment (a "very skinny parallelogram") which has an area of 0.
+
+$$
+\begin{bmatrix}
+1 & 2 \\
+1 & 2
+\end{bmatrix}
+$$
+
+**Example 2**: For the matrix its determinant is 0. This transforms the unit square into a single point (0,0), which has an area of 0.
+
+$$
+\begin{bmatrix}
+0 & 0 \\
+0 & 0
+\end{bmatrix}
+$$
+
+### Negative Determinants
+
+<img src="/metadata/neg_det.png" width="700" />
+
+* A **negative determinant** indicates a **change in orientation** (a "flip" or "reflection") of the transformed space.
+* The sign of the determinant depends on the order in which the basis vectors are considered.
+    * Conventionally, if the transformation results in the basis vectors being in a **clockwise order**, the "area" is considered negative. If in a **counterclockwise order**, it's positive.
+    * **Example**: Permuting columns of a matrix changes the sign of the determinant. If the matrix
+
+$$
+\begin{bmatrix}
+3 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+
+has a determinant of 5, then the matrix with permuted columns
+
+$$
+\begin{bmatrix}
+1 & 3 \\
+2 & 1
+\end{bmatrix}
+$$
+
+will have a determinant of $(1 \times 1) - (3 \times 2) = 1 - 6 = -5$. This corresponds to a flipped orientation of the parallelogram.
+
+### Key Takeaway
+
+* The **singularity of a matrix** is solely determined by whether its **determinant is zero or non-zero**.
+* A determinant of zero signifies a loss of dimension in the transformation (e.g., a square becoming a line or a point). 
+* A non-zero determinant indicates that the transformation preserves the original dimensionality. 
+
