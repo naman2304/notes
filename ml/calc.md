@@ -1445,3 +1445,124 @@ This problem is a classic example of **linear regression**, a fundamental machin
 ### Future Considerations
 
 Solving systems of equations can become computationally expensive with many variables. Future lessons will introduce **gradient descent** as a more efficient method for minimizing functions in such scenarios.
+
+## Gradient Descent: An Iterative Optimization Approach
+
+While derivatives and gradients help solve optimization problems, finding exact analytical solutions can quickly become complex, especially in higher dimensions. **Gradient descent** is an iterative and powerful method for minimizing (or maximizing) functions with many variables.
+
+### The Challenge of Analytical Solutions
+
+Consider the function $f(x) = e^x - \log(x)$.
+
+To find its minimum analytically, we'd calculate its derivative, $f'(x) = e^x - \frac{1}{x}$, and set it to zero:
+$$e^x - \frac{1}{x} = 0$$
+This is equivalent to $e^x = \frac{1}{x}$. Solving this equation analytically for $x$ is difficult. The solution is approximately $x \approx 0.5671$, known as the **Omega constant** or Lambert W function evaluated at 1.
+
+### Limitations of Brute-Force Exploration
+
+One might consider an iterative approach:
+1.  **Pick a random starting point** for $x$.
+2.  **Explore nearby points** (e.g., move a small step left and right).
+3.  **Choose the point that yields a smaller function value** (if minimizing).
+4.  **Repeat** until moving in either direction results in a higher function value, indicating a local minimum.
+
+While this approach works, it's inefficient and might not pinpoint the exact minimum precisely. Gradient descent offers a more refined and efficient way to navigate towards the minimum.
+
+## The Idea Behind Gradient Descent
+
+Imagine you're trying to find the lowest point in a valley while blindfolded. Instead of randomly exploring, you'd feel the slope under your feet and always take a small step in the steepest downhill direction. That's essentially what gradient descent does.
+
+### Utilizing the Derivative (Slope)
+
+* **If the slope is negative** (you're to the left of the minimum and going downhill), you need to move to the **right** (increase your $x$ value).
+* **If the slope is positive** (you're to the right of the minimum and going uphill), you need to move to the **left** (decrease your $x$ value).
+
+This observation leads to the core updating rule:
+**New Point = Old Point - Slope**
+
+Mathematically, if $x_0$ is the old point and $x_1$ is the new point, then:
+
+$$x_1 = x_0 - f'(x_0)$$
+where $f'(x_0)$ is the derivative (slope) of the function at $x_0$.
+
+### Introducing the Learning Rate ($\alpha$)
+
+Taking steps purely based on the slope can lead to problems, especially in steep areas of the function where the derivative is large. This could cause:
+* **Large jumps:** You might overshoot the minimum and oscillate wildly.
+* **Missing the minimum entirely:** You could jump past the minimum and get lost in another part of the function.
+
+To control the step size and ensure a more stable convergence, we introduce a **learning rate**, denoted by $\alpha$ (alpha). This is a small positive number (e.g., 0.01) that scales the step taken in the direction of the negative gradient.
+
+The refined update formula becomes:
+
+$$x_{k+1} = x_k - \alpha \cdot f'(x_k)$$
+
+where $x_k$ is the point at the current iteration $k$, and $x_{k+1}$ is the point for the next iteration.
+
+
+
+### Benefits of the Learning Rate
+
+The learning rate provides an added bonus:
+* **Adaptive step size:** When the function is steep (derivative is large), the term $\alpha \cdot f'(x_k)$ will be relatively large, leading to a bigger step.
+* **Smaller steps near minimum:** As you approach the minimum, the function becomes flatter, the derivative $f'(x_k)$ becomes smaller, resulting in smaller, more precise steps. This is analogous to a golfer hitting the ball hard when far from the hole but with precision when close.
+
+NOTE: This assumption just breaks depending on the type of loss function.
+*  Example: If loss function is say $x^2$ then it works, because farther off from minima slope is higher so we take relatively big steps, but closer off to minima slope is smaller so we take smaller steps and hence we are able to reach minima.
+*  Example: If loss function is say $sqrt(|x|)$ then it don't work, because farther off from minima slope is smaller so we take relatively small steps, but closer off to minima slope is high (at 0 it approaches to infinity) so we take larger and larger steps -- hence we might oscillate and never reach minima.
+
+To mitigate this we can use adaptive learning rate methods like Adam.
+
+### The Gradient Descent Algorithm
+
+Gradient descent is an iterative procedure:
+
+1.  **Define the function** $f(x)$ you want to minimize.
+2.  **Choose a learning rate** $\alpha$ (a small positive value, often between 0.001 and 0.1).
+3.  **Choose an initial starting point** $x_0$.
+4.  **Iterate** the updating step:
+    For $k = 0, 1, 2, \dots$:
+    $$x_{k+1} = x_k - \alpha \cdot f'(x_k)$$
+5.  **Repeat** until convergence. Convergence occurs when the change in $x$ (or the function value $f(x)$) between iterations becomes very small, indicating you're close to the minimum.
+
+This algorithm is very fast and can be iterated thousands of times, leading to solutions very close to the true minimums of functions.
+
+### Example Iterations
+
+Let's apply gradient descent to $f(x) = e^x - \log(x)$, where $f'(x) = e^x - \frac{1}{x}$.
+Choose a starting point $x_0 = 0.05$ and a learning rate $\alpha = 0.005$.
+
+#### Iteration 1:
+* $f'(0.05) = e^{0.05} - \frac{1}{0.05} \approx 1.051 - 20 = -18.949$
+* $x_1 = x_0 - \alpha \cdot f'(x_0) = 0.05 - 0.005 \cdot (-18.949)$
+* $x_1 = 0.05 + 0.094745 = 0.144745$ (This is closer to the minimum compared to 0.05).
+
+#### Iteration 2:
+* $f'(0.144745) = e^{0.144745} - \frac{1}{0.144745} \approx 1.1557 - 6.909 \approx -5.7533$
+* $x_2 = x_1 - \alpha \cdot f'(x_1) = 0.144745 - 0.005 \cdot (-5.7533)$
+* $x_2 = 0.144745 + 0.0287665 \approx 0.1735115$
+
+Notice that with gradient descent, you only need to *calculate* the derivative at each step; you never have to *solve* the equation $f'(x) = 0$ analytically, which is a significant improvement for complex functions.
+
+## Challenges with Learning Rate
+
+The learning rate ($\alpha$) determines the size of the steps taken during gradient descent.
+
+* **Learning Rate Too Large:** If $\alpha$ is too large, the algorithm might **overshoot the minimum** repeatedly, causing the optimization process to diverge or oscillate wildly without ever converging to a stable solution. 
+
+* **Learning Rate Too Small:** Conversely, if $\alpha$ is too small, each step will be tiny. This means the algorithm will take an **extremely long time to converge** to the minimum, or it might get stuck before reaching it within a practical timeframe. 
+
+* **Finding the "Just Right" Learning Rate:** There's no single definitive method for picking the optimal learning rate. It's often problem-dependent and can require experimentation. This is an active area of research, with many advanced methods developed to dynamically adjust the learning rate during training (e.g., adaptive learning rate methods like Adam, RMSprop).
+
+## The Local Minima Problem
+
+Another challenge with gradient descent is the risk of getting stuck in a **local minimum** rather than finding the true **global minimum**.
+
+* A **global minimum** is the lowest point across the entire function.
+* A **local minimum** is the lowest point within a specific region, but not necessarily the absolute lowest point of the function.
+
+If you start your gradient descent algorithm in a region that leads to a local minimum, it will converge there and won't explore other parts of the function that might contain the global minimum.
+
+### Overcoming Local Minima
+
+While there's no foolproof way to guarantee finding the global minimum, a common strategy to mitigate the local minima problem is to **run the gradient descent algorithm multiple times with different random starting points**. By initializing the algorithm from various locations, you increase the chances that at least one of these runs will converge to the global minimum or a very good local minimum.
