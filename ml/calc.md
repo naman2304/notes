@@ -1314,3 +1314,67 @@ For $f(x, y) = x^2 + y^2$ at the point $(2, 3)$:
 $$\nabla f(2, 3) = \begin{bmatrix} 2(2) \\ 2(3) \end{bmatrix} = \begin{bmatrix} 4 \\ 6 \end{bmatrix}$$
 
 This vector [4, 6] represents the gradient of the function $f(x, y) = x^2 + y^2$ at the point $(2, 3)$.
+
+## The Gradient and Optimization
+
+The gradient is crucial for **minimizing (or maximizing) functions with multiple variables**, much like a single derivative is used for single-variable functions.
+
+### Minimizing Single-Variable Functions
+
+* For a function like $f(x) = x^2$, the minimum occurs where the **slope of the tangent line is zero**.
+* We find this point by setting the derivative to zero:
+    * $f'(x) = 2x$
+    * Set $2x = 0$, which gives $x = 0$. This is the minimum point.
+
+### Minimizing Multi-Variable Functions
+
+* For a function like $f(x, y) = x^2 + y^2$, the minimum point is the lowest point on the 3D surface.
+* At this minimum, the **tangent plane is parallel to the "floor"** (the XY-plane).
+* This implies that the **slopes of all partial derivatives are zero** at this point.
+    
+* To find the minimum, we set **all partial derivatives equal to zero** and solve the resulting system of equations.
+    * **Partial derivative with respect to $x$**: $\frac{\partial f}{\partial x} = 2x$
+    * **Partial derivative with respect to $y$**: $\frac{\partial f}{\partial y} = 2y$
+    * Set both to zero:
+        * $2x = 0 \implies x = 0$
+        * $2y = 0 \implies y = 0$
+    * The solution is the point $(x, y) = (0, 0)$, which is the minimum.
+
+* This principle extends to functions with many variables: to find minima or maxima, set all partial derivatives to zero and solve the system of equations. For example, for a function of 12 variables, you would set all 12 partial derivatives to zero.
+
+## Multidimensional Optimization in a Sauna
+
+* **Problem:** Find the coolest point in a 2D sauna, where temperature is a function of x and y coordinates, T(x, y).
+* **Analogy to 1D:** Similar to the 1D sauna problem (Week 1), where movement was restricted to left/right, here you can move in any direction.
+* **Goal:** Reach the point where taking any step makes you hotter. This corresponds to a minimum in the temperature function.
+
+### Finding the Minimum Using Derivatives
+
+* **Concept:** At a minimum (or maximum, or saddle point), the **tangent plane** to the temperature function is parallel to the floor. This means the **partial derivatives** with respect to both x and y are zero.
+    * $\frac{\partial T}{\partial x} = 0$
+    * $\frac{\partial T}{\partial y} = 0$
+* **Example Temperature Function:**
+    $T(x, y) = 85 - \frac{1}{90} (x^2(x-6)y^2(y-6))$
+* **Calculating Partial Derivatives:**
+    * To find $\frac{\partial T}{\partial x}$, treat y as a constant.
+        $\frac{\partial T}{\partial x} = -\frac{1}{90} [ (3x^2 - 12x) y^2(y-6) ] = -\frac{1}{90} [ x(3x - 12) y^2(y-6) ]$
+    * To find $\frac{\partial T}{\partial y}$, treat x as a constant.
+        $\frac{\partial T}{\partial y} = -\frac{1}{90} [ x^2(x-6) (3y^2 - 12y) ] = -\frac{1}{90} [ x^2(x-6) y(3y-12) ]$
+
+### Solving for Critical Points
+
+* **Setting Partial Derivatives to Zero:**
+    * $\frac{\partial T}{\partial x} = 0 \implies x = 0$ or $x = 4$ or $y = 0$ or $y = 6$
+    * $\frac{\partial T}{\partial y} = 0 \implies x = 0$ or $x = 6$ or $y = 0$ or $y = 4$
+* **Candidate Points (where both partial derivatives are zero):**
+    * $(0, 0)$
+    * $(0, 4)$
+    * $(0, 6)$
+    * $(4, 0)$
+    * $(4, 4)$
+    * $(6, 0)$
+    * $(6, 6)$
+* **Filtering Candidates:**
+    * Many points on the edges (where x=0, x=6, y=0, y=6) typically correspond to local maxima (temperature = 85 in this example).
+    * The point $(4, 4)$ is the global minimum, with a temperature of 73.6. This is the coldest point.
+* **Conclusion:** Just like in 1D, setting the derivatives to zero provides candidate points for minima (or maxima). These candidates must then be evaluated to find the desired minimum.
