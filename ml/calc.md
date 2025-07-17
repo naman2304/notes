@@ -1378,3 +1378,70 @@ The gradient is crucial for **minimizing (or maximizing) functions with multiple
     * Many points on the edges (where x=0, x=6, y=0, y=6) typically correspond to local maxima (temperature = 85 in this example).
     * The point $(4, 4)$ is the global minimum, with a temperature of 73.6. This is the coldest point.
 * **Conclusion:** Just like in 1D, setting the derivatives to zero provides candidate points for minima (or maxima). These candidates must then be evaluated to find the desired minimum.
+
+## Two-Dimensional Power Line Problem & Linear Regression
+
+This lesson extends the one-dimensional power line problem to two dimensions, introducing **linear regression** as a core machine learning concept. The goal is to find an optimal straight fiber line connection to minimize the total cost of connecting to three power lines.
+
+### Problem Setup
+
+* Power lines are at specific (x, y) coordinates.
+* Connections to the fiber line are made by wires parallel to the y-axis.
+* Cost of connection is the square of the length of the wire.
+* The fiber line is represented by the equation $y = mx + b$.
+* The objective is to find the optimal $m$ (slope) and $b$ (y-intercept) that minimize the total cost.
+
+### Cost Function Derivation
+
+Consider the three power line coordinates: $(1,2)$, $(2,5)$, and $(3,3)$.
+
+* For a power line at $(x_i, y_i)$, the connection point on the fiber line will have coordinates $(x_i, mx_i + b)$.
+* The length of the wire is $|(mx_i + b) - y_i|$.
+* The cost for each power line is $((mx_i + b) - y_i)^2$.
+
+Let's denote the total cost as $E(m,b)$.
+
+* **Cost for (1,2):** $(m(1) + b - 2)^2 = (m + b - 2)^2$
+* **Cost for (2,5):** $(m(2) + b - 5)^2 = (2m + b - 5)^2$
+* **Cost for (3,3):** $(m(3) + b - 3)^2 = (3m + b - 3)^2$
+
+The total cost function is the sum of these individual costs:
+
+$$E(m,b) = (m + b - 2)^2 + (2m + b - 5)^2 + (3m + b - 3)^2$$
+
+Expanding and combining like terms, the cost function becomes:
+
+$$E(m,b) = 14m^2 + 3b^2 + 12mb - 42m - 20b + 38$$
+
+### Minimizing the Cost Function
+
+To find the optimal $m$ and $b$ that minimize $E(m,b)$, we use partial derivatives:
+
+* Set the partial derivative of $E$ with respect to $m$ equal to 0.
+* Set the partial derivative of $E$ with respect to $b$ equal to 0.
+
+#### Partial Derivative with respect to $m$:
+
+$$\frac{\partial E}{\partial m} = 28m + 12b - 42$$
+
+#### Partial Derivative with respect to $b$:
+
+$$\frac{\partial E}{\partial b} = 6b + 12m - 20$$
+
+Setting both derivatives to zero gives a system of linear equations:
+
+1.  $28m + 12b - 42 = 0$
+2.  $12m + 6b - 20 = 0$
+
+Solving this system of equations: $m = \frac{1}{2}$ and $b = \frac{7}{3}$.
+
+### Minimum Cost and Linear Regression
+
+* The minimum cost $E(\frac{1}{2}, \frac{7}{3}) \approx 4.167$.
+* The optimal fiber line equation is $y = \frac{1}{2}x + \frac{7}{3}$. 
+
+This problem is a classic example of **linear regression**, a fundamental machine learning technique used to find the best-fitting straight line (or hyperplane) through a set of data points.
+
+### Future Considerations
+
+Solving systems of equations can become computationally expensive with many variables. Future lessons will introduce **gradient descent** as a more efficient method for minimizing functions in such scenarios.
