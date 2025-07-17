@@ -1671,3 +1671,105 @@ This new point is closer to the minimum.
 * **Overcoming Local Minima:** To increase the probability of finding the global minimum, it's common practice to:
     * Start the algorithm from **multiple different initial positions**.
     * There is still no guarantee of finding the global minimum, but running it many times increases the chances of finding a good solution.
+
+## Linear Regression using Gradient Descent
+
+Previously, solving linear regression analytically for the power lines problem was cumbersome. Gradient descent offers a faster and simpler approach to minimize the **sum of squares cost function** in linear regression.
+
+### Problem Statement
+
+The goal is to find the optimal slope ($M$) and y-intercept ($B$) for a best-fit line that minimizes the cost of connecting to power lines. This problem translates to minimizing the following function:
+
+$E(M, B) = \sum_{i=1}^n (Mx_i + B - y_i)^2$
+
+The analytical solution previously found was $M = \frac{1}{2}$ and $B = \frac{7}{3}$, yielding a minimum cost of approximately $4.167$.
+
+### Gradient Descent Approach
+
+The core idea is to iteratively take small steps in the direction opposite to the gradient of the cost function until a minimum is reached.
+
+1.  **Define the Gradient:**
+    The gradient of the cost function $E(M, B)$ with respect to $M$ and $B$ is:
+   
+$$
+\nabla E(M, B) = \begin{bmatrix} \frac{\partial E}{\partial M} \\ \frac{\partial E}{\partial B} \end{bmatrix}
+$$
+
+* $\frac{\partial E}{\partial M} = \sum_{i=1}^n 2x_i(Mx_i + B - y_i)$
+* $\frac{\partial E}{\partial B} = \sum_{i=1}^n 2(Mx_i + B - y_i)$
+
+3.  **Initialize:**
+    * Choose an **initial starting point** $(M_0, B_0)$. These are essentially random initial guesses for the slope and y-intercept.
+    * Set a **learning rate** $\alpha$ (alpha), which controls the size of the steps.
+
+4.  **Iterative Update Rule:**
+    The values of $M$ and $B$ are updated in each iteration $k+1$ based on their values at iteration $k$ and the gradient evaluated at $(M_k, B_k)$:
+
+$$
+\begin{bmatrix}
+M_{k+1} \\
+B_{k+1}
+\end{bmatrix} = \begin{bmatrix}
+M_k \\
+B_k
+\end{bmatrix} - \alpha \nabla E(M_k, B_k)
+$$
+
+This expands to:
+* $M_{k+1} = M_k - \alpha \frac{\partial E}{\partial M}(M_k, B_k)$
+* $B_{k+1} = B_k - \alpha \frac{\partial E}{\partial B}(M_k, B_k)$
+
+4.  **Repeat:**
+    This process is repeated until the values of $M$ and $B$ converge, meaning they change very little between iterations, indicating that a minimum cost has been found. 
+
+Gradient descent provides an efficient way to find the optimal parameters $M$ and $B$ for linear regression, especially when dealing with complex problems or large datasets where analytical solutions might be too complex or computationally intensive.
+
+## Linear Regression and Gradient Descent
+
+### Visualizing Linear Regression
+
+* **Objective**: Fit a line ($y = mx + b$) to a set of data points.
+* **Cost Function**: The "cost" of a line fit is typically measured by the sum of squared errors (or losses).
+    * For each data point $(x_i, y_i)$, the predicted $y$ value is $mx_i + b$.
+    * The **error** for a single point is $y_i - (mx_i + b)$.
+    * The **squared loss** for a single point is $(y_i - (mx_i + b))^2$.
+    * The **total cost** is the sum of these squared losses for all points.
+* **Cost Surface Plot**:
+    * Imagine a 3D plot where the horizontal axes represent the parameters **m (slope)** and **b (y-intercept)** of the line.
+    * The vertical axis represents the **cost (sum of squared errors)** for the line defined by that particular *m* and *b*.
+    * A good line fit corresponds to a low cost, appearing as a "valley" or "minimum" on this surface.
+    * A bad line fit corresponds to a high cost, appearing as a "peak" or "high point" on this surface.
+
+### Gradient Descent for Linear Regression
+
+* **Goal**: Find the values of *m* and *b* that minimize the cost function.
+* **Method**: Gradient Descent is an iterative optimization algorithm used to find the minimum of a function.
+    * **Analogy**: Imagine being on a hill (the cost surface) and wanting to reach the lowest point. You take small steps downhill in the steepest possible direction.
+* **Steps**:
+    1.  **Initialize**: Start with arbitrary initial values for $m_0$ and $b_0$. This corresponds to a random starting line.
+    2.  **Calculate Gradient**: Compute the partial derivatives of the cost function with respect to *m* and *b*. These derivatives indicate the "steepest" direction.
+    3.  **Update Parameters**: Adjust *m* and *b* in the direction opposite to the gradient to decrease the cost.
+        * $m_{k+1} = m_k - \alpha \frac{\partial L}{\partial m}$
+        * $b_{k+1} = b_k - \alpha \frac{\partial L}{\partial b}$
+        * Here, $\alpha$ is the **learning rate**, a small positive number that controls the size of each step.
+    4.  **Iterate**: Repeat steps 2 and 3 for a fixed number of iterations (N) or until the change in cost (or parameters) becomes very small. As *m* and *b* are updated, the line fit to the data improves.
+
+### Application to Advertising Sales Prediction
+
+* **Problem**: Predict sales (y) based on TV advertising budget (x).
+* **Data**: A set of *n* observations: $(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)$.
+* **Linear Model**: $y = mx + b$.
+* **Cost Function (Mean Squared Error)**: The standard cost function used is the average of the squared losses for all data points.
+
+$$
+L(m, b) = \frac{1}{2n} \sum_{i=1}^{n} (mx_i + b - y_i)^2
+$$
+
+The $\frac{1}{2}$ factor is a convention to simplify the derivative calculation (it cancels out with the 2 from the exponent when differentiating). It does not change the location of the minimum.
+
+* **Gradient Descent in Practice**:
+    * Start with an initial line ($m_0, b_0$).
+    * Calculate the cost $L(m_0, b_0)$.
+    * Compute the gradients $\frac{\partial L}{\partial m}$ and $\frac{\partial L}{\partial b}$.
+    * Update $m$ and $b$ using the learning rate ($\alpha$).
+    * Repeat this process until the line fits the data well (cost is minimized).
