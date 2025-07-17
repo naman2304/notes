@@ -1566,3 +1566,108 @@ If you start your gradient descent algorithm in a region that leads to a local m
 ### Overcoming Local Minima
 
 While there's no foolproof way to guarantee finding the global minimum, a common strategy to mitigate the local minima problem is to **run the gradient descent algorithm multiple times with different random starting points**. By initializing the algorithm from various locations, you increase the chances that at least one of these runs will converge to the global minimum or a very good local minimum.
+
+## Gradient Descent for Multiple Variables
+
+Gradient descent is an iterative optimization algorithm used to find the minimum of a function. For functions with multiple variables, it leverages **gradients** to efficiently determine the direction of descent, much like derivatives are used for single-variable functions.
+
+### Analogy: Finding the Coolest Spot in a Sauna
+
+Imagine you're in a sauna and want to find the coolest spot.
+
+* **Initial Approach (Inefficient):** You could take random steps in different directions, check the temperature after each step, and move in the direction that led to the coolest temperature. You'd repeat this until you reach a sufficiently cool area. This method is inefficient because:
+    * Choosing random directions is not optimal.
+    * It may take many steps to converge.
+
+### Smart Approach: Using Gradients
+
+Similar to how derivatives guide us in one-variable optimization, **gradients** provide the "smart" direction for multi-variable functions.
+
+* **Gradients** indicate the direction of the **steepest ascent** for a function. To move towards a minimum (the "coolest" spot), you move in the **opposite direction** of the gradient.
+
+This method avoids random steps and systematically guides you towards the minimum.
+
+## Gradient Descent with Two Variables
+
+Gradient Descent in two variables is similar to its one-variable counterpart, but it uses the **gradient** instead of the derivative. The goal remains to find the minimum of a function $f(x, y)$.
+
+### The Gradient
+
+* When dealing with two variables, we have **two partial derivatives**: one with respect to $x$ and one with respect to $y$.
+* These partial derivatives form a vector called the **gradient**, denoted as $\nabla f(x, y)$
+* The **gradient points in the direction of the steepest ascent** (hottest place in the sauna analogy).
+
+### Gradient Descent Algorithm
+
+1.  **Initialize:**
+    * Define a **learning rate** $\alpha$ (alpha), a small positive scalar.
+    * Choose a **starting point** $(x_0, y_0)$.
+
+2.  **Iterative Update:**
+    * To move towards the minimum (coldest place), we take a step in the **direction of the negative gradient**.
+    * The update rule for each iteration $k$ is:
+
+$$
+\begin{bmatrix}
+x_k \\
+y_k
+\end{bmatrix} = \begin{bmatrix}
+x_{k-1} \\
+y_{k-1}
+\end{bmatrix} - \alpha \nabla f(x_{k-1}, y_{k-1})
+$$
+This means:
+$$
+x_k = x_{k-1} - \alpha \frac{\partial f}{\partial x}(x_{k-1}, y_{k-1})
+$$       $$
+y_k = y_{k-1} - \alpha \frac{\partial f}{\partial y}(x_{k-1}, y_{k-1})
+$$
+
+3.  **Repeat:**
+    * Continue repeating step 2 until the algorithm converges.
+    * Convergence is typically indicated when the change in $x$ and $y$ becomes very small, implying the algorithm is no longer moving significantly or has reached a flat region (a minimum).
+
+### Example Application
+
+Consider the temperature function: $T(x,y) = 85 - \frac{1}{90} x^2 (x-6) y^2 (y-6)$.
+To apply gradient descent:
+
+1.  Calculate the partial derivatives $\frac{\partial T}{\partial x}$ and $\frac{\partial T}{\partial y}$.
+2.  Form the gradient vector.
+3.  Choose an initial point (e.g., $(0.50, 0.6)$) and a learning rate (e.g., $\alpha = 0.05$).
+4.  Plug the current point into the gradient to get the direction of steepest ascent.
+5.  Subtract $\alpha$ times the gradient from the current point to get the new point, moving closer to the minimum.
+6.  Repeat these steps until convergence.
+
+For instance, if the gradient at $(0.50, 0.6)$ is [0.114, 0.094]:
+
+$$
+\begin{bmatrix}
+x_1 \\
+y_1
+\end{bmatrix} = \begin{bmatrix}
+0.50 \\
+0.60
+\end{bmatrix} - 0.05 \begin{bmatrix}
+0.114 \\
+0.094
+\end{bmatrix} = \begin{bmatrix}
+0.50 \\
+0.60
+\end{bmatrix} - \begin{bmatrix}
+0.0057 \\
+0.0047
+\end{bmatrix} = \begin{bmatrix}
+0.4943 \\
+0.5953
+\end{bmatrix}
+$$
+
+This new point is closer to the minimum.
+
+### Drawbacks
+
+* **Local Minima:** Just like in one variable, gradient descent in two or more variables can get stuck in a **local minimum** instead of reaching the **global minimum**. 
+* **Overcoming Local Minima:** To increase the probability of finding the global minimum, it's common practice to:
+    * Start the algorithm from **multiple different initial positions**.
+    * There is still no guarantee of finding the global minimum, but running it many times increases the chances of finding a good solution.
