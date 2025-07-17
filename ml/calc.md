@@ -1169,3 +1169,148 @@ There are two primary reasons why logarithms are integral to the log loss functi
 
 The use of logarithms in functions like log loss is a clever mathematical trick that simplifies derivative calculations and mitigates numerical precision issues, making complex optimization problems in machine learning tractable and robust.
 
+## Week 2: Functions with Multiple Variables
+
+This week introduces **functions with two or more variables**, extending concepts from single-variable calculus to higher dimensions.
+
+### From Tangent Line to Tangent Plane
+
+* **Single Variable Functions (e.g., $f(x) = x^2$):** The **derivative** at a point represents the **slope of the tangent line** at that point.
+    * Example: For $f(x) = x^2$, at point (2, 4), the slope of the tangent line is 4.
+
+* **Multi-Variable Functions (e.g., $f(x, y) = x^2 + y^2$):**
+    * These functions have multiple inputs (e.g., $x, y$) and one output ($f(x, y)$ or $z$), requiring a **3D plot**. 
+    * Tangents are no longer lines but **planes**, called **tangent planes**.
+
+### Constructing a Tangent Plane
+
+To find a tangent plane, we take "slices" of the 3D function:
+
+1.  **Fix one variable:**
+    * If we fix $y = \text{constant}$ (e.g., $y=4$), we get a 2D parabola in the XZ plane ($f(x, 4) = x^2 + 4^2$). We can then find the **tangent line** to this parabola with respect to $x$.
+    * If we fix $x = \text{constant}$ (e.g., $x=2$), we get a 2D parabola in the YZ plane ($f(2, y) = 2^2 + y^2$). We can then find the **tangent line** to this parabola with respect to $y$.
+
+2.  **Two Tangent Lines Form a Plane:** Any two intersecting lines define a unique plane. The two tangent lines obtained from fixing one variable at a time will form the **tangent plane**.
+
+### Optimization and Gradient Descent
+
+* Optimizing functions with two or more variables can be computationally complex.
+* **Gradient Descent** is a method that will be introduced to speed up optimization processes for these complex functions.
+
+## Partial Derivatives
+
+Partial derivatives are a fundamental concept when dealing with functions of multiple variables. They represent the rate of change of a multivariable function with respect to one variable, while holding all other variables constant.
+
+### Visualizing Partial Derivatives
+
+Imagine a 3D plot of a function $f(x, y)$.
+
+* If you **cut this 3D surface with a plane** where $y$ is held constant (e.g., $y=4$), the intersection forms a 2D curve (a red parabola in the example). 
+* The **tangent line** to this 2D curve at a specific point represents the **partial derivative with respect to $x$** at that point.
+* Similarly, if you cut the surface with a plane where $x$ is held constant, you get another 2D curve, and its tangent line represents the **partial derivative with respect to $y$**. 
+
+### Calculating Partial Derivatives
+
+To calculate a partial derivative, you follow these steps:
+
+1.  **Treat all other variables as constants.**
+2.  **Differentiate the function** using the standard rules of differentiation with respect to the variable of interest.
+
+#### Example: $f(x, y) = x^2 + y^2$
+
+* **Partial Derivative with respect to $x$ ($\frac{\partial f}{\partial x}$ or $f_x$):**
+    * Treat $y$ as a constant.
+    * So, $f(x, y) = x^2 + \text{constant}$.
+    * $\frac{\partial f}{\partial x} = \frac{d}{dx}(x^2) + \frac{d}{dx}(\text{constant}) = 2x + 0 = 2x$.
+
+* **Partial Derivative with respect to $y$ ($\frac{\partial f}{\partial y}$ or $f_y$):**
+    * Treat $x$ as a constant.
+    * So, $f(x, y) = \text{constant} + y^2$.
+    * $\frac{\partial f}{\partial y} = \frac{d}{dy}(\text{constant}) + \frac{d}{dy}(y^2) = 0 + 2y = 2y$.
+
+### Notation
+
+For a function $f(x, y)$:
+
+* Partial derivative with respect to $x$: $\frac{\partial f}{\partial x}$ or $f_x$.
+* Partial derivative with respect to $y$: $\frac{\partial f}{\partial y}$ or $f_y$.
+
+If a function has more than two variables (e.g., 10 variables), you can take a partial derivative with respect to each of those variables.
+
+## Example: $f(x, y) = 3x^2y^3$
+
+### Partial Derivative with Respect to $x$ ($\frac{\partial f}{\partial x}$ or $f_x$)
+
+To find the partial derivative of $f(x, y)$ with respect to $x$:
+
+1.  **Treat $y$ as a constant.** This means $y^3$ is considered a constant.
+2.  **Differentiate the function** with respect to $x$ using standard differentiation rules.
+
+$$\frac{\partial}{\partial x} (3x^2y^3)$$
+$$= 3 \cdot y^3 \cdot \frac{\partial}{\partial x} (x^2)$$
+$$= 3 \cdot y^3 \cdot (2x)$$
+$$= 6xy^3$$
+
+### Partial Derivative with Respect to $y$ ($\frac{\partial f}{\partial y}$ or $f_y$)
+
+To find the partial derivative of $f(x, y)$ with respect to $y$:
+
+1.  **Treat $x$ as a constant.** This means $x^2$ is considered a constant.
+2.  **Differentiate the function** with respect to $y$ using standard differentiation rules.
+
+$$\frac{\partial}{\partial y} (3x^2y^3)$$
+$$= 3 \cdot x^2 \cdot \frac{\partial}{\partial y} (y^3)$$
+$$= 3 \cdot x^2 \cdot (3y^2)$$
+$$= 9x^2y^2$$
+
+## The Gradient Vector ∇
+
+The **gradient** is a way to condense all the partial derivatives of a multivariable function into a single vector. It's denoted by the **nabla symbol** ($\nabla$).
+
+### Definition of the Gradient
+
+For a function $f$ with multiple variables, the gradient $\nabla f$ is a vector containing all its partial derivatives.
+
+* **For a function of two variables**, $f(x, y)$: The gradient is:
+
+$$
+\nabla f = \begin{bmatrix} \frac{\partial f}{\partial x} \\ \frac{\partial f}{\partial y} \end{bmatrix}
+$$
+
+* **For a function of 'n' variables**, $f(x_1, x_2, \dots, x_n)$: The gradient is:
+
+$$
+\nabla f = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \frac{\partial f}{\partial x_2} \\ \vdots \\ \frac{\partial f}{\partial x_n} \end{bmatrix}
+$$
+
+This means if a function has 17 variables, its gradient would be a vector with 17 entries, each corresponding to the partial derivative with respect to one of those variables.
+
+### Gradient as a Description of the Tangent Plane
+
+The gradient vector provides a good description of the **tangent plane** because its components are the slopes of the lines that form that tangent plane (the partial derivatives in each direction).
+
+### Example: Finding the Gradient
+
+Let's find the gradient of the function $f(x, y) = x^2 + y^2$.
+
+1.  **Calculate the partial derivative with respect to $x$**:
+    $\frac{\partial f}{\partial x} = 2x$
+
+2.  **Calculate the partial derivative with respect to $y$**:
+    $\frac{\partial f}{\partial y} = 2y$
+
+3.  **Form the gradient vector**:
+
+$$
+\nabla f = \begin{bmatrix} 2x \\ 2y \end{bmatrix}
+$$
+
+### Evaluating the Gradient at a Specific Point
+
+To find the gradient at a specific point (e.g., $(2, 3)$ for $f(x, y) = x^2 + y^2$), simply substitute the coordinates of the point into the gradient vector.
+
+For $f(x, y) = x^2 + y^2$ at the point $(2, 3)$:
+
+$$\nabla f(2, 3) = \begin{bmatrix} 2(2) \\ 2(3) \end{bmatrix} = \begin{bmatrix} 4 \\ 6 \end{bmatrix}$$
+
+This vector [4, 6] represents the gradient of the function $f(x, y) = x^2 + y^2$ at the point $(2, 3)$.
