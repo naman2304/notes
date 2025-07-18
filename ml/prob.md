@@ -222,3 +222,392 @@ $P(A \cup B) = P(A) + P(B) - P(A \cap B)$
 * For disjoint (mutually exclusive) events, the intersection $P(A \cap B)$ is 0 (since they cannot happen at the same time).
 * Therefore, for disjoint events, the formula simplifies to:
     $P(A \cup B) = P(A) + P(B) - 0 = P(A) + P(B)$
+
+## Independence of Events
+
+* **Definition**: Two events are **independent** if the occurrence of one does not affect the probability of the other.
+    * **Example**: Tossing a coin multiple times; each toss is independent.
+    * **Non-example**: Moves in a chess game; each move affects subsequent moves.
+* **Importance in Machine Learning**: Assuming independence can significantly simplify calculations and improve prediction models.
+
+## Illustrative Examples of Independence
+
+### School Soccer Preference
+
+* **Scenario 1**: 100 kids, 50 like soccer, 50 don't. Randomly split into two rooms of 50 kids each.
+    * **Best Estimate**: Roughly 25 kids in each room will like soccer due to random distribution.
+* **Scenario 2**: 100 kids, 40 like soccer, 60 don't. Randomly split into Room 1 (30 kids) and Room 2 (70 kids).
+    * **Probability of a kid liking soccer**: $P(S) = 0.4$ (40 out of 100).
+    * **Probability of a kid being in Room 1**: $P(R1) = 0.3$ (30 out of 100).
+    * **Expected number of kids in Room 1 who like soccer**: Since the split is random, the proportion of soccer lovers is expected to be maintained in each room.
+        * Expected kids = $40\%$ of 30 = 12 kids.
+    * **Mathematical Representation**: This implies the probability of a kid playing soccer AND being in Room 1 is the product of their individual probabilities.
+        * $P(S \cap R1) = P(S) \times P(R1)$
+        * $P(S \cap R1) = 0.4 \times 0.3 = 0.12$ (or 12%)
+
+## The Product Rule for Independent Events
+
+* For two independent events A and B, the probability of both A and B occurring (their intersection) is:
+    * $P(A \cap B) = P(A) \times P(B)$
+* This rule is applicable only when events are **independent**.
+
+## Extending the Product Rule
+
+### Coin Toss Example
+
+* **Question**: What is the probability of tossing a fair coin 5 times and getting heads all 5 times?
+* **Solution**: Each toss is independent, and the probability of getting a head on a single toss is $1/2$.
+    * $P(\text{5 Heads}) = P(H_1) \times P(H_2) \times P(H_3) \times P(H_4) \times P(H_5)$
+    * $P(\text{5 Heads}) = \frac{1}{2} \times \frac{1}{2} \times \frac{1}{2} \times \frac{1}{2} \times \frac{1}{2} = (\frac{1}{2})^5 = \frac{1}{32}$
+* The product rule extends to multiple independent events: if events $E_1, E_2, \ldots, E_n$ are all independent, then $P(E_1 \cap E_2 \cap \ldots \cap E_n) = P(E_1) \times P(E_2) \times \ldots \times P(E_n)$.
+
+### Dice Roll Example
+
+* **Recall**: Probability of rolling a 6 on a single die is $1/6$.
+* **Question 1**: What is the probability of rolling two dice and getting two 6s?
+* **Solution**: Each die roll is independent.
+    * $P(\text{6 on first die and 6 on second die}) = P(\text{6 on first die}) \times P(\text{6 on second die})$
+    * $P(\text{6,6}) = \frac{1}{6} \times \frac{1}{6} = (\frac{1}{6})^2 = \frac{1}{36}$
+* **Question 2**: What is the probability of rolling ten fair dice and getting ten 6s?
+* **Solution**: All ten rolls are independent.
+    * $P(\text{ten 6s}) = (\frac{1}{6})^{10}$ (a very small number)
+
+The product rule is a powerful tool for calculating the probability of multiple events occurring, provided those events are independent.
+
+## The Birthday Problem 🎂
+
+The Birthday Problem explores the surprisingly high probability that, in a relatively small group of people, at least two individuals share the same birthday. It's often counter-intuitive.
+
+### Problem Setup
+
+* **Assumption**: There are 365 days in a year (no February 29th).
+* **Goal**: Calculate the probability that, among a group of `n` people, at least two share a birthday.
+
+### The Complement Approach
+
+It's easier to calculate the probability that **no two people** share the same birthday, and then use the **complement rule** to find the probability of at least two sharing a birthday.
+
+* $P(\text{at least two share birthday}) = 1 - P(\text{no two share birthday})$
+
+### Calculating $P(\text{no two share birthday})$
+
+Let's consider `n` people and the probability that all `n` people have different birthdays.
+
+1.  **For the first person (n=1)**:
+    * They can have a birthday on any day of the 365 days.
+    * $P(\text{1 person has unique birthday}) = \frac{365}{365} = 1$
+
+2.  **For the second person (n=2)**:
+    * To have a different birthday from the first person, they must be born on one of the remaining 364 days.
+    * $P(\text{2 people have unique birthdays}) = \frac{365}{365} \times \frac{364}{365}$
+
+3.  **For the third person (n=3)**:
+    * To have a different birthday from the first two, they must be born on one of the remaining 363 days.
+    * $P(\text{3 people have unique birthdays}) = \frac{365}{365} \times \frac{364}{365} \times \frac{363}{365}$
+
+4.  **Generalizing for 'n' people**:
+    * The probability that all `n` people have different birthdays is the product of these fractions:
+
+$$
+P(\text{no two share birthday, for n people}) = \frac{365}{365} \times \frac{364}{365} \times \frac{363}{365} \times \ldots \times \frac{(365 - n + 1)}{365}
+$$
+
+This can also be expressed using permutations:
+
+$$
+P(\text{no two share birthday, for n people}) = \frac{P(365, n)}{365^n} = \frac{365!}{(365-n)! \cdot 365^n}
+$$
+
+### Surprising Results
+
+The probability of no two people sharing a birthday drops surprisingly quickly as the number of people increases.
+
+* **n = 23**:
+    * $P(\text{no two share birthday})$ is approximately **0.493**.
+    * This means $P(\text{at least two share birthday}) = 1 - 0.493 = \mathbf{0.507}$.
+    * **In a group of just 23 people, it's more likely than not (over 50% chance) that two people share the same birthday.**
+
+* **n = 30**:
+    * $P(\text{no two share birthday})$ is approximately **0.294**.
+    * $P(\text{at least two share birthday}) = 1 - 0.294 = \mathbf{0.706}$.
+    * This means there's roughly a **70% chance** that two people share a birthday.
+
+* **n = 50**:
+    * $P(\text{no two share birthday})$ is approximately **0.03**.
+    * $P(\text{at least two share birthday}) = 1 - 0.03 = \mathbf{0.97}$.
+    * Almost certain that two people share a birthday.
+
+* **n = 366**:
+    * By the Pigeonhole Principle, if there are 366 people and only 365 possible birthdays, at least two people **must** share a birthday.
+    * $P(\text{no two share birthday}) = 0$.
+
+### Visualizing the Probability Drop
+
+The graph shows the probability of *no shared birthdays* on the y-axis against the *number of people* on the x-axis. It rapidly decreases, crossing the 0.5 mark at around 23 people, indicating a higher than 50% chance of a shared birthday. This demonstrates the non-intuitive nature of the birthday problem.
+
+## Conditional Probability
+
+**Conditional probability** calculates the likelihood of an event occurring **given that another event has already happened**. It updates our understanding of probabilities based on new information.
+
+### Notation
+
+The probability of event A happening given that event B has occurred is denoted as $P(A|B)$. The vertical bar "|" is read as "given that".
+
+### Example: Two Coin Tosses 💰💰
+
+* **Original Sample Space**: {HH, HT, TH, TT} - 4 equally likely outcomes.
+* **Probability of two heads**: $P(\text{HH}) = \frac{1}{4}$.
+
+#### Scenario 1: Probability of HH given the first coin is H
+
+* **Given Information**: The first coin landed heads.
+* **New Sample Space**: We now only consider outcomes where the first coin is heads: {HH, HT}. This reduces our sample space from 4 to 2 outcomes.
+* **Favorable Outcome**: Only one outcome is HH.
+* **Conditional Probability**: $P(\text{HH} | \text{1st is H}) = \frac{1}{2}$.
+    * The probability changed from $1/4$ to $1/2$ because of the new information.
+
+#### Scenario 2: Probability of HH given the first coin is T
+
+* **Given Information**: The first coin landed tails.
+* **New Sample Space**: We only consider outcomes where the first coin is tails: {TH, TT}.
+* **Favorable Outcome**: There are no outcomes of HH in this new sample space.
+* **Conditional Probability**: $P(\text{HH} | \text{1st is T}) = \frac{0}{2} = 0$.
+    * The probability changed from $1/4$ to $0$ due to the strong condition.
+
+## The General Product Rule
+
+The **general product rule** links conditional probability with the probability of the intersection of two events. It applies whether the events are independent or dependent.
+
+### Formula
+
+For any two events A and B, the probability of both A and B occurring is:
+
+$P(A \cap B) = P(A) \times P(B|A)$
+
+This means the probability of A and B happening is the probability of A happening, multiplied by the probability of B happening **given that A has already happened**.
+
+### Relation to Independent Events
+
+* If events A and B are **independent**, then the occurrence of A does not affect the probability of B.
+* In this special case, $P(B|A) = P(B)$.
+* Substituting this into the general product rule, we get the product rule for independent events:
+    $P(A \cap B) = P(A) \times P(B)$ (which we learned in the previous lesson).
+
+## Example: Rolling Two Dice 🎲🎲
+
+* **Sample Space**: 36 possible outcomes for rolling two dice (e.g., (1,1), (1,2), ..., (6,6)).
+
+#### Scenario 1: Probability that the first die is 6 AND the sum is 10
+
+* Let A = "first die is 6"
+* Let B = "sum is 10"
+* **Favorable outcome for $A \cap B$**: Only (6,4).
+* **Direct Probability**: $P(A \cap B) = \frac{1}{36}$.
+
+* **Using the General Product Rule**:
+    * $P(A) = P(\text{first die is 6})$: There are 6 outcomes where the first die is 6 ((6,1), (6,2), (6,3), (6,4), (6,5), (6,6)). So, $P(A) = \frac{6}{36} = \frac{1}{6}$.
+    * $P(B|A) = P(\text{sum is 10 | first die is 6})$:
+        * Given the first die is 6, our new sample space is the 6 outcomes starting with 6: {(6,1), (6,2), (6,3), (6,4), (6,5), (6,6)}.
+        * Among these, only (6,4) results in a sum of 10.
+        * So, $P(B|A) = \frac{1}{6}$.
+    * Now apply the product rule: $P(A \cap B) = P(A) \times P(B|A) = \frac{1}{6} \times \frac{1}{6} = \frac{1}{36}$. This matches the direct calculation.
+
+#### Scenario 2: Probability that the sum is 10
+
+* **Favorable outcomes**: (4,6), (5,5), (6,4) - 3 outcomes.
+* **Probability**: $P(\text{sum is 10}) = \frac{3}{36} = \frac{1}{12}$.
+
+#### Scenario 3: Probability that the sum is 10 GIVEN the first die is 6
+
+* **Given Information**: The first die is 6.
+* **New Sample Space**: {(6,1), (6,2), (6,3), (6,4), (6,5), (6,6)} - 6 outcomes.
+* **Favorable Outcome for sum is 10**: Only (6,4).
+* **Conditional Probability**: $P(\text{sum is 10 | 1st is 6}) = \frac{1}{6}$.
+    * The probability changed from $1/12$ to $1/6$.
+
+#### Scenario 4: Probability that the sum is 10 GIVEN the first die is 1
+
+* **Given Information**: The first die is 1.
+* **New Sample Space**: {(1,1), (1,2), (1,3), (1,4), (1,5), (1,6)} - 6 outcomes.
+* **Favorable Outcome for sum is 10**: None of these outcomes result in a sum of 10 (max sum is $1+6=7$).
+* **Conditional Probability**: $P(\text{sum is 10 | 1st is 1}) = \frac{0}{6} = 0$.
+    * The probability changed from $1/12$ to $0$.
+
+Conditional probability is a fundamental concept for understanding how new information impacts the likelihood of events.
+
+## Dependent Events
+
+* **Definition**: Two events are **dependent** if the outcome of one event influences the outcome of the other.
+* **Example 1 (Soccer & Room Assignment)**:
+    * 100 kids, 50 play soccer, 50 don't.
+    * Two rooms (capacity 50 each): Room 1 has a World Cup TV, Room 2 has a movie TV.
+    * **Observation**: Kids who like soccer are likely to choose Room 1.
+    * **Conclusion**: Liking soccer and being in Room 1 are dependent events because the choice of room is influenced by whether a kid plays soccer.
+    * **Contrast with Independent Events**: If kids were randomly assigned to rooms, the events would be independent.
+
+## Conditional Probability and Intersections
+
+* **Scenario**: 100 kids, 40 play soccer (S), 60 don't.
+    * Among those who play soccer, 80% wear running shoes (R).
+    * **Given**:
+        * $P(S) = 0.4$
+        * $P(\text{not } S) = 0.6$
+        * $P(R | S) = 0.8$ (Probability of wearing running shoes given they play soccer)
+
+* **Probability of Soccer AND Running Shoes ($P(S \cap R)$)**:
+    * This is the probability that a kid plays soccer AND wears running shoes.
+    * Formula: $P(S \cap R) = P(S) \times P(R | S)$
+    * Calculation: $0.4 \times 0.8 = 0.32$
+    * This means 32% of kids (32 out of 100) are estimated to play soccer and wear running shoes.
+
+* **Scenario Extension**: Probability that a kid wears running shoes when they don't like soccer is 50%.
+    * **Given**: $P(R | \text{not } S) = 0.5$ (Probability of wearing running shoes given they do not play soccer)
+
+* **Probability of NOT Soccer AND Running Shoes ($P(\text{not } S \cap R)$)**:
+    * Formula: $P(\text{not } S \cap R) = P(\text{not } S) \times P(R | \text{not } S)$
+    * Calculation: $0.6 \times 0.5 = 0.3$
+    * This means 30% of kids (30 out of 100) are estimated to not play soccer and wear running shoes.
+
+## Probability Tree
+
+A probability tree visually represents all possible scenarios and their probabilities.
+
+* **Branches:**
+    * **Plays Soccer (S):** $P(S) = 0.4$
+        * Wears Running Shoes (R): $P(R|S) = 0.8 \Rightarrow P(S \cap R) = 0.4 \times 0.8 = 0.32$
+        * Doesn't Wear Running Shoes (R'): $P(R'|S) = 0.2 \Rightarrow P(S \cap R') = 0.4 \times 0.2 = 0.08$
+    * **Doesn't Play Soccer (S'):** $P(S') = 0.6$
+        * Wears Running Shoes (R): $P(R|S') = 0.5 \Rightarrow P(S' \cap R) = 0.6 \times 0.5 = 0.30$
+        * Doesn't Wear Running Shoes (R'): $P(R'|S') = 0.5 \Rightarrow P(S' \cap R') = 0.6 \times 0.5 = 0.30$
+
+* **Sum of all probabilities**: $0.32 + 0.08 + 0.30 + 0.30 = 1.00$
+
+## Visualizing Dependence vs. Independence
+
+* **Independent Events**: Can be represented by non-crossing lines or separate groups where the split for one event doesn't affect the other.
+* **Dependent Events**: Represented by lines that "cross" or influence each other, indicating that the outcome of one event impacts the likelihood of the other. The example of kids choosing rooms based on liking soccer demonstrates this dependency.
+
+## Bayes' Theorem: Probability of Disease Given a Positive Test
+
+Bayes' Theorem helps calculate the **probability of an event (A) occurring given that another event (B) has occurred**, represented as $P(A|B)$. It's widely used in machine learning for tasks like spam filtering and speech recognition.
+
+### Example: Rare Disease Testing
+
+Let's consider a scenario with a rare disease and a diagnostic test:
+
+* **Population:** 1,000,000 people
+* **Disease Prevalence:** 1 in 10,000 people are sick.
+    * Sick individuals: $1,000,000 / 10,000 = 100$
+    * Healthy individuals: $1,000,000 - 100 = 999,900$
+* **Test Effectiveness:** 99% effective.
+    * **For sick people:** 99% are correctly diagnosed as sick, 1% are misdiagnosed as healthy.
+    * **For healthy people:** 1% are misdiagnosed as sick, 99% are correctly diagnosed as healthy.
+
+**Problem:** You tested positive. What is the probability that you actually have the disease given this positive test result?
+
+### Breakdown of Outcomes
+
+Let's categorize the population based on their actual health status and test results:
+
+* **Sick and Diagnosed Sick:**
+    * $99\%$ of 100 sick people $= 0.99 \times 100 = 99$ people.
+* **Sick and Misdiagnosed as Healthy:**
+    * $1\%$ of 100 sick people $= 0.01 \times 100 = 1$ person.
+* **Healthy and Misdiagnosed as Sick (False Positive):**
+    * $1\%$ of 999,900 healthy people $= 0.01 \times 999,900 = 9,999$ people.
+* **Healthy and Diagnosed Healthy:**
+    * $99\%$ of 999,900 healthy people $= 0.99 \times 999,900 = 989,901$ people.
+
+### Calculating the Probability
+
+We are interested in the probability of being sick *given* a positive test result. This means we only consider the group of people who were **diagnosed as sick**.
+
+* **Total people diagnosed sick:**
+    * Sick and diagnosed sick: 99 people
+    * Healthy and misdiagnosed as sick: 9,999 people
+    * Total: $99 + 9,999 = 10,098$ people.
+
+* **Probability of being sick given a positive test:**
+    * $P(\text{Sick | Diagnosed Sick}) = \frac{\text{Number of Sick and Diagnosed Sick}}{\text{Total Number of Diagnosed Sick}}$
+    * $P(\text{Sick | Diagnosed Sick}) = \frac{99}{10,098} \approx 0.0098$
+
+This means there's less than a 1% chance you are actually sick even after testing positive, which can be counterintuitive. This is because the number of healthy people who get a false positive (9,999) is significantly higher than the number of truly sick people who test positive (99), due to the disease's rarity.
+
+### Visualizing with a Tree Diagram
+
+* **Total Population (1,000,000)**
+    * **Sick (100 people)**
+        * Diagnosed Sick: 99 (99%)
+        * Diagnosed Healthy: 1 (1%)
+    * **Healthy (999,900 people)**
+        * Diagnosed Sick: 9,999 (1%)
+        * Diagnosed Healthy: 989,901 (99%)
+
+When you are diagnosed sick, you fall into one of two groups: the 99 truly sick people or the 9,999 healthy but misdiagnosed people. The vast majority of people with a positive test result are, in fact, healthy.
+
+## Bayes' Theorem: The Formula
+
+We want to calculate the **probability of being sick (A) given that you tested sick (B)**, or $P(A|B)$.
+
+### Recall from Conditional Probability
+
+The fundamental formula for conditional probability states:
+
+$$P(A|B) = \frac{P(A \cap B)}{P(B)}$$
+
+Where:
+* $P(A|B)$ is the probability of A given B.
+* $P(A \cap B)$ is the probability of both A and B occurring (their intersection).
+* $P(B)$ is the probability of B occurring.
+
+### Breaking Down the Components
+
+Let's define the events and their given probabilities:
+
+* **A:** Being sick
+    * $P(A) = 1/10,000 = 0.0001$
+* **A':** Not being sick (healthy)
+    * $P(A') = 1 - P(A) = 1 - 0.0001 = 0.9999$
+* **B:** Being diagnosed sick (testing positive)
+* **B|A:** Diagnosed sick given that you are sick (correct diagnosis)
+    * $P(B|A) = 0.99$ (99% effectiveness)
+* **B|A':** Diagnosed sick given that you are not sick (false positive)
+    * $P(B|A') = 0.01$ (1% misdiagnosis)
+
+### Calculating the Numerator: $P(A \cap B)$
+
+The probability of being sick AND diagnosed sick ($P(\text{Sick} \cap \text{Diagnosed Sick})$) can be found using the conditional probability formula $P(A \cap B) = P(A) \cdot P(B|A)$:
+
+$$P(A \cap B) = P(\text{Sick}) \cdot P(\text{Diagnosed Sick | Sick})$$
+
+### Calculating the Denominator: $P(B)$
+
+The probability of being diagnosed sick ($P(\text{Diagnosed Sick})$) involves two mutually exclusive scenarios:
+1.  Being sick and correctly diagnosed sick.
+2.  Being healthy and misdiagnosed as sick (false positive).
+
+Since these are disjoint events (you cannot be both sick and not sick at the same time), we can sum their probabilities:
+
+$$P(B) = P(\text{Diagnosed Sick} \cap \text{Sick}) + P(\text{Diagnosed Sick} \cap \text{Not Sick})$$
+
+Using the conditional probability formula for each term:
+
+$$P(B) = [P(\text{Sick}) \cdot P(\text{Diagnosed Sick | Sick})] + [P(\text{Not Sick}) \cdot P(\text{Diagnosed Sick | Not Sick})]$$
+
+### Bayes' Theorem Formula
+
+Substituting these into the main conditional probability formula, we get Bayes' Theorem:
+
+$$P(A|B) = \frac{P(A) \cdot P(B|A)}{[P(A) \cdot P(B|A)] + [P(A') \cdot P(B|A')]}$$
+
+### Plugging in the Numbers
+
+Using the probabilities defined above:
+
+$$P(\text{Sick | Diagnosed Sick}) = \frac{0.0001 \cdot 0.99}{(0.0001 \cdot 0.99) + (0.9999 \cdot 0.01)}$$
+
+$$P(\text{Sick | Diagnosed Sick}) = \frac{0.000099}{0.000099 + 0.009999}$$
+
+$$P(\text{Sick | Diagnosed Sick}) = \frac{0.000099}{0.010098} \approx 0.0098$$
+
+This confirms the previous numerical example: even with a positive test, the probability of actually having the disease is less than 1%. This highlights the importance of Bayes' Theorem, especially when dealing with rare events and test accuracy.
