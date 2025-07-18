@@ -678,3 +678,104 @@ $$P(\text{Spam | Lottery}) = \frac{0.14}{0.14 + 0.1}$$
 $$P(\text{Spam | Lottery}) = \frac{0.14}{0.24} \approx 0.583$$
 
 Both the intuitive approach and the formula-based approach yield the same result, demonstrating the application of Bayes' Theorem in practical scenarios like spam classification.
+
+## Prior vs. Posterior Probabilities
+
+In probability, especially with Bayes' Theorem, it's crucial to understand the concepts of prior and posterior probabilities.
+
+* **Prior Probability ($$P(A)$$):** This is the initial probability of an event occurring *before* any new information or evidence is considered. It represents our baseline belief or knowledge about the event.
+* **Event (E):** This is the new piece of information or evidence that becomes available.
+* **Posterior Probability ($$P(A|E)$$):** This is the updated probability of the event occurring *after* considering the new information from the event. It reflects a more refined or accurate estimate based on the observed evidence.
+
+The posterior probability is generally a better estimation than the prior because it incorporates additional relevant information.
+
+### Examples
+
+1.  **Spam Email Classification:**
+    * Prior ($$P(\text{Spam})$$): The initial probability that an email is spam, without looking at its content. If 20 out of 100 emails are spam, then $P(\text{Spam}) = 20/100 = 0.2$ (or 20%). This is the base rate.
+    * Event (E): The email contains the word "lottery".
+    * Posterior ($$P(\text{Spam | Lottery})$$): The updated probability that an email is spam, *given* that it contains the word "lottery". In the previous example, this was calculated as $14/24 \approx 0.583$. This is a more accurate assessment because we used specific content information.
+
+2.  **Medical Diagnosis:**
+    * Prior ($$P(\text{Sick})$$): The overall prevalence of the disease in the population. For instance, if 1 in 10,000 people are sick, then $P(\text{Sick}) = 1/10,000 = 0.0001$.
+    * Event (E): You test positive for the disease.
+    * Posterior ($$P(\text{Sick | Diagnosed Positive})$$): The updated probability that you are sick, *given* that you tested positive. As seen, this was surprisingly low due to the rarity of the disease and the false positive rate.
+
+3.  **Rolling Two Dice:**
+    * Scenario: You roll two standard six-sided dice.
+    * Prior ($$P(\text{Sum is 10})$$): The probability that the sum of the values is 10. The possible outcomes for a sum of 10 are (4,6), (5,5), (6,4). There are $6 \times 6 = 36$ total possible outcomes.
+        * $P(\text{Sum is 10}) = 3/36 = 1/12$.
+    * Event (E): The first die is a 6.
+    * Posterior ($$P(\text{Sum is 10 | First Die is 6})$$): Now, considering the first die is a 6, the possible outcomes are (6,1), (6,2), (6,3), (6,4), (6,5), (6,6) - 6 possibilities. Among these, only (6,4) results in a sum of 10.
+        * $P(\text{Sum is 10 | First Die is 6}) = 1/6$. The probability changes significantly with new information.
+
+4.  **Coin Tosses:**
+    * Scenario: You toss two fair coins.
+    * Prior ($$P(\text{Both Heads})$$): The probability that both coins land on heads. The possible outcomes are HH, HT, TH, TT.
+        * $P(\text{Both Heads}) = 1/4$.
+    * Event (E): The first coin lands on heads.
+    * Posterior ($$P(\text{Both Heads | First Coin is Heads})$$): Given the first coin is heads, the possible outcomes are HH, HT.
+        * $P(\text{Both Heads | First Coin is Heads}) = 1/2$.
+     
+## Naïve Bayes Classifier
+
+While a single word (like "lottery") can help classify spam, real-world spam detection uses many words. Combining the probabilities of multiple words using standard Bayes' Theorem can be problematic, leading to the need for the "Naïve Bayes" assumption.
+
+### Challenges with Multiple Features (Words)
+
+When we want to calculate the probability of an email being spam given multiple words (e.g., "lottery" and "winning"), say $P(\text{Spam | Lottery}, \text{Winning})$, directly applying Bayes' Theorem would require:
+
+$$P(\text{Spam | Lottery}, \text{Winning}) = \frac{P(\text{Spam}) \cdot P(\text{Lottery}, \text{Winning | Spam})}{P(\text{Lottery}, \text{Winning})}$$
+
+The challenge arises with the terms $P(\text{Lottery}, \text{Winning | Spam})$ and $P(\text{Lottery}, \text{Winning})$. These represent the probability of an email containing *both* "lottery" and "winning" given it's spam (or any email).
+* **Data Scarcity:** If we have many words (e.g., 100 words), finding emails in our dataset that contain *all* 100 specific words becomes extremely rare, possibly resulting in zero counts (e.g., 0/0), which makes the calculation impossible.
+
+### The Naïve Assumption
+
+To overcome this, the **Naïve Bayes** classifier makes a simplifying assumption: **the features (words) are conditionally independent given the class (spam or not spam)**.
+
+* **Conditional Independence:** This means that the probability of seeing one word in an email (e.g., "lottery") does not affect the probability of seeing another word (e.g., "winning"), assuming we already know if the email is spam or not.
+* **Real-world Applicability:** While this assumption is often *not* strictly true in natural language (words are dependent; "good" often implies "morning"), it often yields surprisingly good results in practice, making Naïve Bayes a powerful and efficient algorithm.
+
+### Naïve Bayes Formula for Multiple Features
+
+Under the independence assumption, the probability of an intersection becomes the product of individual probabilities:
+
+$P(\text{Word}_1, \text{Word}_2, \dots, \text{Word}_n | \text{Class}) = P(\text{Word}_1 | \text{Class}) \cdot P(\text{Word}_2 | \text{Class}) \cdot \dots \cdot P(\text{Word}_n | \text{Class})$
+
+So, for the spam example with "lottery" and "winning":
+
+$$P(\text{Spam | Lottery}, \text{Winning}) = \frac{P(\text{Spam}) \cdot P(\text{Lottery | Spam}) \cdot P(\text{Winning | Spam})}{[P(\text{Spam}) \cdot P(\text{Lottery | Spam}) \cdot P(\text{Winning | Spam})] + [P(\text{Not Spam}) \cdot P(\text{Lottery | Not Spam}) \cdot P(\text{Winning | Not Spam})]}$$
+
+### Example Calculation with "Lottery" and "Winning"
+
+Let's use the previous data and add new data for "winning":
+
+* **Total Emails:** 100
+* **Spam Emails:** 20
+* **Non-Spam (Ham) Emails:** 80
+
+**Prior Probabilities:**
+* $P(\text{Spam}) = 20/100 = 0.2$
+* $P(\text{Ham}) = 80/100 = 0.8$
+
+**Conditional Probabilities (from previous and new data):**
+
+* **For "lottery":**
+    * $P(\text{Lottery | Spam}) = 14/20 = 0.7$
+    * $P(\text{Lottery | Ham}) = 10/80 = 0.125$
+* **For "winning":**
+    * Spam emails containing "winning": 15 (out of 20 spam emails)
+    * Non-spam emails containing "winning": 8 (out of 80 non-spam emails)
+    * $P(\text{Winning | Spam}) = 15/20 = 0.75$
+    * $P(\text{Winning | Ham}) = 8/80 = 0.1$
+
+Now, apply the Naïve Bayes formula:
+
+$$P(\text{Spam | Lottery, Winning}) = \frac{0.2 \cdot 0.7 \cdot 0.75}{(0.2 \cdot 0.7 \cdot 0.75) + (0.8 \cdot 0.125 \cdot 0.1)}$$
+
+$$P(\text{Spam | Lottery, Winning}) = \frac{0.105}{0.105 + 0.01}$$
+
+$$P(\text{Spam | Lottery, Winning}) = \frac{0.105}{0.115} \approx 0.913$$
+
+The probability of an email being spam, given that it contains both "lottery" and "winning", is approximately 91.3%. This much higher probability demonstrates the power of combining multiple features using the Naïve Bayes assumption.
