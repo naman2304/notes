@@ -611,3 +611,70 @@ $$P(\text{Sick | Diagnosed Sick}) = \frac{0.000099}{0.000099 + 0.009999}$$
 $$P(\text{Sick | Diagnosed Sick}) = \frac{0.000099}{0.010098} \approx 0.0098$$
 
 This confirms the previous numerical example: even with a positive test, the probability of actually having the disease is less than 1%. This highlights the importance of Bayes' Theorem, especially when dealing with rare events and test accuracy.
+
+## Bayes' Theorem: Spam Detection Example
+
+This example demonstrates how Bayes' Theorem can be applied to classify emails as spam based on the presence of certain words.
+
+### Scenario Setup
+
+* **Total Emails:** 100
+* **Spam Emails:** 20 (out of 100)
+* **Non-Spam (Ham) Emails:** 80 (out of 100)
+* **Feature:** Presence of the word "lottery".
+    * Spam emails containing "lottery": 14 (out of 20 spam emails)
+    * Non-spam emails containing "lottery": 10 (out of 80 non-spam emails)
+
+**Problem:** What is the probability that an email is spam, given that it contains the word "lottery"? In other words, we want to find $P(\text{Spam | Lottery})$.
+
+### Intuitive Approach
+
+We are only interested in emails that contain the word "lottery".
+
+* **Emails containing "lottery" that are spam:** 14
+* **Emails containing "lottery" that are NOT spam:** 10
+* **Total emails containing "lottery":** $14 + 10 = 24$
+
+The probability of an email being spam given it contains "lottery" is the number of spam emails with "lottery" divided by the total number of emails with "lottery":
+
+$$P(\text{Spam | Lottery}) = \frac{14}{24} = \frac{7}{12} \approx 0.583$$
+
+### Applying Bayes' Theorem Formula
+
+Let's define our events:
+* **A:** Email is spam
+* **A':** Email is not spam
+* **B:** Email contains the word "lottery"
+
+The Bayes' Theorem formula is:
+
+$$P(A|B) = \frac{P(A) \cdot P(B|A)}{[P(A) \cdot P(B|A)] + [P(A') \cdot P(B|A')]}$$
+
+Let's calculate each component:
+
+* **P(A) - Prior Probability of Spam:**
+    * This is the overall probability of an email being spam before considering any features.
+    * $P(\text{Spam}) = \frac{\text{Number of Spam Emails}}{\text{Total Emails}} = \frac{20}{100} = 0.2$
+
+* **P(A') - Probability of Not Spam:**
+    * $P(\text{Not Spam}) = 1 - P(\text{Spam}) = 1 - 0.2 = 0.8$
+
+* **P(B|A) - Probability of "lottery" given Spam:**
+    * This is the probability that a spam email contains the word "lottery".
+    * $P(\text{Lottery | Spam}) = \frac{\text{Spam Emails with "lottery"}}{\text{Total Spam Emails}} = \frac{14}{20} = 0.7$
+
+* **P(B|A') - Probability of "lottery" given Not Spam:**
+    * This is the probability that a non-spam email contains the word "lottery".
+    * $P(\text{Lottery | Not Spam}) = \frac{\text{Non-Spam Emails with "lottery"}}{\text{Total Non-Spam Emails}} = \frac{10}{80} = 0.125$
+
+Now, plug these values into the Bayes' Theorem formula:
+
+$$P(\text{Spam | Lottery}) = \frac{P(\text{Spam}) \cdot P(\text{Lottery | Spam})}{[P(\text{Spam}) \cdot P(\text{Lottery | Spam})] + [P(\text{Not Spam}) \cdot P(\text{Lottery | Not Spam})]}$$
+
+$$P(\text{Spam | Lottery}) = \frac{0.2 \cdot 0.7}{(0.2 \cdot 0.7) + (0.8 \cdot 0.125)}$$
+
+$$P(\text{Spam | Lottery}) = \frac{0.14}{0.14 + 0.1}$$
+
+$$P(\text{Spam | Lottery}) = \frac{0.14}{0.24} \approx 0.583$$
+
+Both the intuitive approach and the formula-based approach yield the same result, demonstrating the application of Bayes' Theorem in practical scenarios like spam classification.
