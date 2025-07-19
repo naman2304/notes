@@ -829,3 +829,412 @@ As shown in previous examples (spam detection and medical diagnosis), Bayes' The
 * **Posterior:** Updated probability ($P(A|E)$) that incorporates the new information, making the prediction more accurate.
 
 In essence, machine learning algorithms often learn to estimate these probabilities from data, allowing them to make informed decisions or generate realistic content.
+
+## Random Variables
+
+* A **random variable** is a variable that can take on multiple values, unlike deterministic variables (e.g., $x=3$) that always have the same value.
+* The values a random variable takes are associated with **uncertain outcomes** of an experiment.
+
+### Examples of Random Variables
+
+* **Coin Flip**: If $X$ is the number of heads in a single coin toss:
+    * $X = 1$ if heads (with $P(X=1) = 0.5$)
+    * $X = 0$ if tails (with $P(X=0) = 0.5$)
+* **10 Coin Tosses**: If $X$ is the number of heads in 10 coin tosses, $X$ can range from 0 to 10.
+    * $P(X=0)$ (all tails) $= (0.5)^{10}$.
+    * $P(X=10)$ (all heads) $= (0.5)^{10}$.
+    * The probability of getting a specific number of heads (e.g., $X=5$) is typically higher than extreme outcomes (e.g., $X=0$ or $X=10$).
+* **Other Examples**:
+    * Number of 1s when rolling multiple dice.
+    * Number of sick patients in a group.
+    * Wait time until the next bus arrives.
+    * Height of a gymnast's jump.
+    * Number of defective products in a shipment.
+    * Amount of rain in a month.
+
+### Types of Random Variables
+
+There are two main types of random variables:
+
+* **Discrete Random Variables**:
+    * Can take a **countable number of values**. This means the possible values can be listed (e.g., 0, 1, 2, 3, ...).
+    * Examples: Number of heads in coin flips, number of children in a family, number of times you flip a coin until you get heads (can be 1, 2, 3, ..., an infinite but countable list).
+* **Continuous Random Variables**:
+    * Can take an **infinite number of values** within an entire interval. The possible values cannot be listed.
+    * Examples: Wait time (e.g., 1 minute, 1.01 minutes, 1.0001 minutes), height, temperature, amount of rain.
+
+### Random vs. Deterministic Variables
+
+* **Deterministic Variables**:
+    * Always take the same value once defined (e.g., $x=2$, input of $f(x) = x^2$).
+    * Associated with a **fixed outcome**.
+* **Random Variables**:
+    * Can take many values.
+    * Associated with an **uncertain outcome**.
+ 
+## Probability Distribution
+
+A **probability distribution** shows all possible scenarios of an experiment and the probability of each scenario occurring. For a random variable, it maps each possible value of the random variable to its probability.
+
+### Example: Tossing Three Coins
+
+Consider flipping three coins, and our random variable $X$ is the **number of heads**.
+* **Total possible outcomes**: $2^3 = 8$
+    * **0 Heads (TTT)**: 1 way. $P(X=0) = 1/8$
+    * **1 Head (HTT, THT, TTH)**: 3 ways. $P(X=1) = 3/8$
+    * **2 Heads (HHT, HTH, THH)**: 3 ways. $P(X=2) = 3/8$
+    * **3 Heads (HHH)**: 1 way. $P(X=3) = 1/8$
+
+This can be visualized as a histogram, where the height of each bar represents the probability. 
+
+### Example: Tossing Four Coins
+
+Let $X$ be the number of heads in four coin tosses.
+* **Total possible outcomes**: $2^4 = 16$
+    * **0 Heads**: 1 way. $P(X=0) = 1/16$
+    * **1 Head**: 4 ways. $P(X=1) = 4/16$
+    * **2 Heads**: 6 ways. $P(X=2) = 6/16$
+    * **3 Heads**: 4 ways. $P(X=3) = 4/16$
+    * **4 Heads**: 1 way. $P(X=4) = 1/16$
+
+## Probability Mass Function (PMF)
+
+For a **discrete random variable** $X$, its **probability mass function (PMF)**, denoted as $p(x)$ or $P(X=x)$, gives the probability that the random variable $X$ takes on a specific value $x$.
+
+### Requirements for a PMF
+
+A function $p(x)$ can be a valid PMF if it satisfies these two conditions:
+1.  **Non-negativity**: The probability of any value must be non-negative.
+    $p(x) \ge 0$ for all possible values of $x$.
+2.  **Summation to One**: The sum of all probabilities for all possible values of the random variable must equal 1.
+    $\sum_{\text{all } x} p(x) = 1$
+
+### Binomial Distribution
+
+The patterns observed in the number of heads in a fixed number of coin tosses (like the examples above) are characteristic of a specific type of probability distribution called the **Binomial Distribution**. This distribution models the number of successes in a fixed number of independent Bernoulli trials (experiments with only two outcomes, like coin flips).
+
+The **binomial distribution** is a fundamental discrete probability distribution. It's used to model the number of successes in a fixed number of independent trials, where each trial has only two possible outcomes (success or failure) and the probability of success remains constant.
+
+## Binomial Coefficient
+
+To calculate the probability of a specific number of successes, we first need to determine the number of ways those successes can occur. This is done using the **binomial coefficient**, often read as "n choose k".
+
+$$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
+
+* $n$ represents the **total number of trials** (e.g., coin tosses).
+* $k$ represents the **number of successes** (e.g., number of heads).
+
+This formula counts the number of unique combinations where you have $k$ successes in $n$ trials.
+
+### Properties of the Binomial Coefficient
+
+* $\binom{n}{k} = \binom{n}{n-k}$: Obtaining $k$ successes is equivalent to obtaining $(n-k)$ failures. For example, getting 2 heads in 5 flips is the same as getting 3 tails in 5 flips.
+
+## Binomial Probability Mass Function (PMF)
+
+The **probability mass function (PMF)** of a binomial distribution gives the probability of obtaining exactly $x$ successes in $n$ trials, where the probability of success in a single trial is $p$.
+
+The PMF is given by:
+
+$$P(X=x) = \binom{n}{x} p^x (1-p)^{n-x}$$
+
+* $X$ is the random variable representing the number of successes.
+* $x$ is the specific number of successes we are interested in (where $x = 0, 1, ..., n$).
+* $n$ is the total number of trials.
+* $p$ is the probability of success in a single trial.
+* $(1-p)$ is the probability of failure in a single trial (often denoted as $q$).
+
+We denote that a random variable $X$ follows a binomial distribution with parameters $n$ and $p$ as $X \sim B(n, p)$.
+
+### Examples
+
+#### Example 1: Probability of 2 Heads in 5 Coin Tosses
+
+Let's find the probability of getting exactly 2 heads in 5 fair coin tosses.
+Here, $n=5$ (number of tosses) and $p=0.5$ (probability of heads). We want to find $P(X=2)$.
+
+1.  **Calculate the binomial coefficient**:
+
+$$
+\binom{5}{2} = \frac{5!}{2!(5-2)!} = \frac{5!}{2!3!} = \frac{5 \times 4 \times 3 \times 2 \times 1}{(2 \times 1)(3 \times 2 \times 1)} = \frac{120}{12} = 10
+$$
+
+There are 10 ways to get 2 heads in 5 tosses.
+
+2.  **Calculate the probability of one specific sequence**:
+    The probability of one specific sequence with 2 heads and 3 tails (e.g., HHTTT) is $p^2 (1-p)^{5-2} = (0.5)^2 (0.5)^3 = 0.25 \times 0.125 = 0.03125$.
+
+3.  **Multiply to get the total probability**:
+    $P(X=2) = 10 \times (0.5)^2 (0.5)^3 = 10 \times 0.03125 = 0.3125$.
+
+#### Example 2: Probability of 3 Ones when rolling a die 5 times
+
+Consider rolling a standard six-sided die 5 times and wanting to find the probability of getting exactly 3 ones.
+This can be thought of as a biased coin flip: "success" is rolling a 1, and "failure" is rolling anything else.
+* $n=5$ (number of rolls)
+* $p=1/6$ (probability of rolling a 1)
+* $x=3$ (number of ones we want)
+
+Using the PMF:
+$$P(X=3) = \binom{5}{3} \left(\frac{1}{6}\right)^3 \left(1-\frac{1}{6}\right)^{5-3}$$
+
+$$P(X=3) = \binom{5}{3} \left(\frac{1}{6}\right)^3 \left(\frac{5}{6}\right)^2$$
+
+First, calculate $\binom{5}{3}$:
+$$\binom{5}{3} = \frac{5!}{3!(5-3)!} = \frac{5!}{3!2!} = \frac{120}{(6)(2)} = 10$$
+
+Now, substitute back into the PMF:
+$$P(X=3) = 10 \times \left(\frac{1}{6}\right)^3 \times \left(\frac{5}{6}\right)^2$$
+
+$$P(X=3) = 10 \times \frac{1}{216} \times \frac{25}{36}$$
+
+$$P(X=3) = \frac{10 \times 25}{216 \times 36} = \frac{250}{7776} \approx 0.03215$$
+
+#### Example 3: Parameters for rolling a die 10 times and recording the number of 1s
+
+If we roll a die 10 times and record the number of 1s, this is a binomial distribution.
+* **Number of trials ($n$)**: 10 (since we roll the die 10 times).
+* **Probability of success ($p$)**: $1/6$ (since the probability of rolling a 1 is $1/6$).
+
+So, the parameters for this binomial distribution are $n=10$ and $p=1/6 \approx 0.1667$.
+
+### Shape of the PMF
+
+The shape of the binomial PMF depends on the value of $p$:
+* If $p=0.5$ (e.g., a fair coin), the PMF will be **symmetrical**.
+* If $p < 0.5$, the PMF will be **skewed to the left** (higher probabilities for smaller numbers of successes).
+* If $p > 0.5$, the PMF will be **skewed to the right** (higher probabilities for larger numbers of successes).
+
+The concept of **combinations**, specifically "n choose k," is fundamental to understanding the binomial distribution. It provides the number of ways to select $k$ items from a set of $n$ distinct items *without regard to the order* of selection.
+
+## Derivation of the Binomial Coefficient
+
+### Permutations (Ordered Selection)
+
+When we select $k$ items from $n$ items and the **order matters**, these are called permutations.
+* For the first selection, there are $n$ options.
+* For the second selection, there are $n-1$ options (since one item has already been picked).
+* For the third selection, there are $n-2$ options.
+* ...
+* For the $k$-th selection, there are $n-(k-1) = n-k+1$ options.
+
+The total number of ordered ways to pick $k$ items from $n$ is the product:
+$$n \times (n-1) \times (n-2) \times \dots \times (n-k+1)$$
+
+This can be expressed using factorials as:
+$$\frac{n!}{(n-k)!}$$
+
+### Accounting for Repetitions (Unordered Selection)
+
+The above formula counts sets of items multiple times if the order is different (e.g., picking item A then B is distinct from B then A). To get **unordered sets** (combinations), we need to divide by the number of ways to order the $k$ chosen items.
+
+The number of ways to order $k$ distinct items is $k!$ (k-factorial), which is the product $k \times (k-1) \times \dots \times 1$.
+
+### The Binomial Coefficient Formula
+
+By dividing the number of ordered selections by the number of ways to order the $k$ selected items, we get the binomial coefficient:
+
+$$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
+
+This formula represents the number of ways to choose $k$ elements from a set of $n$ elements in an unordered way.
+
+### Special Case: Zero Factorial
+
+* $0! = 1$ (by definition).
+* This ensures that $\binom{n}{0} = \frac{n!}{0!(n-0)!} = \frac{n!}{1 \cdot n!} = 1$. This makes sense, as there's only one way to choose zero items from a set (by choosing nothing).
+
+## Binomial Distribution with Biased Coins
+
+When dealing with a **biased coin** (or any trial where the probability of "success" $p$ is not 0.5), the individual outcomes are no longer equally likely.
+
+Consider flipping a coin $n$ times where:
+* $P(\text{Heads}) = p$
+* $P(\text{Tails}) = (1-p)$
+
+If we want to find the probability of getting exactly $k$ heads:
+1.  **Probability of a specific sequence**: For any specific sequence with $k$ heads and $(n-k)$ tails (e.g., HH...H T...T), the probability is $p^k \cdot (1-p)^{n-k}$.
+2.  **Number of possible sequences**: We use the binomial coefficient $\binom{n}{k}$ to find all the different orderings of $k$ heads and $(n-k)$ tails.
+
+Combining these, the **Probability Mass Function (PMF)** for the binomial distribution with a biased coin is:
+
+$$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+This formula allows us to calculate the probability of observing exactly $k$ successes in $n$ trials, even when the probability of success $p$ is not 0.5.
+
+
+
+For example, if you flip a coin 5 times with $P(\text{Heads})=0.3$ and $P(\text{Tails})=0.7$:
+* $P(X=0 \text{ heads}) = \binom{5}{0} (0.3)^0 (0.7)^5 = 1 \times 1 \times (0.7)^5 = 0.16807$
+* $P(X=1 \text{ head}) = \binom{5}{1} (0.3)^1 (0.7)^4 = 5 \times 0.3 \times 0.2401 = 0.36015$
+* $P(X=2 \text{ heads}) = \binom{5}{2} (0.3)^2 (0.7)^3 = 10 \times 0.09 \times 0.343 = 0.3087$
+* And so on.
+
+As $p$ deviates from 0.5, the histogram (PMF plot) of the binomial distribution will become **asymmetrical** or **skewed**, reflecting the higher probability of outcomes biased towards the more likely result (heads or tails).
+
+## Bernoulli Distribution
+
+The **Bernoulli distribution** is a fundamental discrete probability distribution that models a single experiment with only two possible outcomes: **success** or **failure**. It has a single parameter, $p$, which represents the probability of success.
+
+### Key Characteristics
+
+* **Single Trial**: The experiment consists of only one trial.
+* **Two Outcomes**: The outcome is either a "success" (typically denoted by 1) or a "failure" (typically denoted by 0).
+* **Probability of Success ($p$)**: This is the probability that the outcome is a success.
+* **Probability of Failure ($1-p$)**: This is the probability that the outcome is a failure.
+
+### Examples
+
+1.  **Coin Flip**:
+    * **Experiment**: Flipping a single coin.
+    * **Success**: Getting a head ($X=1$).
+    * **Failure**: Getting a tail ($X=0$).
+    * **Parameter $p$**: Probability of getting a head (e.g., $p=0.5$ for a fair coin).
+
+2.  **Rolling a Die for a Specific Number**:
+    * **Experiment**: Rolling a single six-sided die.
+    * **Success**: Rolling a '1' ($X=1$).
+    * **Failure**: Rolling any number other than '1' ($X=0$).
+    * **Parameter $p$**: Probability of rolling a '1', which is $1/6$. So, $p=1/6$, and $1-p=5/6$.
+
+3.  **Patient Health Status**:
+    * **Experiment**: Observing a single patient.
+    * **Success**: The patient is sick ($X=1$). (While "sick" might not conventionally be a "success", in the context of counting sick patients, it's the outcome we're interested in measuring).
+    * **Failure**: The patient is healthy ($X=0$).
+    * **Parameter $p$**: Probability that the patient is sick.
+
+### Probability Mass Function (PMF)
+
+The PMF of a Bernoulli distribution is given by:
+
+$$
+P(X=x) = \begin{cases}
+p & \text{if } x=1 \\
+1-p & \text{if } x=0
+\end{cases}
+$$
+
+This can be written compactly as:
+$$P(X=x) = p^x (1-p)^{1-x} \quad \text{for } x \in \{0, 1\}$$
+
+You've hit on a crucial distinction in probability: **discrete vs. continuous distributions**. It's all about whether the possible values a random variable can take can be listed or not.
+
+## Discrete Distributions
+
+In **discrete distributions**, the possible outcomes of a random variable can be listed or counted. Think of them as distinct, separate points on a number line.
+
+* **Example 1: Number of Heads**: If you toss a coin 3 times, the number of heads ($X$) can only be 0, 1, 2, or 3. You can clearly list these values.
+* **Example 2: Population**: The number of people in a town can be 0, 1, 2, 3, up to millions. Even though it can be a large number, it's still countable.
+
+For discrete distributions, we use a **Probability Mass Function (PMF)**, where the height of each bar in a histogram directly represents the probability of that specific outcome. The sum of the heights of all bars must equal 1.
+
+## Continuous Distributions
+
+In **continuous distributions**, the random variable can take on any value within a given interval. You cannot list all the possible outcomes because there are infinitely many, uncountably many, values between any two points.
+
+* **Example 1: Waiting Time**: If you're waiting for a bus, the waiting time ($X$) could be 1 minute, 1.01 minutes, $\pi$ minutes (3.14159...), or any value within a range. You can't make a list of all possible waiting times.
+* **Example 2: Height**: A person's height isn't just 1.70m or 1.71m; it can be 1.705m, 1.7056m, and so on.
+
+### The Problem with Point Probabilities in Continuous Distributions
+
+With continuous random variables, the probability of the variable taking on any **exact, single value is zero**.
+* **Why?** Because there are infinitely many possible values. If each had a non-zero probability, the sum of all probabilities would vastly exceed 1.
+
+### Probability Density Function (PDF)
+
+Since we can't assign probabilities to single points, for continuous distributions, we talk about the probability of a random variable falling within a **range or interval**. This is where the **Probability Density Function (PDF)** comes in.
+
+Imagine the histogram approach from discrete distributions, but with infinitely many, infinitesimally thin bars. As the width of the intervals shrinks to zero, the histogram becomes a smooth curve.
+
+* **Area Under the Curve**: For a continuous distribution, the **area under the curve** of the PDF over a specific interval represents the probability that the random variable falls within that interval.
+* **Total Area**: Just like the sum of probabilities in a discrete distribution, the **total area under the entire PDF curve must equal 1**. This signifies that the random variable must take some value within its entire possible range.
+
+In essence, the height of the PDF curve itself at a given point doesn't represent probability directly (it's "probability density"), but rather indicates where values are more likely to fall. The actual probability comes from integrating (finding the area under) the curve over an interval.
+
+## Probability Density Function (PDF)
+
+For **continuous random variables**, we cannot talk about the probability of the variable taking on an **exact single value**, because this probability is always **zero**. Instead, we talk about the probability of the variable falling within a **specific interval**. This is where the **Probability Density Function (PDF)**, denoted by $f(x)$ or $f_X(x)$, comes into play.
+
+### Intuition: From Histograms to Curves
+
+Imagine a continuous variable, like the duration of a phone call, which can take any value (e.g., 2 minutes, 2.01 minutes, 2.0005 minutes).
+
+1.  **Discretizing Intervals**: If we divide the total possible duration (say, 0 to 5 minutes) into small, equal-sized intervals (e.g., 1-minute intervals), we can create a histogram where the height of each bar represents the probability that the call falls within that interval. The **area** of each bar (height $\times$ width) is the probability.
+    
+2.  **Making Intervals Finer**: As we make these intervals smaller and smaller (e.g., 30-second, then 15-second intervals), the bars become thinner and more numerous. The probability for each individual narrow interval decreases, but the total area under all bars still sums to 1.
+    
+3.  **The Continuous Limit**: If we make the intervals infinitesimally small, the tops of the bars form a smooth curve. This curve is the **Probability Density Function (PDF)**.
+    
+
+### Calculating Probabilities with a PDF
+
+For a continuous random variable $X$, the probability that $X$ falls within an interval $[a, b]$ is given by the **area under the PDF curve between $a$ and $b$**. Mathematically, this is calculated using **integration**:
+
+$$P(a \le X \le b) = \int_{a}^{b} f(x) \,dx$$
+
+* The area represents the accumulation of probability over that interval.
+* The probability of $X$ being *exactly* a specific value (e.g., $P(X=2)$) is 0 because a single point has no width, and thus no area under the curve.
+
+### Requirements for a Valid PDF
+
+A function $f(x)$ can be considered a valid PDF if it satisfies the following conditions:
+
+1.  **Non-negativity**: The function must be non-negative for all possible values of $x$. You cannot have negative probabilities.
+    $f(x) \ge 0$ for all $x \in \mathbb{R}$
+2.  **Total Area of One**: The total area under the entire curve of the PDF must be equal to 1. This means the random variable must take on *some* value within its entire range of possibilities.
+    $\int_{-\infty}^{\infty} f(x) \,dx = 1$
+
+### Summary: Discrete vs. Continuous
+
+| Feature           | Discrete Random Variables                       | Continuous Random Variables                      |
+| :---------------- | :---------------------------------------------- | :----------------------------------------------- |
+| **Outcomes** | Finite or countably infinite list of values     | Any value within an interval (uncountably infinite) |
+| **Probability of single value** | $P(X=x) > 0$                           | $P(X=x) = 0$                                 |
+| **Function type** | **Probability Mass Function (PMF)**, $p(x)$   | **Probability Density Function (PDF)**, $f(x)$ |
+| **Probability calculation** | Sum of $p(x)$ for specific values      | Area under $f(x)$ (using integration)            |
+| **Visual representation** | Histogram (bar heights are probabilities) | Smooth curve (area under curve is probability) |
+
+## Cumulative Distribution Function (CDF)
+
+The **Cumulative Distribution Function (CDF)** provides the probability that a random variable will take a value less than or equal to a specific point. It's a more convenient way to calculate probabilities compared to finding areas under a curve.
+
+### CDF for Discrete Distributions
+
+* **Cumulative Probability**: Tells the probability an event happened before a reference point.
+* For discrete distributions, the CDF is a **step function** with jumps.
+    * The height of each jump corresponds to the **probability mass** at that specific value.
+    * If a point is not a possible outcome, the CDF remains flat, indicating no probability accumulation at that point.
+* **Example (Phone Call Duration)**:
+    * Probability of a call between 0 and 1 minute is the value of the CDF at 1 minute.
+    * Probability of a call between 0 and 2 minutes is the sum of probabilities for 0-1 and 1-2 minutes. This is represented by the CDF value at 2 minutes.
+
+### CDF for Continuous Distributions
+
+* For continuous distributions, the CDF is a **continuous and smooth function**.
+* It's obtained by **integrating** the Probability Density Function (PDF) from the beginning up to a certain point.
+* Since individual points in a continuous distribution have zero probability mass, there are no jumps in the CDF.
+* The area under the PDF up to a certain point $x$ is equal to the height of the CDF at that point $x$.
+
+### General Properties of CDF
+
+The CDF, denoted as $F_X(x)$, is defined as the probability that a random variable $X$ is less than or equal to some value $x$:
+
+$$F_X(x) = P(X \le x)$$
+
+This function is defined for all real numbers from $-\infty$ to $+\infty$.
+
+* **Range**: All CDF values are between 0 and 1, inclusive: $0 \le F_X(x) \le 1$. This is because it represents a probability.
+* **Left Endpoint**: As $x$ approaches negative infinity, the CDF approaches 0: $\lim_{x \to -\infty} F_X(x) = 0$. This means there's no accumulated probability before any possible outcomes.
+* **Right Endpoint**: As $x$ approaches positive infinity, the CDF approaches 1: $\lim_{x \to \infty} F_X(x) = 1$. This signifies that all possible probabilities have been accumulated.
+* **Non-decreasing**: The CDF can never decrease. As $x$ increases, the accumulated probability can only stay the same or increase, never decrease (as probabilities are non-negative).
+    * Mathematically, if $a < b$, then $F_X(a) \le F_X(b)$.
+
+### Relationship between PDF/PMF and CDF
+
+* **PDF (Probability Density Function)** for continuous variables and **PMF (Probability Mass Function)** for discrete variables are represented by lowercase $f$. They describe the probability distribution at individual points or intervals.
+* **CDF (Cumulative Distribution Function)** is represented by uppercase $F$. It describes the accumulated probability up to a certain point.
+* PDF/PMF is always positive, and the total area/sum of probabilities is 1.
+* CDF starts at 0, ends at 1, and is always non-decreasing.
+
+### Usage
+
+Both PDF/PMF and CDF provide the same information but in different forms. The choice of which to use depends on the convenience for a given calculation or analysis.
