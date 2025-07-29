@@ -2,7 +2,9 @@ Appendix
 * Andrej Karpathy videos
     * [Deep Dive into LLMs like ChatGPT](https://www.youtube.com/watch?v=7xTGNNLPyMI) 
     * [How I use LLMs](https://www.youtube.com/watch?v=EWvNQjAaOHw)
- 
+ * 3Blue1Brown
+    * [Neural Network playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
+
 ---
 
 ## Deep Dive into LLMs like ChatGPT
@@ -344,3 +346,8 @@ LLMs can be equipped with tools, allowing them to interact with external systems
     * **Quality of Life Features:** Memory, custom instructions, custom GPTs for personalization and efficiency.
 * **LLMs as Tools:** Use them as powerful tools for inspiration, first drafts, and acceleration.
 * **Verify and Be Responsible:** Do not blindly trust LLM output; always verify information, especially for high-stakes tasks. They will still hallucinate or make errors due to their inherent nature.
+
+---
+
+## 3Blue1Brown Neural Network playlist
+
