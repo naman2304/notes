@@ -577,7 +577,7 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
 * The process involves repeatedly applying the chain rule backward through the network, leveraging the "error signals" from later layers.
 
 
-### Video 4: Large Language Models (LLMs) & Transformers
+### Video 5: Large Language Models (LLMs) & Transformers
 
 #### What is an LLM?
 * A **Large Language Model** is a sophisticated mathematical function that **predicts the next word** in any given text.
@@ -617,3 +617,81 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
 #### Emergent Behavior
 * The specific, fluent, and useful behavior of LLMs is an **emergent phenomenon** from the tuning of billions of parameters during training.
 * This makes it **challenging to interpret exactly why** an LLM makes specific predictions.
+
+### Video 6: GPT & Transformers: The Core Mechanics 🛠️
+
+#### What do GPT Initials Mean?
+* **G**enerative: These models **generate** new text.
+* **P**retrained: Models learn from a **massive amount of data** (e.g., internet text). "Pre" implies further fine-tuning is possible.
+* **T**ransformer: A **specific neural network architecture** that is the core invention behind the current AI boom.
+
+#### Transformer Applications
+* Originally for **language translation** (Google, 2017).
+* Now used for:
+    * **Text generation** (like ChatGPT).
+    * **Text-to-speech** and **speech-to-text**.
+    * **Text-to-image** (e.g., DALL-E, Midjourney).
+
+#### How LLMs Generate Text (Next Word Prediction)
+* **Core Task:** Predict the **next word** (or token) given previous text.
+* **Prediction Form:** A **probability distribution** over all possible next words/chunks.
+* **Generation Process:**
+    1.  Give the model an **initial snippet (seed text)**.
+    2.  Model predicts probabilities for the next token.
+    3.  **Randomly sample** a token from this distribution (allowing less likely words for naturalness).
+    4.  **Append** the sampled token to the text.
+    5.  **Repeat** the process with the new, longer text.
+* **Scale Matters:** Small models (e.g., GPT-2) generate less coherent text; much larger models (e.g., GPT-3) generate sensible, even creative, stories.
+
+#### High-Level Transformer Data Flow
+1.  **Tokenization:** Input text (or image/sound) is broken into **tokens** (words, sub-words, or common character combos).
+2.  **Embedding:** Each token is converted into a **vector** (a list of numbers) that encodes its meaning.
+3.  **Attention Block:** These vectors "talk to each other" in parallel. They update their values (meanings) based on **context** (e.g., "model" in "machine learning model" vs. "fashion model"). This figures out relevance and updates meanings.
+4.  **Multi-Layer Perceptron (MLP) / Feed-Forward Layer:** Vectors pass through this independently (in parallel). It gives the model extra capacity to learn and store language patterns.
+5.  **Repeat:** Steps 3 and 4 (Attention and MLP) are **repeated many times** (multiple blocks/layers).
+6.  **Final Prediction:** The last vector in the sequence (now enriched with full context) is used to produce a **probability distribution** for the next token.
+
+#### Deep Learning Fundamentals for Transformers
+* **Machine Learning:** Using data to determine a model's behavior, rather than explicit coding.
+    * *Example:* Linear Regression finds best-fit line parameters (slope, intercept) from data.
+* **Deep Learning:** A class of models (like NNs) that **scale remarkably well** with data and parameters.
+* **Key Format Requirements for Scalable Training (Backpropagation):**
+    1.  **Input/Layers as Arrays (Tensors):** All data and intermediate layers are formatted as arrays of real numbers.
+    2.  **Weights for Weighted Sums:** Model parameters are mostly **weights**, which interact with data through **weighted sums**. (Often seen as **matrix multiplications**).
+        * GPT-3 has 175 billion weights, organized into ~28,000 matrices.
+    3.  **Data vs. Weights:** Crucial distinction:
+        * **Weights (blue/red):** The "brains," learned during training, determine behavior.
+        * **Data (gray):** The specific input being processed for a given run.
+
+#### Initial & Final Steps in Detail
+
+##### 1. Token Embedding
+* **Vocabulary:** The model has a fixed list of all possible tokens (e.g., 50,257 for GPT-3).
+* **Embedding Matrix ($W_E$):** The first set of weights. Each column in this matrix represents a **vector for a specific token**.
+    * Initially random, learned during training.
+    * **High-Dimensional Space:** Word embeddings are high-dimensional vectors (e.g., GPT-3 uses 12,288 dimensions).
+    * **Semantic Meaning:** During training, models learn embeddings where **directions in the space carry meaning**.
+        * *Example:* "woman - man" vector is similar to "queen - king" vector. 
+        * This allows for "vector math" to find related words (e.g., Italy - Germany + Hitler $\approx$ Mussolini).
+* **Parameter Count:** GPT-3's embedding matrix adds ~617 million parameters.
+
+##### 2. Context & Positional Encoding
+* **Context Size:** Transformers process a fixed number of vectors at a time (e.g., 2048 for GPT-3). This limits the amount of text the model can consider for prediction.
+* **Positional Encoding:** Vectors also encode information about the **position** of the word in the sequence (to be covered later).
+* **Soaking in Context:** The network's primary goal is to enrich these initial word vectors with context from the entire input sequence.
+
+##### 3. Unembedding Matrix & Softmax
+* **Prediction:** Only the **last vector** in the processed sequence is used to predict the next token. (Though in training, all vectors simultaneously predict their immediate next token for efficiency).
+* **Unembedding Matrix ($W_U$):** Another weight matrix that maps the final context-rich vector to a list of 50,000+ values (one for each token in the vocabulary).
+    * Adds another ~617 million parameters. Total parameters now slightly over 1 billion.
+* **Softmax Function:**
+    * **Purpose:** Converts an arbitrary list of numbers (called **logits**) into a valid **probability distribution** (values between 0 and 1, summing to 1).
+    * **Mechanism:** $P(i) = e^{z_i} / \sum_k e^{z_k}$ (where $z_i$ are the inputs/logits).
+    * **Effect:** Larger input values get probabilities closer to 1; smaller values get probabilities closer to 0. It's "soft" because similar large values still get significant weight.
+    * **Temperature (T):** An optional constant in softmax.
+        * **Higher T:** Makes the distribution more uniform (more "creative" or "random" output).
+        * **Lower T:** Makes the largest values dominate more aggressively (more "predictable" output).
+        * *Example:* Generating a story with T=0 gives a predictable, trite outcome; higher T gives more original but potentially nonsensical results.
+
+#### Foundation for Attention
+* Understanding **word embeddings**, **softmax**, how **dot products measure similarity**, and the dominance of **matrix multiplication with tunable parameters** are essential prerequisites for grasping the **attention mechanism**, the true heart of Transformers.
