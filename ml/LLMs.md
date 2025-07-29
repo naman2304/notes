@@ -351,3 +351,54 @@ LLMs can be equipped with tools, allowing them to interact with external systems
 
 ## 3Blue1Brown Neural Network playlist
 
+### Video 1: Neural Networks: The Structure
+
+#### The Recognition Challenge
+* Our brains recognize varying handwritten digits effortlessly.
+* Programming a computer to do this (e.g., classifying 28x28 pixel images) is **difficult** with traditional methods.
+* **Neural Networks (NNs)** offer a solution: they're mathematical structures that **learn** to identify patterns.
+
+#### What is a Neural Network?
+* Inspired by the brain, an NN is a **function** mapping inputs to outputs.
+* **Learning:** The process of a computer automatically finding optimal internal settings (parameters) to solve a problem.
+* **Goal:** Understand the **structure** of a basic NN for handwritten digit recognition.
+
+#### Neurons & Layers
+* **Neuron:** A unit holding a **number (activation)**, typically between 0 and 1. Higher activation means "more active."
+* **Layers:** Neurons are organized into layers.
+    * **Input Layer:** Represents raw data. For a 28x28 image, 784 neurons, each holding a pixel's grayscale value (0=black, 1=white).
+    * **Output Layer:** Represents the network's prediction. For digits 0-9, 10 neurons; the highest activation indicates the predicted digit.
+    * **Hidden Layers:** Intermediate layers (e.g., two layers with 16 neurons each in this example). They process information, abstracting features from the input.
+* **Flow:** Activations in one layer determine activations in the next.
+
+#### Hierarchical Feature Detection (The "Hope")
+* NNs are hoped to learn **hierarchical features**:
+    * **Early Layers:** Detect simple features like **edges**.
+    * **Middle Layers:** Combine edges into **sub-components** (e.g., loops, lines).
+    * **Later Layers:** Combine sub-components to recognize complete digits.
+* This layered abstraction is useful for many AI tasks (e.g., speech recognition: sounds → syllables → words).
+
+#### How Neurons Activate: Weights & Biases
+* A neuron's activation in a layer is determined by:
+    1.  **Weighted Sum:** Sum of (previous layer's neuron activations $\times$ their respective **weights**).
+        * **Weights (W):** Numerical strength of connection. They define *what* pattern a neuron detects.
+            * *Example:* For an edge detector, positive weights on pixels forming the edge, negative on surrounding pixels. 
+    2.  **Bias (b):** A number added to the weighted sum. It controls the threshold for a neuron to become active (e.g., how high the sum needs to be).
+    3.  **Activation Function:** "Squishes" the result into the 0-1 range.
+        * **Sigmoid ($\sigma$):** $\sigma(z) = 1 / (1 + e^{-z})$. Maps any real number $z$ to a value between 0 and 1.
+        * **ReLU (Rectified Linear Unit):** $\text{ReLU}(z) = \max(0, z)$. Common in modern NNs, often easier to train than sigmoid.
+
+#### Network Parameters & Learning
+* A network has many **weights and biases** (parameters). This example has ~13,000.
+* **Learning:** The process where the computer **finds the best values** for these parameters, allowing the network to solve the given problem (e.g., recognizing digits accurately).
+* Manually setting these parameters is impractical; thus, learning algorithms are essential.
+
+#### Mathematical Representation
+* Using **linear algebra** simplifies computation:
+    * Activations: **vectors**.
+    * Weights between layers: **matrices**.
+    * Biases: **vectors**.
+* The transition from one layer's activations ($a$) to the next ($a'$) is:
+    $a' = \sigma(Wa + b)$
+    * This compact notation is efficient for coding and computation.
+* An entire NN is a complex, multi-layered function with many parameters, which is why it can solve complex tasks.
