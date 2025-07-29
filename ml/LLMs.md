@@ -457,8 +457,163 @@ Here are the super crisp notes for the second 3blue1brown neural network video:
     * It's trained only on clean, centered digits and optimized for confidence, not common-sense understanding.
 
 #### Modern Context
-* This "plain vanilla" network is an older technology (1980s-90s).
+* This "plain vanilla" network is an older technology (1980s-90s) [multilayer perceptron]
 * It's a necessary **foundation** for understanding more advanced, powerful modern variants.
-* **Current Research Insights:**
-    * Deep networks can "memorize" randomly labeled data, but training on structured data is much faster (easier to find good minima).
-    * Local minima in structured datasets often lead to equally good performance.
+
+### Video 3: Neural Networks: Backpropagation
+
+#### Recap: Network & Cost
+* **Network Structure:** 784 input neurons (28x28 pixel image), two 16-neuron hidden layers, 10 output neurons (digits 0-9).
+* **Parameters:** ~13,000 **weights** and **biases** that define network behavior.
+* **Cost Function:** Measures network "lousiness." Calculated as the average squared difference between network output and desired output over all training examples.
+* **Learning Goal:** Find weights and biases that **minimize this cost function** using **gradient descent**.
+    * **Gradient:** A vector indicating the direction of steepest *increase* in cost.
+    * **Negative Gradient:** The direction of steepest *decrease* in cost ("downhill"). Its components tell you how sensitive the cost is to each weight/bias change (which "nudge" gives "most bang for buck").
+
+#### What is Backpropagation?
+* **Backpropagation (Backprop):** An algorithm to **efficiently compute this negative gradient** of the cost function with respect to all weights and biases.
+* It determines how each weight and bias should be adjusted to decrease the cost.
+
+#### Intuitive Walkthrough (for a Single Training Example)
+Let's consider one input image (e.g., a "2") where the network currently outputs random activations.
+
+1.  **Output Layer Desired Changes:**
+    * We want the "2" output neuron's activation to increase (towards 1) and all other output neurons' activations to decrease (towards 0).
+    * The **size of desired nudges** is proportional to how far off the current activation is from its target. (e.g., if a neuron is already close to 0, its desired decrease is small).
+
+2.  **Influencing the Output Neuron (e.g., the '2' neuron):**
+    * A neuron's activation is $\sigma(\sum (\text{weight} \times \text{prevactivation}) + \text{bias})$.
+    * To increase this output neuron's activation, we have three avenues:
+        * **Increase its bias.**
+        * **Increase its incoming weights:** Especially for connections from *bright* neurons in the previous layer, as these have a larger impact on the weighted sum ("more bang for your buck"). This relates to **Hebbian theory**: "neurons that fire together, wire together."
+        * **Change previous layer's activations:** Make activations connected by *positive* weights brighter, and those by *negative* weights dimmer. Again, changes proportional to weight strength are most effective.
+
+3.  **Propagating Backwards:**
+    * We can't directly change previous layer activations.
+    * However, the "desired changes" for the previous layer's activations from the output layer's perspective become the **"error signals"** for that previous layer.
+    * Each neuron in the hidden layer receives error signals from *all* connected neurons in the next layer. These signals are summed up (proportionally to weights) to determine the "total desired nudge" for that hidden neuron.
+    * This process **recursively applies** the same logic: once we have desired nudges for a layer's activations, we determine how their *own* incoming weights and biases should change to achieve those nudges. This "backwards propagation" gives the algorithm its name.
+
+#### Combining Training Examples: Stochastic Gradient Descent (SGD)
+* Each training example suggests a slightly different set of nudges for weights and biases.
+* To get a full gradient descent step:
+    1.  **True Gradient Descent (ideal but slow):** Compute the "desired nudges" (gradient contribution) for *every single training example*, then **average** them all.
+    2.  **Stochastic Gradient Descent (SGD) (practical):**
+        * Randomly **shuffle** all training data.
+        * Divide into small **mini-batches** (e.g., 100 examples).
+        * For each mini-batch, compute the "desired nudges" and make a gradient step.
+        * This is an **approximation** of the true gradient but is much faster computationally.
+        * *Analogy:* "A drunk man stumbling aimlessly down a hill but taking quick steps," rather than a "carefully calculating man taking slow, exact steps."
+* **Result:** Repeatedly applying SGD steps across mini-batches will converge to a **local minimum** of the cost function, making the network perform well on training data.
+
+#### Key Takeaway
+* Backpropagation is the method to figure out exactly how much and in what direction to adjust *each* of the network's thousands of weights and biases to reduce the overall error.
+* **Requirement:** Needs ample **labeled training data** (like the MNIST database for digits).
+
+### Video 4: Neural Networks: Backpropagation (Calculus) 📐
+
+#### Goal
+* Understand **how the chain rule is applied** in neural networks to calculate gradients.
+* This is crucial for **gradient descent** – minimizing the cost function.
+
+#### Simple Case: Single Neuron Per Layer
+* **Network:** Input $\rightarrow$ Neuron $(L-1) \rightarrow$ Neuron $(L)$ (Output).
+* **Variables:**
+    * $a^{(L-1)}$: Activation of neuron in layer $L-1$.
+    * $a^{(L)}$: Activation of neuron in layer $L$.
+    * $y$: Desired output for $a^{(L)}$ for a given training example.
+    * $C_0 = (a^{(L)} - y)^2$: Cost for this single training example.
+    * $w^{(L)}$: Weight connecting $a^{(L-1)}$ to $a^{(L)}$.
+    * $b^{(L)}$: Bias for $a^{(L)}$.
+    * $z^{(L)} = w^{(L)}a^{(L-1)} + b^{(L)}$: Weighted sum before activation function.
+    * $a^{(L)} = \sigma(z^{(L)})$ (where $\sigma$ is the sigmoid or ReLU function).
+
+* **Dependency Chain:**
+  ```
+      w^L
+           \
+    a^(L-1)  --> z^L --> a^L --> C_0
+           /
+      b^L
+  ```
+* **Goal:** Find $\frac{\partial C_0}{\partial w^{(L)}}$ (how sensitive $C_0$ is to $w^{(L)}$). This tiny nudge to $w^{(L)}$ causes some nudge to $z^{(L)}$ which in turn causes some nudge to $a^{(L)}$ which directly influences the $C_0$
+
+#### The Chain Rule in Action
+* The chain rule allows us to break down derivatives through the dependency chain:
+    $\frac{\partial C_0}{\partial w^{(L)}} = \frac{\partial C_0}{\partial a^{(L)}} \cdot \frac{\partial a^{(L)}}{\partial z^{(L)}} \cdot \frac{\partial z^{(L)}}{\partial w^{(L)}}$
+
+* **Calculating Each Term:**
+    1.  **$\frac{\partial C_0}{\partial a^{(L)}} = 2(a^{(L)} - y)$**: Measures how far off the output is. Larger difference means greater sensitivity.
+    2.  **$\frac{\partial a^{(L)}}{\partial z^{(L)}} = \sigma'(z^{(L)})$**: The derivative of the activation function (e.g., derivative of sigmoid).
+    3.  **$\frac{\partial z^{(L)}}{\partial w^{(L)}} = a^{(L-1)}$**: The sensitivity depends on the activation of the *previous* neuron. A brighter previous neuron means changes to its incoming weight have a larger impact (connects to "neurons that fire together, wire together" idea).
+
+* **Bias Sensitivity ($\frac{\partial C_0}{\partial b^{(L)}}$):**
+    * Very similar to weight sensitivity. Only $\frac{\partial z^{(L)}}{\partial b^{(L)}}$ changes, which is simply $1$.
+    * So, $\frac{\partial C_0}{\partial b^{(L)}} = \frac{\partial C_0}{\partial a^{(L)}} \cdot \frac{\partial a^{(L)}}{\partial z^{(L)}} \cdot 1$.
+
+* **Propagating Backwards to Previous Activations:**
+    * $\frac{\partial C_0}{\partial a^{(L-1)}} = \frac{\partial C_0}{\partial a^{(L)}} \cdot \frac{\partial a^{(L)}}{\partial z^{(L)}} \cdot \frac{\partial z^{(L)}}{\partial a^{(L-1)}}$
+    * Here, $\frac{\partial z^{(L)}}{\partial a^{(L-1)}} = w^{(L)}$.
+    * This term ($\frac{\partial C_0}{\partial a^{(L-1)}}$) tells us how sensitive the cost is to the activation of the *previous* layer. This "error signal" is then used to calculate derivatives for weights/biases in *earlier* layers, iteratively moving backward.
+
+#### Generalizing to Multiple Neurons Per Layer
+* The core chain rule application remains the same.
+* **Notation:** Indices added to specify neurons within a layer.
+    * $a_j^{(L)}$: Activation of $j^{th}$ neuron in layer $L$.
+    * $y_j$: Desired output for $a_j^{(L)}$.
+    * $C_0 = \sum_j (a_j^{(L)} - y_j)^2$: Cost is sum of squared differences over all output neurons.
+    * $w_{jk}^{(L)}$: Weight connecting $k^{th}$ neuron in layer $L-1$ to $j^{th}$ neuron in layer $L$.
+    * $z_j^{(L)} = \sum_k (w_{jk}^{(L)} a_k^{(L-1)}) + b_j^{(L)}$.
+* **Derivatives still look similar:** $\frac{\partial C_0}{\partial w_{jk}^{(L)}}$ follows the chain rule for that specific weight's path.
+* **Key Difference:** How a neuron in layer $L-1$ influences the cost.
+    * **$\frac{\partial C_0}{\partial a_k^{(L-1)}}$:** This neuron ($a_k^{(L-1)}$) now influences **multiple neurons** in layer $L$ ($a_0^{(L)}, a_1^{(L)}, \dots$).
+    * Therefore, its sensitivity to cost is the **sum of its influences through all paths** to the next layer's neurons:
+        $\frac{\partial C_0}{\partial a_k^{(L-1)}} = \sum_j \left( \frac{\partial C_0}{\partial a_j^{(L)}} \cdot \frac{\partial a_j^{(L)}}{\partial z_j^{(L)}} \cdot \frac{\partial z_j^{(L)}}{\partial a_k^{(L-1)}} \right)$
+        * Where $\frac{\partial z_j^{(L)}}{\partial a_k^{(L-1)}} = w_{jk}^{(L)}$.
+
+#### Conclusion
+* Backpropagation computes all partial derivatives of the cost function with respect to every weight and bias.
+* These derivatives form the **gradient vector**, which dictates the adjustments in **gradient descent** to minimize the network's cost.
+* The process involves repeatedly applying the chain rule backward through the network, leveraging the "error signals" from later layers.
+
+
+### Video 4: Large Language Models (LLMs) & Transformers
+
+#### What is an LLM?
+* A **Large Language Model** is a sophisticated mathematical function that **predicts the next word** in any given text.
+* It assigns a **probability** to all possible next words, not a single certain word.
+* **Chatbot Interaction:** LLMs complete dialogue by repeatedly predicting the next word of an AI assistant's response.
+* **Non-Deterministic Output:** While the model itself is deterministic, randomness in selecting less likely words makes the output feel more natural and often produces different answers for the same prompt.
+
+#### LLM Training (Pre-training)
+* **Data:** LLMs are trained on **enormous amounts of text**, typically from the internet. (e.g., GPT-3 training data would take a human over 2600 years to read).
+* **Parameters/Weights:** An LLM's behavior is determined by **hundreds of billions** of these continuous values. These are the "dials" being tuned.
+    * No human manually sets these; they start randomly (gibberish output).
+* **Refinement Process:**
+    1.  The model is fed training text with the **last word removed**.
+    2.  Its prediction for that missing word is compared to the **true last word**.
+    3.  **Backpropagation** (the algorithm from previous videos) is used to **tweak all parameters**. This makes the model more likely to predict the correct word and less likely to predict others.
+* **Scale of Computation:** Training large LLMs is **mind-boggling**. It can take over **100 million years** for a supercomputer performing a billion operations per second.
+* **Result:** After trillions of examples, the model not only predicts accurately on training data but also makes **reasonable predictions on unseen text**.
+
+#### Reinforcement Learning with Human Feedback (RLHF)
+* **Pre-training Goal:** Auto-completing random text.
+* **Chatbot Goal:** Being a good AI assistant.
+* **RLHF addresses this gap:**
+    * Human workers **flag unhelpful or problematic predictions**.
+    * Their corrections further **adjust model parameters**, making it more likely to give user-preferred responses.
+
+#### Transformers & Parallelization
+* **GPUs:** Special computer chips optimized for **parallel operations** are crucial for the massive scale of LLM training.
+* **Pre-2017 Models:** Processed text **one word at a time** (difficult to parallelize).
+* **Transformers (Introduced 2017 by Google):**
+    * A new model architecture that processes text **all at once, in parallel**.
+    * **Word Embeddings:** Each word is converted into a **long list of numbers** (a vector). This encodes its meaning and allows numerical processing.
+    * **Attention Mechanism:** The unique feature of Transformers. It allows these numerical word representations to "talk to one another" and **refine their meanings based on context** (e.g., "bank" in "river bank"). This happens in parallel. 
+    * **Feed-Forward Neural Networks:** Also included, providing additional capacity to store language patterns.
+    * **Iterative Flow:** Data flows through many iterations of attention and feed-forward networks, enriching the word embeddings.
+    * **Final Prediction:** A final function on the last word's vector (influenced by all context) produces probabilities for the next word.
+
+#### Emergent Behavior
+* The specific, fluent, and useful behavior of LLMs is an **emergent phenomenon** from the tuning of billions of parameters during training.
+* This makes it **challenging to interpret exactly why** an LLM makes specific predictions.
