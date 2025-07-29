@@ -384,8 +384,8 @@ LLMs can be equipped with tools, allowing them to interact with external systems
         * **Weights (W):** Numerical strength of connection. They define *what* pattern a neuron detects.
             * *Example:* For an edge detector, positive weights on pixels forming the edge, negative on surrounding pixels. 
     2.  **Bias (b):** A number added to the weighted sum. It controls the threshold for a neuron to become active (e.g., how high the sum needs to be).
-    3.  **Activation Function:** "Squishes" the result into the 0-1 range.
-        * **Sigmoid ($\sigma$):** $\sigma(z) = 1 / (1 + e^{-z})$. Maps any real number $z$ to a value between 0 and 1.
+    3.  **Activation Function:*
+        * **Sigmoid ($\sigma$):** "Squishes" the result into the 0-1 range. $\sigma(z) = 1 / (1 + e^{-z})$. Maps any real number $z$ to a value between 0 and 1.
         * **ReLU (Rectified Linear Unit):** $\text{ReLU}(z) = \max(0, z)$. Common in modern NNs, often easier to train than sigmoid.
 
 #### Network Parameters & Learning
@@ -402,3 +402,63 @@ LLMs can be equipped with tools, allowing them to interact with external systems
     $a' = \sigma(Wa + b)$
     * This compact notation is efficient for coding and computation.
 * An entire NN is a complex, multi-layered function with many parameters, which is why it can solve complex tasks.
+
+Here are the super crisp notes for the second 3blue1brown neural network video:
+
+### Video 2: Neural Networks: How They Learn
+
+#### Recap: Network Structure
+* **Goal:** Handwritten digit recognition (28x28 pixels).
+* **Input Layer:** 784 neurons (pixel values 0-1).
+* **Hidden Layers:** Two layers, 16 neurons each (arbitrary choice).
+* **Output Layer:** 10 neurons (0-9 digits), brightest activation is prediction.
+* **Neuron Activation:** Based on a **weighted sum** of previous layer's activations, plus a **bias**, passed through an **activation function** (e.g., sigmoid/ReLU).
+* **Parameters:** ~13,000 adjustable **weights** and **biases**. These define network behavior.
+
+#### The Learning Problem
+* **Goal:** Adjust 13,000 weights/biases to improve performance on **training data**.
+* **Training Data:** Images of digits + their correct labels (e.g., MNIST dataset).
+* **Generalization:** Hope that learning on training data helps classify **new, unseen images**.
+* **Learning is Optimization:** It's essentially finding the minimum of a function.
+
+#### Cost Function
+* **Purpose:** Measures how "bad" the network's current performance is.
+* **Calculation:** For a training example, sum of squared differences between network's output activations and desired (correct) output activations.
+    * *Example:* If target is '3' (output neuron 3 = 1, others = 0), and network outputs (0.1, 0.2, 0.9, ...), the cost is high.
+* **Overall Cost:** Average cost over *all* training examples.
+* **Input:** The 13,000 weights and biases.
+* **Output:** A single number representing "lousiness."
+* **Goal of Learning:** **Minimize** this cost function.
+
+#### Gradient Descent: The Learning Algorithm
+* **Analogy:** Finding the lowest point in a multi-dimensional "valley."
+* **Concept:** Start anywhere, then repeatedly take small steps in the **steepest downhill direction**.
+* **Gradient:** In multivariable calculus, the gradient is a vector that points in the direction of **steepest ascent**.
+    * **Negative Gradient:** Points in the direction of **steepest descent** (downhill). Its magnitude indicates steepness.
+* **Process:**
+    1.  Initialize weights/biases randomly.
+    2.  Calculate the negative gradient of the cost function at the current parameter values.
+    3.  Adjust weights/biases in the direction of the negative gradient (take a small "step downhill").
+    4.  Repeat steps 2 & 3.
+* **Outcome:** Converges to a **local minimum** of the cost function. (Not guaranteed global minimum).
+* **Benefit of Continuous Activations:** Allows for a "smooth" cost function, making gradient descent feasible.
+* **"Learning" means:** Minimizing this cost function using gradient descent.
+
+#### Backpropagation (Next Video's Topic)
+* The efficient algorithm for computing the **gradient** of the cost function. This is the core of NN learning.
+
+#### Network Performance & Limitations
+* **Simple NN Performance:** This basic network (two 16-neuron hidden layers) achieves ~96% accuracy on unseen digits. With tweaks, up to 98%.
+* **Unexpected Hidden Layer Behavior:**
+    * **Initial Hope:** Hidden layers would detect clear features (edges, loops).
+    * **Reality:** The weights connecting layers often look "random," not clearly defined edges. The network finds a successful local minimum, but not necessarily by forming human-interpretable features.
+* **Network "Confidence" Issues:**
+    * If fed random noise, the network still confidently outputs a digit, showing it doesn't understand "uncertainty" or how to *generate* digits.
+    * It's trained only on clean, centered digits and optimized for confidence, not common-sense understanding.
+
+#### Modern Context
+* This "plain vanilla" network is an older technology (1980s-90s).
+* It's a necessary **foundation** for understanding more advanced, powerful modern variants.
+* **Current Research Insights:**
+    * Deep networks can "memorize" randomly labeled data, but training on structured data is much faster (easier to find good minima).
+    * Local minima in structured datasets often lead to equally good performance.
