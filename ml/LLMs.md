@@ -1,8 +1,11 @@
 Appendix
-* [Deep Dive into LLMs like ChatGPT](https://www.youtube.com/watch?v=7xTGNNLPyMI)
-* [How I use LLMs](https://www.youtube.com/watch?v=EWvNQjAaOHw)
+* Andrej Karpathy videos
+    * [Deep Dive into LLMs like ChatGPT](https://www.youtube.com/watch?v=7xTGNNLPyMI) 
+    * [How I use LLMs](https://www.youtube.com/watch?v=EWvNQjAaOHw)
+ 
+---
 
-## Large Language Models (LLMs) Deep Dive: Concise Notes
+## Deep Dive into LLMs like ChatGPT
 
 This document provides concise notes on the construction, training, and capabilities of Large Language Models (LLMs) like ChatGPT, based on Andrej Karpathy's "Deep Dive into LLMs like ChatGPT" video.
 
@@ -196,7 +199,7 @@ This is the newest and most actively researched stage, pushing models beyond mer
 
 ---
 
-## How I Use LLMs: Concise Notes
+## How I Use LLMs
 
 This document summarizes Andrej Karpathy's "How I use LLMs" video, focusing on practical applications, available settings, and his personal usage strategies.
 
