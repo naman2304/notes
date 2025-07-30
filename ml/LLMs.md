@@ -702,3 +702,67 @@ This embedding matrix is also learned during the training. Then during inference
 
 #### Foundation for Attention
 * Understanding **word embeddings**, **softmax**, how **dot products measure similarity**, and the dominance of **matrix multiplication with tunable parameters** are essential prerequisites for grasping the **attention mechanism**, the true heart of Transformers.
+
+### Video 7: Transformers: The Attention Mechanism ✨
+
+#### Context Recap
+* **Goal:** Predict the next word (or token) in a text sequence.
+* **Input:** Text broken into **tokens** (we'll pretend they're words for simplicity).
+* **Initial Step:** Each token is converted into a **high-dimensional vector (embedding)**.
+    * **Key Idea:** Directions in this embedding space correspond to **semantic meaning** (e.g., gender, geographical origin).
+* **Transformer's Aim:** Refine these initial embeddings to bake in **rich contextual meaning**.
+
+#### Why Attention? The Need for Context
+* **Problem:** Initial token embeddings are context-free. "Mole" in "American shrew mole," "mole of carbon," and "biopsy of the mole" all start with the **same** initial embedding.
+* **Solution:** Attention allows embeddings to exchange information and update their meanings based on **surrounding context**.
+    * *Example:* "Mole" should be adjusted to mean "animal," "chemical unit," or "skin growth" based on its context.
+    * *Example:* "Tower" after "Eiffel" should be updated to mean "Eiffel Tower" (associated with Paris, France, steel) and if "miniature" is added, its "tallness" aspect should diminish.
+* **Broader Goal:** Attention moves information across distant parts of the sequence, allowing the final token's embedding (which predicts the next word) to incorporate all relevant context from the entire input.
+
+#### Single Head of Attention: The Computations
+Attention involves three types of learned matrices (weights) that transform the embeddings:
+
+1.  **Queries (Q):**
+    * Each input embedding ($e$) is multiplied by a **Query Matrix ($W_Q$)** to produce a **query vector ($q$)**.
+    * *Conceptual Role:* Like asking a question about the word's context (e.g., a noun "creature" asking "Are there any adjectives preceding me?").
+    * Dimension of $q$ is smaller than $e$ (e.g., 128 for GPT-3).
+
+2.  **Keys (K):**
+    * Each input embedding ($e$) is multiplied by a **Key Matrix ($W_K$)** to produce a **key vector ($k$)**.
+    * *Conceptual Role:* Like providing an answer to a query (e.g., an adjective "fluffy" answering "Yes, I'm an adjective in this position.").
+    * Same dimension as $q$.
+
+3.  **Dot Products & Attention Pattern:**
+    * **Measure Alignment:** The **dot product** of each **Query** with every **Key** is computed. This measures how well each key "answers" each query, indicating relevance.
+    * *Example:* High dot product between "creature" (query) and "fluffy" (key) means "fluffy" is highly relevant to "creature."
+    * **Attention Scores:** These dot products form a grid of scores.
+    * **Normalization (Softmax):** Each column of scores (representing how relevant all *other* words are to a *given* word) is normalized using **Softmax**. This turns scores into probabilities (0-1, sum to 1). This resulting grid is the **attention pattern**.
+        * **Formula:** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability. 
+
+4.  **Masking (for Causal LLMs like GPT):**
+    * During training, transformers predict words sequentially. To prevent "cheating," **later tokens are prevented from influencing earlier tokens**.
+    * This is done by setting dot products for "future" tokens to **negative infinity** *before* softmax. After softmax, these become 0.
+
+5.  **Values (V) & Updating Embeddings:**
+    * Each input embedding ($e$) is multiplied by a **Value Matrix ($W_V$)** to produce a **value vector ($v$)**.
+    * *Conceptual Role:* If a word is relevant, what information should it "add" to the target word's embedding?
+    * **Updating:** For each target embedding (column in the attention pattern):
+        * Take a **weighted sum** of all other words' **value vectors**, using the attention pattern probabilities as weights.
+        * This sum is the $\Delta e$ (change) to be added to the original embedding.
+        * The new, refined embedding is $e + \Delta e$.
+    * **Value Matrix Factoring:** In practice, $W_V$ is often factored into two smaller matrices (Value Down, Value Up) to save parameters, especially in multi-head attention.
+
+#### Multi-Headed Attention
+* **Concept:** Instead of just one attention calculation, **many "attention heads" run in parallel**, each with its own distinct $W_Q, W_K,$ and $W_V$ matrices.
+* **Purpose:** Allows the model to learn **many different types of contextual relationships** simultaneously (e.g., one head for adjective-noun, another for verb-object, another for sentiment).
+* **Combination:** Each head produces a proposed change to the embedding. These proposed changes are **summed together** and added to the original embedding.
+* **Parameter Count (GPT-3 example):**
+    * GPT-3 uses **96 attention heads** per block.
+    * Each head: ~6.3 million parameters (for $W_Q, W_K, W_{V\_down}, W_{V\_up}$).
+    * Total per block: $96 \times 6.3 \text{ million} \approx 600 \text{ million parameters}$.
+    * GPT-3 has **96 such blocks** (layers), leading to almost **58 billion parameters** for attention alone.
+
+#### Other Components & Scaling
+* **Multi-Layer Perceptrons (MLPs):** Data also flows through MLP blocks *between* attention blocks. These account for the majority of the remaining parameters in LLMs (to be discussed later).
+* **Context Size:** The number of tokens a transformer can process at once ($N^2$ complexity for attention). For GPT-3, it's 2048 tokens. This is a major bottleneck for long conversations.
+* **Parallelizability:** Attention is highly parallelizable, which allows for the massive scaling of models using **GPUs**. This ability to scale is a key reason for the recent success of deep learning.
