@@ -1075,7 +1075,7 @@ When a model overfits (has high variance), it performs well on training data but
     * Formula: $||w||_2 = \sqrt{\sum w_i^2}$
     * Effect: Encourages **small weights** by shrinking them smoothly toward zero. It spreads weight values more evenly.
 
-### Lasso vs Ridge Regression
+### Types of regularization
 
 * **Lasso Regression (L1 regularization):**
     * Adds $\lambda \sum |w_i|$ to the loss function.
@@ -1087,6 +1087,10 @@ When a model overfits (has high variance), it performs well on training data but
     * **Effect:** Shrinks all weights smoothly toward zero, but typically **not exactly zero**.
     * **Use case:** Useful when many features contribute small effects, and you want to keep all of them but reduce their individual impact.
     * **Optimization:** Smoother and more stable as the squared term is differentiable everywhere.
+* Early Stopping
+    * How it works: Early stopping involves monitoring the model’s performance on a validation set during training and stopping training when performance starts to degrade (i.e., when validation error starts increasing).
+    * Effect: It prevents the model from training for too many epochs, thus avoiding overfitting.
+    * When to use: Early stopping is useful when you’re training models for many epochs and want to stop as soon as overfitting begins.
 
 **Hence:**
 * **Lasso** gives **sparse models**.
