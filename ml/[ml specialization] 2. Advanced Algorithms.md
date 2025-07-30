@@ -2205,13 +2205,27 @@ For skewed datasets, **precision** and **recall** are more informative metrics. 
 
 #### Metrics Definitions:
 
-1.  **Precision:** "Of all that we *predicted as positive*, what fraction were *actually positive*?"
-    $$\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}$$
-    * High precision means when the model predicts positive, it's usually correct. (Minimizes false positives).
-
-2.  **Recall:** "Of all that were *actually positive*, what fraction did we *correctly detect*?"
+1.  **Accuracy:** "proportion of all classifications that were correct, whether positive or negative"
+    $$\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}$$
+    * Avoid for imbalanced datasets.
+    
+3.  **Recall (true positive rate):** "Of all that were *actually positive*, what fraction did we *correctly detect*?" (we want this ideally to be 1)
     $$\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}$$
     * High recall means the model finds most of the actual positive cases. (Minimizes false negatives).
+    * Use when false negatives are more expensive than false positives.
+
+4.  **False positive rate:** "probability of false alarm" (we want this ideally to be 0)
+    $$\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}$$
+    * High recall means the model finds most of the actual positive cases. (Minimizes false negatives).
+    * Use when false positives are more expensive than false negatives.
+   
+5.  **Precision:** "Of all that we *predicted as positive*, what fraction were *actually positive*?" (we want this ideally to be 1)
+    $$\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}$$
+    * High precision means when the model predicts positive, it's usually correct. (Minimizes false positives).
+    * Use when it's very important for positive predictions to be accurate.
+
+
+Precision improves as false positives decrease, while recall improves when false negatives decrease. But increasing the classification threshold tends to decrease the number of false positives and increase the number of false negatives, while decreasing the threshold has the opposite effects. As a result, precision and recall often show an inverse relationship, where improving one of them worsens the other.
 
 ### Example Calculation:
 
