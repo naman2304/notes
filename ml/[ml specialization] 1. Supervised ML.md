@@ -1062,6 +1062,8 @@ When a model overfits (has high variance), it performs well on training data but
     * **Benefit:** Allows you to keep all features, but reduces the impact of less important ones.
     * **Note:** By convention, the bias term ($b$) is usually *not* regularized, as it typically makes little practical difference.
 
+**Applying regularization is generally considered to be more important when training logistic regression models vs. linear regression models.**
+
 <img src="/metadata/regularization.png" width="600" />
 
 ## Types of regularization
