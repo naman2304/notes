@@ -1,8 +1,9 @@
 **Appendix**  
-[Machine Learning Specialization](https://www.coursera.org/specializations/machine-learning-introduction)
-* [Supervised Machine Learning: Regression and Classification](https://www.coursera.org/learn/machine-learning?specialization=machine-learning-introduction)
-* [Advanced Learning Algorithms](https://www.coursera.org/learn/advanced-learning-algorithms?specialization=machine-learning-introduction)
-* [Unsupervised Learning, Recommenders, Reinforcement Learning](https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning?specialization=machine-learning-introduction)
+* [Machine Learning Specialization](https://www.coursera.org/specializations/machine-learning-introduction)
+    * [Supervised Machine Learning: Regression and Classification](https://www.coursera.org/learn/machine-learning?specialization=machine-learning-introduction)
+    * [Advanced Learning Algorithms](https://www.coursera.org/learn/advanced-learning-algorithms?specialization=machine-learning-introduction)
+    * [Unsupervised Learning, Recommenders, Reinforcement Learning](https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning?specialization=machine-learning-introduction)
+* [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course)
 
 ---
 
@@ -218,6 +219,12 @@ Recall our linear function: $f_{w,b}(x) = wx + b$.
 ## Measuring Model Fit: The Cost Function
 
 For each training example $(x^{(i)}, y^{(i)})$, our model predicts $ŷ^{(i)} = f_{w,b}(x^{(i)})$. We want these predictions ($ŷ^{(i)}$) to be close to the actual target values ($y^{(i)}$).
+
+Usually, we have two choices -- when we put an outlier in a dataset, we see following behavior:
+* Mean Squared Error (MSE). Here, an outlier moves the model more towards outlier. The model is closer to the outliers but further away from most of the other data points.
+* Mean Absolute Error (MAE). Here, an outlier moves the model lesser towards outlier. The model is further away from the outliers but closer to most of the other data points.
+
+L2 loss incurs a much higher penalty for an outlier than L1 loss.
 
 To measure "how well" the line fits, we use a **cost function**, denoted as $J(w, b)$. For linear regression, we typically use the **squared error cost function**:
 
