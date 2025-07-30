@@ -645,9 +645,9 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
 
 #### High-Level Transformer Data Flow
 1.  **Tokenization:** Input text (or image/sound) is broken into **tokens** (words, sub-words, or common character combos).
-2.  **Embedding:** Each token is converted into a **vector** (a list of numbers) that encodes its meaning.
+2.  **Embedding:** Each token is converted into a **vector** (a list of numbers) that encodes its meaning. If you think of these vectors as coordinates in some high dimensionsal space, words with similar meanings tend to land on vectors that are close to each other in that space.
 3.  **Attention Block:** These vectors "talk to each other" in parallel. They update their values (meanings) based on **context** (e.g., "model" in "machine learning model" vs. "fashion model"). This figures out relevance and updates meanings.
-4.  **Multi-Layer Perceptron (MLP) / Feed-Forward Layer:** Vectors pass through this independently (in parallel). It gives the model extra capacity to learn and store language patterns.
+4.  **Multi-Layer Perceptron (MLP) / Feed-Forward Layer:** Vectors pass through this independently (in parallel). Here the vectors don't talk to each other. It gives the model extra capacity to learn and store language patterns.
 5.  **Repeat:** Steps 3 and 4 (Attention and MLP) are **repeated many times** (multiple blocks/layers).
 6.  **Final Prediction:** The last vector in the sequence (now enriched with full context) is used to produce a **probability distribution** for the next token.
 
@@ -663,6 +663,8 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
         * **Weights (blue/red):** The "brains," learned during training, determine behavior.
         * **Data (gray):** The specific input being processed for a given run.
 
+<img src="/metadata/gpt3.png" width="700" />
+
 #### Initial & Final Steps in Detail
 
 ##### 1. Token Embedding
@@ -671,9 +673,13 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
     * Initially random, learned during training.
     * **High-Dimensional Space:** Word embeddings are high-dimensional vectors (e.g., GPT-3 uses 12,288 dimensions).
     * **Semantic Meaning:** During training, models learn embeddings where **directions in the space carry meaning**.
-        * *Example:* "woman - man" vector is similar to "queen - king" vector. 
+        * *Example:* "woman minus man" vector is similar to "queen minus king" vector. 
         * This allows for "vector math" to find related words (e.g., Italy - Germany + Hitler $\approx$ Mussolini).
 * **Parameter Count:** GPT-3's embedding matrix adds ~617 million parameters.
+
+<img src="/metadata/embed_mat.png" width="700" />
+
+This embedding matrix is also learned during the training. Then during inference, we just lookup the relevant column vectors (from the embedding matrix) for the prompt tokens and feed those vectors to the model to generate output.
 
 ##### 2. Context & Positional Encoding
 * **Context Size:** Transformers process a fixed number of vectors at a time (e.g., 2048 for GPT-3). This limits the amount of text the model can consider for prediction.
@@ -687,11 +693,12 @@ Let's consider one input image (e.g., a "2") where the network currently outputs
 * **Softmax Function:**
     * **Purpose:** Converts an arbitrary list of numbers (called **logits**) into a valid **probability distribution** (values between 0 and 1, summing to 1).
     * **Mechanism:** $P(i) = e^{z_i} / \sum_k e^{z_k}$ (where $z_i$ are the inputs/logits).
-    * **Effect:** Larger input values get probabilities closer to 1; smaller values get probabilities closer to 0. It's "soft" because similar large values still get significant weight.
-    * **Temperature (T):** An optional constant in softmax.
-        * **Higher T:** Makes the distribution more uniform (more "creative" or "random" output).
-        * **Lower T:** Makes the largest values dominate more aggressively (more "predictable" output).
+    * **Effect:** Larger input values get probabilities closer to 1; smaller values get probabilities closer to 0. It's "soft" because similar large values still get significant weight. Sum of all the values is equal to 1.
+    * **Temperature (T):** An optional constant in softmax.  $P(i) = e^{z_i / T} / \sum_k e^{z_k / T}$ (where $z_i$ are the inputs/logits and T is the temperature).
+        * **Higher T:** We give more weight to lower values, which makes the distribution more uniform (more "creative" or "random" output).
+        * **Lower T:** We give more weight to higher values, which makes the largest values dominate more aggressively (more "predictable" output). For T=0, the probability of token with highest $z_i$ is 1, and everything else is 0.
         * *Example:* Generating a story with T=0 gives a predictable, trite outcome; higher T gives more original but potentially nonsensical results.
+        * Usually max temperature that APIs allow is 2 (because beyond that model starts spitting out nonsensical things)
 
 #### Foundation for Attention
 * Understanding **word embeddings**, **softmax**, how **dot products measure similarity**, and the dominance of **matrix multiplication with tunable parameters** are essential prerequisites for grasping the **attention mechanism**, the true heart of Transformers.
