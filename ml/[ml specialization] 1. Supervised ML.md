@@ -391,6 +391,35 @@ $w = w - \alpha \frac{\partial}{\partial w} J(w)$ (simplified to one parameter, 
 
 In both cases, the derivative term (scaled by $\alpha$) guides $w$ in the direction that **reduces the cost $J(w)$**, moving towards the minimum.
 
+# Hyperparamters
+Hyperparameters are variables that control different aspects of training. Three common hyperparameters are:
+* Learning rate
+* Batch size
+* Epochs
+
+In contrast, parameters are the variables, like the weights and bias, that are part of the model itself. In other words, hyperparameters are values that you control; parameters are values that the model calculates during training.
+
+## Learning rate
+* **$\alpha$ too small:** Leads to **slow convergence**. Steps are tiny, requiring many iterations to reach the minimum.
+* **$\alpha$ too large:** Can cause **overshooting, oscillations, or divergence**, potentially failing to reach the minimum. The cost might even increase.
+
+## Batch size
+The batch size refers to the number of training samples that will be used in one forward and backward pass during the training process.
+
+Two common techniques to get the right gradient on average without needing to look at every example in the dataset before updating the weights and bias are
+* Stochastic Gradient Descent (SGD): Stochastic gradient descent uses only a single example (a batch size of one) per iteration. Given enough iterations, SGD works but is very noisy. "Noise" refers to variations during training that cause the loss to increase rather than decrease during an iteration. The term "stochastic" indicates that the one example comprising each batch is chosen at random.
+* Mini-batch Stochastic Gradient Descent: Mini-batch stochastic gradient descent is a compromise between full-batch and SGD. For number of data points, the batch size can be any number greater than 1 and less than N. The model chooses the examples included in each batch at random, averages their gradients, and then updates the weights and bias once per iteration.
+
+## Epochs
+An epoch refers to one complete cycle through the entire training dataset. Effects of epoch
+* Too few epochs: The model might not have enough time to learn effectively, and the model might underfit (not capture the patterns in the data).
+* Too many epochs: The model may start to overfit, where it learns not just the general patterns but also noise and irrelevant details in the training data, reducing its ability to generalize to new data.
+
+Example: Dataset having 200 data points. Batch size is 10. Epoch is 4.
+* Since the dataset has 200 data points and each mini-batch has 10 data points, you can split the dataset into 200/10=20 mini batches.
+* Since you are updating weights after each mini-batch, and you have 20 mini-batches in one epoch, you will update the weights 20 times per epoch.
+* Over the 4 epochs, you'll update the weights 20 times per epoch, so: 20×4=80 weight updates.
+
 # Gradient Descent: The Importance of Learning Rate ($\alpha$)
 
 The **learning rate ($\alpha$)** critically affects **gradient descent's efficiency and convergence**. The update rule is $W = W - \alpha \frac{\partial}{\partial W} J(W)$.
