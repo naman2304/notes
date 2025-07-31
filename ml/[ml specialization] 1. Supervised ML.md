@@ -663,6 +663,14 @@ When features have disparate scales, the **cost function's contour plot becomes 
 
 Feature scaling standardizes feature ranges, making gradient descent converge faster.
 
+* **Normalization** is the process of transforming features to a similar scale. This helps models train more effectively and converge faster.
+* Benefits of normalization include:
+   * Faster model convergence during training.
+   * Avoiding the **NaN trap**, where values exceed floating-point precision.
+   * Ensuring the model learns appropriate weights for each feature, preventing it from overemphasizing features with wider ranges.
+* It is recommended to normalize features with distinctly different ranges (e.g., age and income) or a single feature with a wide range (e.g., city population).
+* **Important**: If a feature is normalized during training, it must also be normalized in the same way when making predictions.
+
 ## Scaling to 0-1 Range (Rescaling)
 
 To scale feature $x_j$ (e.g., $x_1$ size: 300-2000 sq ft, $x_2$ bedrooms: 0-5):
@@ -681,12 +689,40 @@ Rescales features to be centered around zero.
 
 ## Z-score Normalization
 
-Rescales features to have zero mean and unit variance (**new feature set now have mean = 0 and std deviation = 1**)
+Rescales features to have zero mean and unit variance (**new feature set now have mean = 0 and std deviation = 1**). The Z-score for a given value is how many standard deviations away from the mean the value is.
+
 * For each $x_j$: $(x_j - \mu_j) / \sigma_j$
     * $\mu_j$ is the mean of feature $j$.
     * $\sigma_j$ is the standard deviation of feature $j$.
 * Example: $x_1$ (mean 600, std dev 450) $\rightarrow (x_1 - 600) / 450$.
 * Result: Features are typically in a range like -3 to +3.
+* Z-score scaling is a good choice for data that follows a **normal distribution** or a distribution that is similar to a normal distribution.
+
+### Log Scaling
+
+  * **Log scaling** computes the logarithm (usually the natural logarithm, ln) of the raw value.
+  * The formula is:
+    $$x' = ln(x)$$
+  * This technique is effective for data that follows a **power law distribution**, where a few values are very large and the majority are small. Log scaling helps to make these disparate values more manageable for the model. Power law distribution looks as follows:
+      * Low values of X have very high values of Y. As the values of X increase, the values of Y quickly decrease.
+      * Consequently, high values of X have very low values of Y.
+  * *Example*: Movie ratings or book sales, where a few items are extremely popular and most are not.
+
+### Clipping
+
+  * **Clipping** is a technique to limit the influence of extreme outliers by setting a maximum (or minimum) threshold for feature values.
+  * For example, you can cap all values above a certain point (e.g., 4.0) to that value. This is useful for distributions that are mostly normal but have a few very extreme outliers.
+  * Clipping is not a true normalization technique but is highly effective at "taming" unruly numerical features.
+  * It can be combined with other normalization methods, such as clipping Z-scores that fall outside a range like [-3, 3].
+
+### Summary of Normalization Techniques
+
+| Technique | Formula | When to Use |
+| :--- | :--- | :--- |
+| **Linear Scaling** | $$x' = \frac{x - x_{min}}{x_{max} - x_{min}}$$ | For **flat-shaped**, uniformly distributed data with stable bounds and no extreme outliers. |
+| **Z-score Scaling** | $$x' = \frac{x - μ}{σ}$$ | For **bell-shaped**, normally distributed data. |
+| **Log Scaling** | $$x' = ln(x)$$ | For data with a **heavy tail**, conforming to a power law distribution. |
+| **Clipping** | If $x \> max$, set $x' = max$ \<br\> If $x \< min$, set $x' = min$ | For features containing **extreme outliers** to minimize their influence. |
 
 ## Rule of Thumb for Feature Ranges
 
@@ -697,6 +733,48 @@ Aim for features to be within the range of **approximately -1 to +1**.
     * Range is very small (e.g., [-0.001, 0.001]).
     * Values are large but within a narrow range (e.g., [98.6, 105]).
 * **When in doubt, perform feature scaling.** It almost never hurts and often speeds up gradient descent.
+
+## Binning (or Bucketing)
+
+* **Binning** is a feature engineering technique that groups a range of numerical values into discrete "bins" or "buckets." This essentially converts numerical data into categorical data.
+* A model trained on binned data learns a separate weight for each bin. For example, if a temperature feature is divided into three bins (cold, comfortable, hot), the model learns a distinct weight for each of these categories.
+* Binning is a good alternative to scaling or clipping when:
+    * The relationship between the feature and the label is not linear.
+    * The feature values are clustered rather than uniformly distributed.
+* Each bin is typically represented in the feature vector using a one-hot encoding, where one element is `1.0` and the rest are `0.0`.
+
+### Binning vs. Raw Values
+
+* Using raw numerical values for a feature in a linear model assumes a linear relationship between the feature and the label. This is not always the case.
+* Binning allows the model to learn different weights for different ranges of the feature, which can be more effective for non-linear patterns, such as a "bell-shaped" relationship between temperature and shopper count.
+
+### Quantile Bucketing
+
+* **Quantile bucketing** is a specific strategy for binning where the boundaries are chosen so that each bucket contains an equal (or nearly equal) number of examples.
+* This is particularly useful for datasets with a **skewed distribution** or extreme outliers. It ensures that no bucket is empty or contains too few examples for the model to learn from.
+* Unlike equal-interval bucketing, which can result in some buckets having very few examples and others having many, quantile bucketing distributes the data evenly. This allows the model to learn from all parts of the data distribution more effectively.
+* For skewed data, quantile bucketing gives more information space to the data's "torso" (the densely populated area), while equal-interval bucketing gives more space to the "long tail" (the sparse, less common values).
+
+## Data Scrubbing
+
+**Data scrubbing** is the process of removing or fixing bad data values to ensure the reliability of a dataset. Just like a grocery store removes bad apples, you must clean your data before using it to train a model. A few bad data points can significantly harm a model's performance.
+
+### Common Data Problems
+
+* **Omitted values**: When a feature's value is missing for a given example.
+* **Duplicate examples**: When the same data point is included in the dataset multiple times.
+* **Out-of-range feature values**: When a feature's value falls outside a valid or expected range, often due to human error or a malfunction.
+* **Bad labels**: When the label for an example is incorrect, which can happen if human raters are inconsistent.
+
+### Detecting and Fixing Problems
+
+You can write scripts to automatically detect issues like omitted values, duplicate examples, and out-of-range values. For example, if a temperature feature should be between 10 and 30 degrees, a script can flag any values outside this range.
+
+Once detected, bad data can be handled in two main ways:
+* **Removal**: The problematic examples are deleted from the dataset.
+* **Imputation**: The missing or incorrect values are replaced with a substitute, such as the mean or median of the feature.
+
+When labels are created by multiple people, it's important to analyze them statistically to ensure consistency among raters.
 
 # Monitoring Gradient Descent Convergence
 
@@ -914,6 +992,9 @@ Just like in linear regression, you can use **polynomial features** in logistic 
 * By including higher-order polynomial terms (e.g., $x_1^2, x_1x_2, x_2^2$), logistic regression can define even more complex decision boundaries (e.g., ellipses, arbitrary shapes).
 
 **Note:** If you only use linear features ($x_1, x_2, \dots$), the decision boundary will always be linear.
+
+#### Prediction Bias
+Prediction bias is the difference between the mean of a model's predictions and the mean of ground-truth labels in the data. A model trained on a dataset where 5% of the emails are spam should predict, on average, that 5% of the emails it classifies are spam. In other words, the mean of the labels in the ground-truth dataset is 0.05, and the mean of the model's predictions should also be 0.05. If this is the case, the model has zero prediction bias. Of course, the model might still have other problems.
 
 ## Cost Function for Logistic Regression
 
@@ -1264,3 +1345,90 @@ KNN is a **supervised learning** algorithm used for both **classification and re
 * **Choice of K:** The value of $K$ is a hyperparameter that directly influences the bias-variance trade-off. A small $K$ can lead to high variance (sensitive to noise), while a large $K$ can lead to high bias (oversmoothing, missing local patterns).
 * **Sensitivity:** KNN is highly sensitive to irrelevant features (which can distort distances) and requires proper **feature scaling** (as features with larger scales will disproportionately influence distance calculations).
 * **Prediction Speed:** KNN is generally slower at prediction time compared to other "eager" learning algorithms, especially when dealing with very large datasets, because it must calculate distances to (or search through) all training points for each new prediction.
+
+## Working with Numerical Data
+
+### Numerical vs. Categorical Data
+
+* **Numerical Data**: Integers or floating-point values that behave like numbers. They are additive, countable, and ordered.
+    * *Examples*: Temperature, weight, the number of items.
+* **Categorical Data**: Data that represents categories, even if they are numbers. They do not have a mathematical relationship.
+    * *Example*: US postal codes. Postal code 40004 is not twice the value of 20002.
+
+Machine Learning practitioners spend a significant amount of time evaluating, cleaning, and transforming data.
+
+## How a Model Ingests Data
+
+### Feature Vectors
+
+* Models do not directly ingest raw data from a dataset row by row.
+* Instead, a model ingests an array of floating-point values for each example, which is called a **feature vector**.
+* A feature vector is an intermediary between the raw dataset and the model.
+
+### Feature Engineering
+
+* Models learn more effectively from altered values rather than raw values.
+* The process of converting raw dataset values into a representation that a model can learn from is called **feature engineering**. It's a crucial part of machine learning.
+* Every value in a feature vector must be a floating-point number.
+* Feature engineering also involves converting non-numerical data (like strings) into numerical representations.
+
+### Common Feature Engineering Techniques
+
+* **Normalization**: The process of converting numerical values into a standard range, which helps the model learn more efficiently.
+* **Binning** (or **Bucketing**): The process of converting continuous numerical values into discrete buckets or ranges. This can help handle non-linear relationships.
+
+## First Steps in Data Analysis
+
+Before creating feature vectors, it's crucial to analyze numerical data using two main methods: visualization and statistical evaluation.
+
+### Visualize Your Data
+
+* **Visualizing data** through plots and graphs helps identify hidden patterns and anomalies.
+* This practice should be done at the beginning of the data pipeline and after every data transformation to continually check assumptions.
+* Tools like pandas are recommended for visualization.
+
+### Statistically Evaluate Your Data
+
+* Gather basic statistics to mathematically evaluate potential features and labels.
+* Key statistics to examine include:
+    * **Mean** and **median**.
+    * **Standard deviation**.
+    * **Quartile divisions**: The 0th, 25th, 50th (median), 75th, and 100th percentiles.
+
+### Finding Outliers
+
+* **Outliers** are values that are significantly distant from other values. They can negatively impact model training.
+* A strong indicator of outliers is a significant difference between the range of the 0th to 25th percentiles and the 75th to 100th percentiles.
+* **Types of Outliers:**
+    * **Mistakes**: These are data entry errors or instrument malfunctions. They should generally be deleted from the dataset.
+    * **Legitimate data points**: These are not errors. The decision to keep or remove them depends on whether the model needs to make predictions on such values.
+        * **Keep** if the model needs to handle these extreme values, as they can sometimes help in making better predictions.
+        * **Delete** or apply techniques like **clipping** if the model does not need to account for them, as they can still be harmful to the model. Clipping is a technique for handling outliers by doing either or both of the following: reducing feature values that are greater than a maximum threshold down to that maximum threshold or/and increasing feature values that are less than a minimum threshold up to that minimum threshold.
+
+## Qualities of Good Numerical Features
+
+Good numerical features are essential for effective model training. They should be clearly named, checked for bad data, and have sensible values without "magic numbers" that can confuse the model.
+
+### Clearly Named
+
+* Features should have clear, sensible, and obvious names.
+* **Bad example**: `house_age: 851472000` (unclear units)
+* **Good example**: `house_age_years: 27` (clear units)
+* While the model itself doesn't care about the name, clear naming is vital for human understanding and collaboration.
+
+### Checked Before Training
+
+* It's critical to check and test for **outliers** and bad data values.
+* **Bad example**: `user_age_in_years: 224` (an impossible age)
+* **Good example**: `user_age_in_years: 24` (a valid age)
+* Always scrutinize your data for anomalies that could be due to errors rather than genuine data points.
+
+### Sensible Values
+
+* Features should not contain "magic values"—arbitrary numbers used to represent something else, like a missing value.
+* **Bad example**: Using `-1` in a `watch_time_in_seconds` feature to represent "no value recorded". This forces the model to interpret a non-sensical value.
+* **Good practice for continuous features**: Create a separate Boolean feature to indicate the presence or absence of a value.
+    * `watch_time_in_seconds: 4.82`
+    * `is_watch_time_in_seconds_defined: True`
+* **Good practice for discrete features**: Add a new value to the finite set of possible values to explicitly represent the missing data.
+    * *Example*: `product_category` can have values `{0: 'electronics', 1: 'books', 2: 'clothing', 3: 'missing_category'}`. The model can then learn a specific weight for this "missing" category.
