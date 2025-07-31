@@ -1432,3 +1432,73 @@ Good numerical features are essential for effective model training. They should 
     * `is_watch_time_in_seconds_defined: True`
 * **Good practice for discrete features**: Add a new value to the finite set of possible values to explicitly represent the missing data.
     * *Example*: `product_category` can have values `{0: 'electronics', 1: 'books', 2: 'clothing', 3: 'missing_category'}`. The model can then learn a specific weight for this "missing" category.
+
+
+## Working with Categorical Data
+
+* **Categorical data** has a finite, specific set of possible values.
+    * *Examples*: Animal species, street names, spam/not spam, binned numbers.
+* **Numerical data** can be meaningfully multiplied. For example, a house of 200 square meters is roughly twice the value of a house of 100 square meters, all else being equal.
+
+### Numbers as Categorical Data
+* Features containing integer values, like postal codes, should often be treated as categorical data instead of numerical data.
+* If a model treats a postal code numerically, it will try to find a mathematical relationship between different postal codes (e.g., 20004 is twice 10002), which is nonsensical.
+* Representing these as categorical allows the model to learn a separate, independent weight for each individual postal code.
+
+### Encoding
+* **Encoding** is the process of converting categorical data into numerical vectors that a model can train on.
+* Models can only process floating-point values, so strings (like "dog") must be encoded.
+
+## Encoding Low-Dimensional Categorical Data
+
+* **Dimension** is the number of elements in a feature vector.
+* When a categorical feature has a small, finite number of categories, it is considered **low-dimensional**.
+* A **vocabulary** is a list of all possible categories for a feature. A model can learn a different weight for each category in the vocabulary.
+
+### From Strings to Numbers
+
+* Machine learning models can only process **floating-point numbers**, not strings.
+* The first step to encode categorical data is to map each unique string category to a unique **integer index**.
+* Simply using these integer indices in a model is a mistake because the model would incorrectly interpret the values as having a numerical, quantitative relationship (e.g., index 6 is "six times" index 1).
+
+### One-Hot Encoding
+
+* **One-hot encoding** converts each categorical index into a vector where one element is **1.0** and all others are **0.0**.
+* The length of this vector is equal to the number of categories in the vocabulary.
+* The one-hot vector is what is passed to the feature vector for training, not the string or the index number.
+* **Sparse representation** is an efficient way to store these vectors, as they are mostly zeros. Instead of storing the full vector, you only store the index of the non-zero element. Use sparse representation only to store these vectors, training the model happens via one hot encoding vector only.
+
+### Handling Outliers
+
+* In categorical data, outliers are rare categories (e.g., "Mauve" car color).
+* To handle these, you can group all rare categories into a single **"out-of-vocabulary" (OOV)** bucket. The model learns a single weight for this catch-all category.
+
+## Encoding High-Dimensional Categorical Data
+
+* For features with a large number of categories (high-dimensional), one-hot encoding can be inefficient, leading to very large feature vectors.
+* **Embeddings** are a more effective and common technique for high-dimensional categorical features. They represent each category as a dense vector of floating-point values, significantly reducing the dimensionality. This leads to faster training and lower inference latency.
+* **Hashing** (or the **hashing trick**) is another technique that maps categories to a smaller, predefined number of bins using a hash function. This reduces dimensionality but can lead to "collisions" where different categories map to the same bin.
+* The hashing process involves:
+    1.  Choosing the number of bins, N.
+    2.  Applying a hash function to each category string.
+    3.  Assigning the category to a bin using the hash value modulo N.
+    4.  Creating a one-hot encoding for the bins.
+ 
+## Feature Crosses
+
+* **Feature crosses** combine two or more categorical or binned features by taking their Cartesian product.
+* They allow linear models to learn complex, non-linear relationships and interactions between features.
+* The feature cross creates a new synthetic feature that represents a specific combination of values from the original features.
+
+### Creating a Feature Cross
+
+* When you cross two features, for every possible combination of their values, a new feature is created.
+* For a leaf dataset with features `edges` (`smooth`, `toothed`, `lobed`) and `arrangement` (`opposite`, `alternate`), the feature cross would result in a new set of features like `Smooth_Opposite`, `Toothed_Opposite`, etc.
+* The value of a new feature-cross is the product of the corresponding one-hot encoded values from the original features. For a leaf with `lobed` edges and an `alternate` arrangement, only the `Lobed_Alternate` feature will have a value of 1, with all others being 0.
+
+### Use Cases and Considerations
+
+* **Domain knowledge** is a great way to identify potentially useful feature crosses. Without it, finding effective crosses can be difficult and computationally expensive.
+* **Neural networks** can automatically find and apply useful feature combinations, which can be an alternative to manually creating crosses.
+* **Sparsity**: Crossing two sparse features creates an even more sparse new feature. This can lead to very high-dimensional feature vectors, as the new feature's size is the product of the original features' sizes.
+* **Analogy**: Feature crosses are analogous to **polynomial transforms**, but they are generally used for categorical data, while polynomial transforms are for numerical data.
