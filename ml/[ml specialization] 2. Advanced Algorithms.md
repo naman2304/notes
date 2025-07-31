@@ -2175,49 +2175,6 @@ While there's no simple "ethical checklist," here are suggestions for building m
 
 This collective responsibility is vital to ensure ML systems benefit society. The course will now transition to optional videos on handling skewed datasets, a common practical challenge in ML.
 
-## Imbalanced Datasets
-
-* A dataset is **imbalanced** when one label (**majority class**) is much more common than another (**minority class**).
-* An imbalanced dataset can cause problems if there are too few minority class examples for the model to train on effectively, leading to poor predictions for the minority class.
-* The severity of imbalance is categorized by the percentage of data belonging to the minority class:
-    * **Mild**: 20-40%
-    * **Moderate**: 1-20%
-    * **Extreme**: less than 1%
-
-### Downsampling and Upweighting
-
-* **Downsampling** and then **upweighting** are techniques used to address imbalanced datasets by adjusting the training data to give the model more exposure to the minority class.
-* The general process is:
-    1.  **Downsample the majority class**: Reduce the number of majority class examples in the training set to a smaller, more balanced ratio relative to the minority class. This helps during training as within mini batches, it is more likely now to see positive labels (say if we choose mini batch size to be 50)
-    2.  **Upweight the downsampled class**: Increase the **example weight** of the downsampled majority class examples. This makes each of these examples more important to the model during loss calculation, effectively "undoing" the downsampling for the purpose of the final prediction while retaining the benefits of a balanced training set.
-* The example weight should be equal to the downsampling factor. For example, if you downsample by a factor of 10, the example weight should be 10.
-* This combination helps to reduce **prediction bias** and ensures that mini-batches contain enough minority class examples for effective training.
-
-#### Example
-A model detecting a rare disease.
-* **Dataset**: 990 people without the disease (majority class), 10 people with the disease (minority class).
-* **Model Behavior**: A model might learn to always predict "no disease" and achieve 99% accuracy. This is a form of **prediction bias** because it fails to correctly identify the rare, but important, disease cases.
-
-This two-step process is used to force the model to pay more attention to the rare data.
-
-##### 1. Downsampling the Majority Class
-
-* **Action**: We reduce the number of examples from the majority class in our training data.
-* **Example**: From the 990 "no disease" cases, we only select a random subset, like 40 examples.
-* **Result**: Our new, smaller training set is more balanced, with a ratio of 10 "disease" cases to 40 "no disease" cases (a 1:4 ratio instead of 1:99). This makes the minority class more visible during training.
-
-##### 2. Upweighting the Downsampled Class
-
-* **Action**: We assign a higher **example weight** to the downsampled majority class examples. The weight is proportional to the factor by which we downsampled. This "weight" is completely diff from weight as model parameters. 
-* **Example**: We reduced the majority class from 990 to 40, a factor of roughly 25. So, we give each of the 40 "no disease" examples a weight of 25.
-* **Result**: This ensures that while the model sees a balanced number of examples during training, the overall impact of the majority class on the model's loss calculation is still proportional to its true prevalence in the real world. This helps to reduce prediction bias and prevents the model from overcorrecting and over-predicting the minority class.
-
-### Rebalancing Ratios
-
-* The ideal rebalancing ratio is a hyperparameter that needs to be tuned through experimentation.
-* The optimal ratio depends on the batch size, the original imbalance ratio, and the size of the training set.
-* A key goal is to ensure that each training **mini-batch** contains multiple examples of the minority class to enable proper learning.
-
 ## Evaluating Skewed Datasets: Precision and Recall (Optional)
 
 When the ratio of positive to negative examples in a binary classification problem is highly skewed (e.g., 99.5% negative, 0.5% positive), standard **classification accuracy** can be a misleading metric.
@@ -2348,6 +2305,49 @@ This concludes the practical tips for building ML systems. Next week, we'll cove
 * **Cons:**
     * **Potential loss of important information** from the discarded majority class samples.
     * Lower data efficiency, as you're effectively throwing data away.
+
+## Imbalanced Datasets
+
+* A dataset is **imbalanced** when one label (**majority class**) is much more common than another (**minority class**).
+* An imbalanced dataset can cause problems if there are too few minority class examples for the model to train on effectively, leading to poor predictions for the minority class.
+* The severity of imbalance is categorized by the percentage of data belonging to the minority class:
+    * **Mild**: 20-40%
+    * **Moderate**: 1-20%
+    * **Extreme**: less than 1%
+
+### Downsampling and Upweighting
+
+* **Downsampling** and then **upweighting** are techniques used to address imbalanced datasets by adjusting the training data to give the model more exposure to the minority class.
+* The general process is:
+    1.  **Downsample the majority class**: Reduce the number of majority class examples in the training set to a smaller, more balanced ratio relative to the minority class. This helps during training as within mini batches, it is more likely now to see positive labels (say if we choose mini batch size to be 50)
+    2.  **Upweight the downsampled class**: Increase the **example weight** of the downsampled majority class examples. This makes each of these examples more important to the model during loss calculation, effectively "undoing" the downsampling for the purpose of the final prediction while retaining the benefits of a balanced training set.
+* The example weight should be equal to the downsampling factor. For example, if you downsample by a factor of 10, the example weight should be 10.
+* This combination helps to reduce **prediction bias** and ensures that mini-batches contain enough minority class examples for effective training.
+
+#### Example
+A model detecting a rare disease.
+* **Dataset**: 990 people without the disease (majority class), 10 people with the disease (minority class).
+* **Model Behavior**: A model might learn to always predict "no disease" and achieve 99% accuracy. This is a form of **prediction bias** because it fails to correctly identify the rare, but important, disease cases.
+
+This two-step process is used to force the model to pay more attention to the rare data.
+
+##### 1. Downsampling the Majority Class
+
+* **Action**: We reduce the number of examples from the majority class in our training data.
+* **Example**: From the 990 "no disease" cases, we only select a random subset, like 40 examples.
+* **Result**: Our new, smaller training set is more balanced, with a ratio of 10 "disease" cases to 40 "no disease" cases (a 1:4 ratio instead of 1:99). This makes the minority class more visible during training.
+
+##### 2. Upweighting the Downsampled Class
+
+* **Action**: We assign a higher **example weight** to the downsampled majority class examples. The weight is proportional to the factor by which we downsampled. This "weight" is completely diff from weight as model parameters. 
+* **Example**: We reduced the majority class from 990 to 40, a factor of roughly 25. So, we give each of the 40 "no disease" examples a weight of 25.
+* **Result**: This ensures that while the model sees a balanced number of examples during training, the overall impact of the majority class on the model's loss calculation is still proportional to its true prevalence in the real world. This helps to reduce prediction bias and prevents the model from overcorrecting and over-predicting the minority class.
+
+### Rebalancing Ratios
+
+* The ideal rebalancing ratio is a hyperparameter that needs to be tuned through experimentation.
+* The optimal ratio depends on the batch size, the original imbalance ratio, and the size of the training set.
+* A key goal is to ensure that each training **mini-batch** contains multiple examples of the minority class to enable proper learning.
 
 ### Precision & Recall
 
