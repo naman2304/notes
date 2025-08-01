@@ -740,22 +740,28 @@ Attention involves three types of learned matrices (weights) that transform the 
     * *Example:* High dot product between "creature" (query) and "fluffy" (key) means "fluffy" is highly relevant to "creature."
     * **Attention Scores:** These dot products form a grid of scores.
     * **Normalization (Softmax):** Each column of scores (representing how relevant all *other* words are to a *given* word) is normalized using **Softmax**. This turns scores into probabilities (0-1, sum to 1). This resulting grid is the **attention pattern**.
-        * **Formula:** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability. 
+        * **Attention(Q, K, V) =** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability.  this $d_k$ is dimension of key vector
 
 5.  **Masking (for Causal LLMs like GPT):**
+    <img src="/metadata/mask.png" width="700" />
     * During training, transformers predict words sequentially. To prevent "cheating," **later tokens are prevented from influencing earlier tokens**.
     * This is done by setting dot products for "future" tokens to **negative infinity** *before* softmax. After softmax, these become 0.
 
-6.  **Values (V) & Updating Embeddings:**
+Note that this matrix size is product of context length -- that's why it's very challenging for AI Labs to scale context window. Other techniques being used here: Sparse Attention Mechanisms, Blockwise Attention, Linformer, Reformer, Ring attention, Longformer, Adaptive Attention Span.
+
+7.  **Values (V) & Updating Embeddings:**
+    <img src="/metadata/val_mat.png" width="700" />
     * Each input embedding ($e$) is multiplied by a **Value Matrix ($W_V$)** to produce a **value vector ($v$)**.
     * *Conceptual Role:* If a word is relevant, what information should it "add" to the target word's embedding?
     * **Updating:** For each target embedding (column in the attention pattern):
         * Take a **weighted sum** of all other words' **value vectors**, using the attention pattern probabilities as weights.
         * This sum is the $\Delta e$ (change) to be added to the original embedding.
         * The new, refined embedding is $e + \Delta e$.
-    * **Value Matrix Factoring:** In practice, $W_V$ is often factored into two smaller matrices (Value Down, Value Up) to save parameters, especially in multi-head attention.
+    * **Value Matrix Factoring:** It looks like value matrix dimension is context length * context length (12288 * 12288) but in practice, $W_V$ is often factored into two smaller matrices (Value Down, Value Up) to save parameters, especially in multi-head attention -- so two matrices of 12288 * 128 and 128 * 12288 sizes. So it looks like value up * value down * e = v
 
 #### Multi-Headed Attention
+ <img src="/metadata/multi_attn.png" width="700" />
+ 
 * **Concept:** Instead of just one attention calculation, **many "attention heads" run in parallel**, each with its own distinct $W_Q, W_K,$ and $W_V$ matrices.
 * **Purpose:** Allows the model to learn **many different types of contextual relationships** simultaneously (e.g., one head for adjective-noun, another for verb-object, another for sentiment).
 * **Combination:** Each head produces a proposed change to the embedding. These proposed changes are **summed together** and added to the original embedding.
@@ -765,9 +771,63 @@ Attention involves three types of learned matrices (weights) that transform the 
     * Total per block: $96 \times 6.3 \text{ million} \approx 600 \text{ million parameters}$.
     * GPT-3 has **96 such blocks** (layers), leading to almost **58 billion parameters** for attention alone.
 
+ <img src="/metadata/val_out.png" width="700" />
+* We thought of this value matrix as two matrices of 12288 * 128 and 128 * 12288 sizes. But in papers, only second one is called value matrix. All the first one value matrix in a block are concatenated, and it's called output matrix.
+
 #### Other Components & Scaling
 * **Multi-Layer Perceptrons (MLPs):** Data also flows through MLP blocks *between* attention blocks. These account for the majority of the remaining parameters in LLMs (to be discussed later).
 * **Context Size:** The number of tokens a transformer can process at once ($N^2$ complexity for attention). For GPT-3, it's 2048 tokens. This is a major bottleneck for long conversations.
 * **Parallelizability:** Attention is highly parallelizable, which allows for the massive scaling of models using **GPUs**. This ability to scale is a key reason for the recent success of deep learning.
 
 Some self-attention mechanisms are bidirectional, meaning that they calculate relevance scores for tokens preceding and following the word being attended to. For example, in Figure 3, notice that words on both sides of it are examined. So, a bidirectional self-attention mechanism can gather context from words on either side of the word being attended to. By contrast, a unidirectional self-attention mechanism can only gather context from words on one side of the word being attended to. Bidirectional self-attention is especially useful for generating representations of whole sequences, while applications that generate sequences token-by-token require unidirectional self-attention. For this reason, encoders use bidirectional self-attention, while decoders use unidirectional.
+
+### Video 8: Transformers: Multi-Layer Perceptrons (MLPs) 🧠
+
+#### MLP's Role in Transformers
+* **MLPs** are the other major component of a transformer, alongside **Attention**.
+* While Attention handles **context**, MLPs are thought to be the primary place where **facts and knowledge are stored**.
+* The computation is relatively simple, but the interpretation of what it's doing is complex.
+* This section will use a toy example: storing the fact that "Michael Jordan plays basketball."
+
+#### The Core MLP Operation
+An MLP block processes each vector from the sequence **independently and in parallel** (they don't "talk" to each other here). The operation on a single vector ($E$) is as follows:
+
+1.  **"Up" Projection (Questions):**
+    * The vector $E$ is multiplied by a large **"up" projection matrix ($W_{\text{up}}$)**. A bias vector ($B_{\text{up}}$) is also added.
+    * This matrix is filled with learned parameters.
+    * **Conceptual Meaning:** Each **row** of $W_{\text{up}}$ can be thought of as a **"question"** about the input vector's features. A dot product between the row and the vector measures how much the vector aligns with that feature.
+        * *Example:* A row could represent "Michael" + "Jordan." The dot product will be high if the vector $E$ encodes both names.
+    * This matrix maps the vector to a much higher-dimensional "neuron" space. (e.g., in GPT-3, it's 4x the embedding dimension, or nearly 50,000 dimensions).
+
+2.  **Activation Function (ReLU):**
+    * The resulting high-dimensional vector is passed through a simple **non-linear function**.
+    * A common choice is the **ReLU (Rectified Linear Unit)**: it sets all negative values to zero and leaves positive values unchanged.
+    * **Conceptual Meaning:** This creates a clean "yes/no" or "AND gate" behavior.
+        * *Example:* A neuron's value becomes positive **only if** the vector encodes both "Michael" and "Jordan," while staying zero otherwise.
+    * The positive values in this vector are what are referred to as "active neurons."
+
+3.  **"Down" Projection (Actions):**
+    * The activated neuron vector is multiplied by a second matrix, the **"down" projection matrix ($W_{\text{down}}$)**. A bias vector ($B_{\text{down}}$) is added.
+    * This matrix maps the vector back down to the original embedding dimension.
+    * **Conceptual Meaning:** Each **column** of $W_{\text{down}}$ is a vector that gets **added to the result if its corresponding neuron is active**.
+        * *Example:* The column corresponding to our "Michael Jordan" neuron could be the "basketball" vector. If the neuron is active, this "basketball" knowledge is added to the output.
+
+4.  **Residual Connection:**
+    * The final output of the MLP is **added to the original input vector ($E$)**.
+    * The sum is the final vector flowing out of the MLP block.
+
+#### Parameter Breakdown (GPT-3)
+* **MLP Blocks** make up the majority of a transformer's parameters.
+* **Up & Down Projection Matrices:**
+    * $W_{\text{up}}$: ~12,288 columns (embedding dim) $\times$ ~50,000 rows (neuron dim) $\approx$ 604 million parameters.
+    * $W_{\text{down}}$: Transposed, same number of parameters.
+    * Total per MLP: ~1.2 billion parameters.
+* **Total MLP Parameters:** GPT-3 has **96 MLP blocks**, for a total of **~116 billion parameters** devoted to MLPs.
+* **Grand Total:** This accounts for ~2/3 of the total 175 billion parameters in GPT-3.
+
+#### A Note on Superposition
+* **Traditional View:** We might assume each neuron represents a single, distinct feature (e.g., "Michael Jordan"). This would limit the number of features to the number of neurons.
+* **Superposition Hypothesis:** It's more likely that models use **"nearly perpendicular" directions** to encode features.
+    * In high dimensions, you can fit **exponentially more** "nearly perpendicular" vectors than strictly perpendicular ones.
+    * This means a transformer can store **far more ideas** than the number of neurons it has.
+    * **Result:** Individual features might not be a single neuron but a **combination of several neurons**, making the network harder to interpret but much more powerful and scalable. This could be a key reason why LLMs perform so well with size. 
