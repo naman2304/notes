@@ -741,7 +741,8 @@ Attention involves three types of learned matrices (weights) that transform the 
     * *Example:* High dot product between "creature" (query) and "fluffy" (key) means "fluffy" is highly relevant to "creature."
     * **Attention Scores:** These dot products form a grid of scores.
     * **Normalization (Softmax):** Each column of scores (representing how relevant all *other* words are to a *given* word) is normalized using **Softmax**. This turns scores into probabilities (0-1, sum to 1). This resulting grid is the **attention pattern**.
-        * **Attention(Q, K, V) =** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability.  this $d_k$ is dimension of key vector
+        * **Attention(Q, K, V) =** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ * V
+        * where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability.  this $d_k$ is dimension of key vector
 
 4.  **Masking (for Causal LLMs like GPT):**
     <img src="/metadata/mask.png" width="700" />
@@ -791,6 +792,7 @@ Some self-attention mechanisms are bidirectional, meaning that they calculate re
 * This section will use a toy example: storing the fact that "Michael Jordan plays basketball."
 
 #### The Core MLP Operation
+ <img src="/metadata/tran_mlp.png" width="700" />
 An MLP block processes each vector from the sequence **independently and in parallel** (they don't "talk" to each other here). The operation on a single vector ($E$) is as follows:
 
 1.  **"Up" Projection (Questions):**
@@ -807,12 +809,14 @@ An MLP block processes each vector from the sequence **independently and in para
         * *Example:* A neuron's value becomes positive **only if** the vector encodes both "Michael" and "Jordan," while staying zero otherwise.
     * The positive values in this vector are what are referred to as "active neurons."
 
-3.  **"Down" Projection (Actions):**
+3.  **"Down" Projection (Actions):**  
     * The activated neuron vector is multiplied by a second matrix, the **"down" projection matrix ($W_{\text{down}}$)**. A bias vector ($B_{\text{down}}$) is added.
     * This matrix maps the vector back down to the original embedding dimension.
     * **Conceptual Meaning:** Each **column** of $W_{\text{down}}$ is a vector that gets **added to the result if its corresponding neuron is active**.
         * *Example:* The column corresponding to our "Michael Jordan" neuron could be the "basketball" vector. If the neuron is active, this "basketball" knowledge is added to the output.
 
+  <img src="/metadata/down_proj.png" width="700" />
+  
 4.  **Residual Connection:**
     * The final output of the MLP is **added to the original input vector ($E$)**.
     * The sum is the final vector flowing out of the MLP block.
@@ -827,8 +831,12 @@ An MLP block processes each vector from the sequence **independently and in para
 * **Grand Total:** This accounts for ~2/3 of the total 175 billion parameters in GPT-3.
 
 #### A Note on Superposition
+<img src="/metadata/superpos.png" width="700" />
+
 * **Traditional View:** We might assume each neuron represents a single, distinct feature (e.g., "Michael Jordan"). This would limit the number of features to the number of neurons.
 * **Superposition Hypothesis:** It's more likely that models use **"nearly perpendicular" directions** to encode features.
-    * In high dimensions, you can fit **exponentially more** "nearly perpendicular" vectors than strictly perpendicular ones.
+    * In high dimensions (say N)
+        * you can fit N vectors which are perpendicular to each other [all vectors at 90 degree to each other]
+        * you can fit **exponentially more** "nearly perpendicular" vectors (say b/w 89 and 91 degrees) than strictly perpendicular ones.
     * This means a transformer can store **far more ideas** than the number of neurons it has.
     * **Result:** Individual features might not be a single neuron but a **combination of several neurons**, making the network harder to interpret but much more powerful and scalable. This could be a key reason why LLMs perform so well with size. 
