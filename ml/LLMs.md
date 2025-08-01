@@ -720,9 +720,11 @@ This embedding matrix is also learned during the training. Then during inference
 * **Broader Goal:** Attention moves information across distant parts of the sequence, allowing the final token's embedding (which predicts the next word) to incorporate all relevant context from the entire input.
 
 #### Single Head of Attention: The Computations
+"a fluffy blue creature roamed the verdant forest" when changed to embeddings is say 'E1 E2 E3 E4 E5 E6 E7 E8". Assume, motivation here is to have nouns be enriched with adjective info ("creature" with "fluffy" and "blue"; "forest" with "verdant")
 Attention involves three types of learned matrices (weights) that transform the embeddings:
 
-1.  **Queries (Q):**
+1.  **Queries (Q):**  
+    <img src="/metadata/attn1.png" width="500" />
     * Each input embedding ($e$) is multiplied by a **Query Matrix ($W_Q$)** to produce a **query vector ($q$)**.
     * *Conceptual Role:* Like asking a question about the word's context (e.g., a noun "creature" asking "Are there any adjectives preceding me?").
     * Dimension of $q$ is smaller than $e$ (e.g., 128 for GPT-3).
@@ -732,18 +734,19 @@ Attention involves three types of learned matrices (weights) that transform the 
     * *Conceptual Role:* Like providing an answer to a query (e.g., an adjective "fluffy" answering "Yes, I'm an adjective in this position.").
     * Same dimension as $q$.
 
-3.  **Dot Products & Attention Pattern:**
+3.  **Dot Products & Attention Pattern:**  
+    <img src="/metadata/attn2.png" width="700" />
     * **Measure Alignment:** The **dot product** of each **Query** with every **Key** is computed. This measures how well each key "answers" each query, indicating relevance.
     * *Example:* High dot product between "creature" (query) and "fluffy" (key) means "fluffy" is highly relevant to "creature."
     * **Attention Scores:** These dot products form a grid of scores.
     * **Normalization (Softmax):** Each column of scores (representing how relevant all *other* words are to a *given* word) is normalized using **Softmax**. This turns scores into probabilities (0-1, sum to 1). This resulting grid is the **attention pattern**.
         * **Formula:** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability. 
 
-4.  **Masking (for Causal LLMs like GPT):**
+5.  **Masking (for Causal LLMs like GPT):**
     * During training, transformers predict words sequentially. To prevent "cheating," **later tokens are prevented from influencing earlier tokens**.
     * This is done by setting dot products for "future" tokens to **negative infinity** *before* softmax. After softmax, these become 0.
 
-5.  **Values (V) & Updating Embeddings:**
+6.  **Values (V) & Updating Embeddings:**
     * Each input embedding ($e$) is multiplied by a **Value Matrix ($W_V$)** to produce a **value vector ($v$)**.
     * *Conceptual Role:* If a word is relevant, what information should it "add" to the target word's embedding?
     * **Updating:** For each target embedding (column in the attention pattern):
