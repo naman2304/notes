@@ -720,7 +720,8 @@ This embedding matrix is also learned during the training. Then during inference
 * **Broader Goal:** Attention moves information across distant parts of the sequence, allowing the final token's embedding (which predicts the next word) to incorporate all relevant context from the entire input.
 
 #### Single Head of Attention: The Computations
-"a fluffy blue creature roamed the verdant forest" when changed to embeddings is say 'E1 E2 E3 E4 E5 E6 E7 E8". Assume, motivation here is to have nouns be enriched with adjective info ("creature" with "fluffy" and "blue"; "forest" with "verdant")
+"a fluffy blue creature roamed the verdant forest" when changed to embeddings is say 'E1 E2 E3 E4 E5 E6 E7 E8". Assume, motivation here is to have nouns be enriched with adjective info ("creature" with "fluffy" and "blue"; "forest" with "verdant").
+
 Attention involves three types of learned matrices (weights) that transform the embeddings:
 
 1.  **Queries (Q):**  
@@ -742,14 +743,14 @@ Attention involves three types of learned matrices (weights) that transform the 
     * **Normalization (Softmax):** Each column of scores (representing how relevant all *other* words are to a *given* word) is normalized using **Softmax**. This turns scores into probabilities (0-1, sum to 1). This resulting grid is the **attention pattern**.
         * **Attention(Q, K, V) =** $\text{Softmax}(\frac{QK^T}{\sqrt{d_k}})$ where $Q$ is the matrix of all queries, $K^T$ is the transpose of the matrix of all keys, and $\sqrt{d_k}$ is for numerical stability.  this $d_k$ is dimension of key vector
 
-5.  **Masking (for Causal LLMs like GPT):**
+4.  **Masking (for Causal LLMs like GPT):**
     <img src="/metadata/mask.png" width="700" />
     * During training, transformers predict words sequentially. To prevent "cheating," **later tokens are prevented from influencing earlier tokens**.
     * This is done by setting dot products for "future" tokens to **negative infinity** *before* softmax. After softmax, these become 0.
 
 Note that this matrix size is product of context length -- that's why it's very challenging for AI Labs to scale context window. Other techniques being used here: Sparse Attention Mechanisms, Blockwise Attention, Linformer, Reformer, Ring attention, Longformer, Adaptive Attention Span.
 
-7.  **Values (V) & Updating Embeddings:**
+5.  **Values (V) & Updating Embeddings:**
     <img src="/metadata/val_mat.png" width="700" />
     * Each input embedding ($e$) is multiplied by a **Value Matrix ($W_V$)** to produce a **value vector ($v$)**.
     * *Conceptual Role:* If a word is relevant, what information should it "add" to the target word's embedding?
