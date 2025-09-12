@@ -21,11 +21,6 @@ Appendix
 * **Lindy's Law:** Assuming a technology's future life expectancy is proportional to its current age (if it's been around, it will likely continue).
 
 ## Chapter 1: Introduction to Building AI Applications with Foundation Models
-Here are your revision notes for **Chapter 1: Introduction to Building AI Applications with Foundation Models**, crafted purely from the provided sources:
-
-***
-
-### **Chapter 1: Introduction to Building AI Applications with Foundation Models - Revision Notes**
 
 **I. Overview of AI Engineering in the Era of Foundation Models**
 
