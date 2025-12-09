@@ -69,3 +69,80 @@ Agentic workflows are currently used to build a wide range of applications, incl
 
 -   Agentic AI workflows can range from simple, multi-step processes to highly complex, autonomous systems.
 -   The degree of autonomy is an important factor when designing and building different types of applications.
+
+## The Spectrum of Agentic Autonomy
+
+### Why the Term "Agentic"?
+
+-   The AI community was engaged in a debate over the precise definition of an "agent," leading to disagreements about whether a system qualified as a "true agent."
+-   Andrew Ng introduced the term **"agentic"** to reframe the discussion.
+-   Using "agentic" as an adjective acknowledges that systems can possess agent-like qualities to **different degrees**, rather than being a binary (is/is not an agent) classification.
+-   This shift in terminology helps the community focus on the practical work of building these systems rather than debating definitions.
+
+### Notational Convention in this Course
+
+-   **Red Boxes**: Represent user input (e.g., a query, an input document).
+-   **Gray Boxes**: Indicate a call to a Large Language Model (LLM).
+-   **Green Boxes**: Denote actions carried out by other software, such as:
+    -   Calling a web search API.
+    -   Executing code to fetch a website's content.
+    -   This is often referred to as **tool use**.
+
+
+### Levels of Agent Autonomy
+
+The degree to which an agent operates autonomously exists on a spectrum.
+
+#### Less Autonomous Agents
+-   **Process:** Follows a **fully deterministic sequence of steps** that are hard-coded by the programmer.
+-   **Decision-Making:** The primary autonomy lies in the text the LLM generates, not in the workflow itself.
+-   **Example (Essay on Black Holes):**
+    1.  LLM generates search queries (gray box).
+    2.  Hard-coded step to call a web search API (green box).
+    3.  Hard-coded step to fetch web pages (green box).
+    4.  LLM writes the essay using the fetched content (gray box).
+-   **Value:** These systems are highly valuable and are being built for many businesses today.
+
+#### More Autonomous Agents
+-   **Process:** The LLM determines the sequence of steps dynamically. The workflow is not predetermined.
+-   **Decision-Making:** The LLM decides *which* tools to use, *how* to use them, and whether to *iterate* or *reflect*.
+-   **Example (Essay on Black Holes):**
+    1.  The LLM decides whether to search the web, news sources, or academic archives like arXiv.
+    2.  The LLM chooses to call the web search tool.
+    3.  The LLM decides how many web pages to fetch.
+    4.  The LLM might write a draft, then decide to reflect and go back to fetch more information before producing the final output.
+-   **Characteristics:** These agents are less predictable, harder to control, and are an area of active research.
+
+### Summary of the Spectrum
+
+| Category | Characteristics | Control & Predictability |
+| :--- | :--- | :--- |
+| **Less Autonomous** | Steps are predetermined and hard-coded by an engineer. | High |
+| **Semi-Autonomous** | Can make some decisions, such as choosing from a predefined set of tools. | Medium |
+| **Highly Autonomous** | Makes many decisions, including the sequence of steps, and may even create new tools. | Low |
+
+## Benefits of Agentic Workflows
+
+### 1. Enhanced Performance
+Agentic workflows allow for the effective completion of tasks that were previously impossible with standard zero-shot prompting.
+* **The "Human Eval" Benchmark (Coding Tasks):**
+    * **GPT-3.5 (Zero-shot):** ~40% accuracy when asked to write code directly.
+    * **GPT-4 (Zero-shot):** ~67% accuracy.
+    * **Agentic Workflow Impact:** Wrapping GPT-3.5 in an agentic workflow (e.g., prompting it to write code, reflect, and improve) results in performance that often exceeds the zero-shot performance of GPT-4.
+* **Key Insight:** The performance improvement gained by implementing an agentic workflow on an older model often dwarfs the improvement gained by simply upgrading to the next generation of the model.
+
+### 2. Parallelism
+While agentic workflows may take longer than a single direct prompt, they can execute specific sub-tasks much faster than a human by running processes in parallel.
+* **Sequential vs. Parallel:** A human must research sequentially (read one page, then the next). An agent can parallelize data gathering.
+* **Example (Essay on Black Holes):**
+    1.  Three LLM instances run in parallel to generate search terms.
+    2.  Multiple web search queries are executed simultaneously.
+    3.  The agent identifies and downloads multiple web pages (e.g., 9 pages) at the same time.
+    4.  All gathered data is fed into an LLM for synthesis.
+
+### 3. Modularity
+Agentic workflows allow developers to break a system into individual components, making it easy to swap tools or models to optimize performance.
+* **Swapping Tools:** You can choose different tools for specific steps.
+    * *Search Engines:* Google, Bing, DuckDuckGo, Tavily, You.com (u.com).
+    * *Specialized Search:* Swapping a general web search for a news-specific search engine to find the latest breakthroughs.
+* **Swapping Models:** You do not need to use the same LLM for every step. You can route different tasks to different models or providers based on which one performs best for that specific action (e.g., planning vs. drafting).
