@@ -261,3 +261,31 @@ When designing a workflow, view the system as a collection of available componen
 2. **Verify Feasibility:** For each step, ask if it can be implemented with an LLM or an available tool (API/Function).
 3. **Decompose Further:** If the answer is "No," ask *"How would a human do this step?"* and break that specific step down into smaller sub-steps that are feasible.
 4. **Iterate:** Expect to build an initial workflow, evaluate it, and then refine the decomposition (adding steps like "critique" or "plan") to improve performance.
+
+## Evaluations (Evals) for Agentic Workflows  
+### The Importance of Discipline  
+* One of the biggest predictors of success in building agentic workflows is the ability to drive a **disciplined evaluation process**.
+* Building effective agents requires not just coding the workflow, but systematically measuring and improving it.
+
+### The Development Strategy  
+* **Build First, Evaluate Later:** It is nearly impossible to anticipate every potential error in advance.  
+* **Manual Discovery:** Start by building the agent, then manually inspect outputs to find specific behaviors you dislike.
+* *Example:* You might find your customer service agent is awkwardly mentioning competitors ("Unlike RivalCo, we make returns easy...").
+* **Iterative Loop:** Once an undesirable behavior is identified, build a specific metric to track it and work to eliminate it.
+
+### Types of Evaluations  
+#### 1. Objective Evals (Code-Based)  
+* Used for "black and white" criteria where the presence or absence of a feature is clear.
+* **Method:** Write standard code (e.g., Python scripts) to search the text.
+* **Example:** **Competitor Mentions**.
+* If you have a list of competitors, write code to count the frequency of their names appearing in the agent's output.
+
+#### 2. Subjective Evals (LLM-as-a-Judge)
+* Used for free-text outputs where quality is nuanced (e.g., "Is this a high-quality research report?").
+* **Method:** Use a separate, often stronger, LLM to read the output and assign a score (e.g., 1 to 5).
+* **Limitation:** LLMs can be inconsistent with simple scalar ratings (1-5). While useful as a first pass, more advanced techniques are often required for accuracy.
+
+### Scope of Evaluations (Preview)
+* **End-to-End Evals:** Measuring the quality of the *final* output produced by the entire agent.
+* **Component-Level Evals:** Measuring the quality of a *single step* within the workflow.
+* **Error Analysis (Traces):** Reading through the **intermediate outputs** (traces) of every step to pinpoint exactly where the reasoning or execution failed.
