@@ -146,3 +146,118 @@ Agentic workflows allow developers to break a system into individual components,
     * *Search Engines:* Google, Bing, DuckDuckGo, Tavily, You.com (u.com).
     * *Specialized Search:* Swapping a general web search for a news-specific search engine to find the latest breakthroughs.
 * **Swapping Models:** You do not need to use the same LLM for every step. You can route different tasks to different models or providers based on which one performs best for that specific action (e.g., planning vs. drafting).
+
+## Examples of Agentic AI Applications
+
+### 1. Invoice Processing (Structured Process)
+This is a common business task involving the extraction of specific data from documents.
+
+* **Goal:** Extract key fields (Biller Name, Address, Amount Due, Due Date) from a PDF invoice and record them in a database.
+* **Workflow:**
+    1. **Input:** Invoice PDF.
+    2. **Tool Use:** Call a PDF-to-text API to convert the document into a format the LLM can ingest (e.g., Markdown).
+    3. **LLM Decision:** Verify if the document is actually an invoice.
+    4. **Extraction:** LLM extracts the required fields.
+    5. **Tool Use:** Call an API/Database tool to update records.
+* **Characteristics:** This is considered an **easier** workflow because there is a clear, standard procedure to follow step-by-step.
+
+### 2. Basic Customer Order Inquiry (Structured Process)
+An agent designed to handle specific, predictable customer questions, such as order status.
+
+* **Goal:** Respond to a customer email regarding a specific order.
+* **Workflow:**
+    1. **Input:** Customer email.
+    2. **LLM Analysis:** Extract order details and customer name.
+    3. **Tool Use:** Query the orders database to retrieve status.
+    4. **LLM Action:** Draft an email response.
+    5. **Tool Use (Human-in-the-loop):** Place the draft in a queue for human review before sending.
+* **Characteristics:** Similar to invoice processing, this follows a clear, pre-defined path.
+
+### 3. General Customer Service Agent (Dynamic/Harder)
+An agent designed to respond to *any* customer query, where the steps cannot be hard-coded in advance.
+
+* **Scenario A (Inventory Check):** "Do you have black jeans or blue jeans?"
+    * The agent must plan a sequence: Check Black Inventory \rightarrow Check Blue Inventory \rightarrow Synthesize Answer.
+
+* **Scenario B (Returns):** "I'd like to return the beach towel."
+    * The agent must decide the logic: Verify purchase \rightarrow Check Return Policy (e.g., is it within 30 days? is it unused?) \rightarrow If valid, issue packing slip \rightarrow Update database to "Return Pending".
+
+* **Characteristics:** This is **harder** because the LLM must **plan** the sequence of steps itself ("solve as you go") rather than following a fixed flowchart.
+
+### 4. Computer Use Agents (Cutting Edge/Hardest)
+Agents that interact directly with a computer interface (web browser) to perform tasks.
+
+* **Example:** Checking flight availability on United Airlines.
+    * The agent navigates the website, clicks buttons, and fills text fields.
+    * *Resilience:* In the video example, when the agent struggled with the United site, it autonomously navigated to Google Flights to find the data, then returned to the United site to confirm.
+
+* **Current Limitations:**
+    * Agents often struggle if pages load slowly or have complex layouts.
+    * Currently not reliable enough for mission-critical applications.
+    * Remains an area of active research.
+
+**Key Skill:** The most important skill for building these systems is **Task Decomposition**—the ability to look at a complex workflow and break it down into discrete, executable steps.
+
+## Task Decomposition
+
+### The Core Philosophy of Decomposition
+The central challenge in Agentic AI is transforming complex human or business activities into discrete steps that an agentic workflow can execute.
+
+* **The Feasibility Check:** When breaking a task into steps, the primary question to ask for each step is: *"Can this be done by an LLM, a short piece of code, a function call, or a tool?"*
+* **Handling Complexity:** If a specific step is too complex for an LLM to perform reliably, reflect on how a human would handle it. Humans typically break complex tasks down (e.g., they don't write an essay in one breath; they outline, research, draft, and revise).
+
+### Iterative Refinement Example: Research Agent
+
+**Level 1: Direct Generation**
+
+* **Method:** Prompting an LLM to "Write an essay on Topic X" in one go.
+* **Limitation:** For complex topics, this often results in surface-level points and lacks deep insight.
+
+**Level 2: Initial Decomposition**
+
+* **Step 1:** Write an essay outline. (*Feasible for LLM*)
+* **Step 2:** Generate search terms and search the web. (*Feasible for LLM + Search Tool*)
+* **Step 3:** Write the essay based on search results. (*Feasible for LLM*)
+* **Outcome:** Improved depth, but the result might feel "disjointed" (e.g., the beginning may not align consistently with the end).
+
+**Level 3: Advanced Decomposition (Solving for Quality)**  
+If the output is still not satisfactory (e.g., disjointedness), decompose the "Write Essay" step further:
+
+* **Step 3a:** Write a first draft.
+* **Step 3b (Reflection):** Read the draft and identify parts needing revision. (*Feasible for LLM*)
+* **Step 3c:** Revise the draft based on the critique.
+* **Conclusion:** Breaking a single step into three (Draft \rightarrow Critique \rightarrow Revise) mimics the human writing process and yields a richer, more coherent result.
+
+### Examples of Task Decomposition
+
+**1. Customer Order Inquiries**
+
+* **Step 1 (Extract):** Identify the sender, the items ordered, and the order number from the email. (*Feasible for LLM*)
+* **Step 2 (Retrieve):** Generate a database query to pull relevant records (shipping status, dates). (*Feasible for LLM + Database Tool*)
+* **Step 3 (Respond):** Draft and send an email response using the retrieved info. (*Feasible for LLM + Email API*)
+
+**2. Invoice Processing**
+
+* **Step 1:** Extract required fields (Biller, Address, Date, Amount) from the text-converted invoice. (*Feasible for LLM*)
+* **Step 2:** Verify the extraction and call a function to save the data into a database. (*Feasible for LLM + Database Tool*)
+
+### The Building Blocks of Agentic Workflows
+When designing a workflow, view the system as a collection of available components to be sequenced:
+
+**AI Models**
+
+* **LLMs:** Core engines for text generation, reasoning, and decision-making.
+* **Multimodal Models:** For processing images or audio.
+* **Specialized Models:** Tools for specific tasks like PDF-to-text conversion, text-to-speech, or image analysis.
+
+**Software Tools & APIs**
+
+* **External APIs:** Web search, voice search, real-time weather, email sending, calendar access.
+* **Retrieval (RAG):** Tools to search and retrieve relevant text from large databases.
+* **Code Execution:** Tools allowing the LLM to write and run code (e.g., Python) for calculations or data processing.
+
+### Summary Strategy for Building Workflows
+1. **Analyze the Task:** Observe how a human or business performs the task and identify the high-level discrete steps.
+2. **Verify Feasibility:** For each step, ask if it can be implemented with an LLM or an available tool (API/Function).
+3. **Decompose Further:** If the answer is "No," ask *"How would a human do this step?"* and break that specific step down into smaller sub-steps that are feasible.
+4. **Iterate:** Expect to build an initial workflow, evaluate it, and then refine the decomposition (adding steps like "critique" or "plan") to improve performance.
