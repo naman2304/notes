@@ -289,3 +289,50 @@ When designing a workflow, view the system as a collection of available componen
 * **End-to-End Evals:** Measuring the quality of the *final* output produced by the entire agent.
 * **Component-Level Evals:** Measuring the quality of a *single step* within the workflow.
 * **Error Analysis (Traces):** Reading through the **intermediate outputs** (traces) of every step to pinpoint exactly where the reasoning or execution failed.
+
+## Key Design Patterns for Agentic Workflows
+Building effective agentic workflows involves sequencing building blocks using established patterns. There are four major design patterns that help structure these complex systems.
+
+### 1. Reflection  
+Reflection involves the agent examining its own outputs to identify improvements, rather than just generating a final result in one pass.
+
+* **Process:**
+    1. **Generate:** The LLM produces an initial output (e.g., Python code).
+    2. **Critique:** The system prompts the LLM (or a separate agent) to check the work for correctness, style, and efficiency.
+    3. **Iterate:** The LLM uses this critique to generate a vastly improved version (v2, v3, etc.).
+* **External Feedback:** Reflection can also incorporate external signals, such as running generated code to check for execution errors, which are then fed back to the LLM to fix bugs.
+* **The Critique Agent:** You can simulate a second agent specifically prompted with a persona (e.g., "Your role is to critique code") to review the work of the first agent.
+
+### 2. Tool Use  
+Tool use allows LLMs to interact with the outside world by calling functions or "tools" to perform specific tasks that pure text generation cannot handle.
+
+* **Functionality:** The LLM decides *when* to call a tool and *what* arguments to pass to it.
+* **Examples:**
+    * **Web Search:** To answer questions about current events or product reviews (e.g., "Best coffee maker").
+    * **Code Execution:** To solve math problems or perform data analysis by writing and running code (e.g., calculating compound interest).
+    * **Productivity:** Interfacing with email, calendars, or databases.
+    * **Perception:** Processing images or audio.
+
+### 3. Planning  
+Planning enables the LLM to autonomously decide the sequence of steps required to complete a complex objective, rather than following a hard-coded workflow defined by the developer.
+
+* **Mechanism:** The agent breaks down a high-level request into a specific sequence of actions or API calls.
+* **Example (HuggingGPT):**
+    * *User Request:* "Generate an image where a girl is reading a book and the pose is the same as the boy in this image, then describe it."
+    * *Agent's Plan:*
+        1. Call Pose Determination Model (to analyze the boy).
+        2. Call Image Generation Model (to create the girl's image).
+        3. Call Image-to-Text Model (to describe the new image).
+        4. Call Text-to-Speech Model (to read the description).
+* **Trade-off:** Planning agents are more powerful and flexible but can be harder to control and more unpredictable than fixed workflows.
+
+### 4. Multi-Agent Collaboration
+This pattern simulates a human organization where multiple specialized agents collaborate to accomplish a complex task.
+
+* **Concept:** Instead of one generalist agent, you instantiate multiple agents with distinct roles (personas).
+* **Example (ChatDev):** A virtual software company composed of a CEO agent, a Programmer agent, a Tester agent, and a Designer agent working together to build software.
+* **Example (Marketing Brochure):**
+    * **Researcher Agent:** Gathers facts.
+    * **Marketer Agent:** Write the copy based on research.
+    * **Editor Agent:** Reviews and polishes the text.
+* **Benefit:** Research shows that multi-agent systems often produce better outcomes for complex tasks (like writing biographies or playing games) compared to single agents, though they can be harder to orchestrate.
