@@ -395,8 +395,35 @@ Reflection is particularly helpful in specific scenarios where errors are subtle
 To maximize the benefit of reflection, prompts should be specific and directive.
 
 * **Tips:**
-* **Explicit Instruction:** Clearly state that the model should "review" or "reflect" on the first draft.
-* **Define Criteria:** Provide specific rubrics for the critique.
-    * *Domain Names:* "Check if easy to pronounce", "Check for negative connotations."
-    * *Emails:* "Check the tone", "Verify all facts/dates against context."
-* **Learning Strategy:** A good way to improve prompt engineering skills is to download open-source software and read the prompts written by experienced developers.
+    * **Explicit Instruction:** Clearly state that the model should "review" or "reflect" on the first draft.
+    * **Define Criteria:** Provide specific rubrics for the critique.
+        * *Domain Names:* "Check if easy to pronounce", "Check for negative connotations."
+        * *Emails:* "Check the tone", "Verify all facts/dates against context."
+    * **Learning Strategy:** A good way to improve prompt engineering skills is to download open-source software and read the prompts written by experienced developers.
+
+## Reflection with Multimodal Models  
+### The Concept  
+Reflection becomes even more powerful when applied to visual tasks by using **Multimodal LLMs** (models that can process both text and images). This allows the system to visually critique its own output alongside the code that created it.
+
+### Example: Chart Generation Workflow  
+* **Goal:** Create a plot comparing Q1 coffee sales between 2024 and 2025 using CSV data.
+* **Step 1: Initial Generation**
+    * Prompt an LLM to write Python code to generate the plot.
+    * **Outcome (V1):** The code executes but might produce a suboptimal visualization, such as a cluttered "stacked bar plot" that is difficult to read.
+* **Step 2: Multimodal Reflection**
+    * **Inputs:** Feed the **V1 Code** AND the **Generated Image** (the plot itself) into a multimodal LLM.
+    * **Prompt:** Ask the model to examine the image, critique it for clarity, and write new code to improve the visualization.
+    * **Mechanism:** The model uses **visual reasoning** to "see" that the plot is unclear (e.g., determining that a side-by-side comparison is better than a stacked one).
+    * **Outcome (V2):** The model writes updated code that generates a much clearer, more professional graph.
+
+### Model Selection & Prompting Strategies
+* **Mixing Models:** You can use different LLMs for different steps to leverage their specific strengths.
+    * *Generation:* Use a standard high-performance model (e.g., GPT-4o).
+    * *Reflection:* Consider using a **Reasoning Model** (Thinking Model), as they can be more effective at finding logic bugs or improving structure.
+* **Persona & Criteria:**
+    * Assign a specific role to the reflection agent (e.g., "You are an expert Data Analyst").
+    * Provide explicit criteria for the critique, such as **Readability**, **Clarity**, and **Completeness**.
+
+### Performance Impact
+* Reflection typically improves performance, but the magnitude varies by application (from a small bump to significant improvement).
+* It is crucial to run evaluations (evals) to measure the actual impact on your specific use case and tune the prompts accordingly.
